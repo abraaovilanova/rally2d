@@ -1,5 +1,5 @@
 import desertSheet from '../assets/world/deserto.png';
-import desertTestSheet from '../assets/world/deserto-teste.png';
+import desertV2Sheet from '../assets/world/deserto-v2.png';
 import iceForestSheet from '../assets/world/gelo-floresta.png';
 import cenario from './cenario.json';
 import etapas from './cenario-etapas.json';
@@ -71,8 +71,9 @@ interface Sheet {
 const SHEETS: Record<string, Sheet> = {
   deserto: { src: desertSheet, image: new Image() },
   'gelo-floresta': { src: iceForestSheet, image: new Image() },
-  // Em teste: a folha do Deserto com o cacto e o espectador novos numa faixa extra.
-  'deserto-teste': { src: desertTestSheet, image: new Image() },
+  // O Deserto refeito. O chão e o leito ainda são os antigos, recortados para dentro
+  // dela: os ladrilhos novos são os últimos da fila.
+  'deserto-v2': { src: desertV2Sheet, image: new Image() },
 };
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
@@ -454,8 +455,11 @@ function drawSprite(
 }
 
 /**
- * Os pórticos de largada e chegada, atravessados sobre a Pista.
- * Marcam no mundo os dois pontos que o HUD só sabe dizer em número.
+ * Os pórticos de largada e chegada, em pé sobre a Pista.
+ *
+ * Ficavam deitados atravessados no traçado, que é convenção de vista de cima. Com o
+ * Ponto de Vista misto — chão de cima, objeto em 3/4 — o pórtico é objeto: fica em pé,
+ * apoiado no meio da Pista, e o Carro passa por baixo dele.
  */
 export function drawGates(ctx: CanvasRenderingContext2D, stage: Stage): void {
   const scenery = SCENERY[stage.biome.id];
@@ -475,18 +479,16 @@ function gate(
   trackWidth: number,
 ): void {
   const i = Math.min(Math.max(index, 1), center.length - 1);
-  const a = center[i - 1];
   const b = center[i];
-  const heading = Math.atan2(b.y - a.y, b.x - a.x);
   const s = scenery.sprites[name];
+  // Largo o bastante para atravessar a Pista: o pórtico é o que diz onde ela começa.
   const w = trackWidth * 1.15;
   const h = (s.h / s.w) * w;
 
   ctx.save();
   ctx.translate(b.x, b.y);
-  // Deitado sobre a Pista: visto de cima, o pórtico é uma faixa cruzando o traçado.
-  ctx.rotate(heading + Math.PI / 2);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h / 2, w, h);
+  // Em pé e apoiado no chão, como todo objeto: não gira com o traçado.
+  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h, w, h);
   ctx.restore();
 }

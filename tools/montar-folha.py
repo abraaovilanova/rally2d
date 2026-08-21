@@ -88,7 +88,11 @@ def main() -> int:
             continue
 
         pecas.extend(achados)
-        papeis.setdefault(item['papel'], []).append((achados[0][0], item.get('peso', 3)))
+        # Quem tem mais de um quadro entra nas listas pelo **nome base**: é ele que o jogo
+        # resolve para o quadro da vez. Registrar `torcedor1-0` congelaria o sujeito no
+        # primeiro quadro, que é como o público deixou de acenar da primeira vez.
+        registrado = item['nome'] if len(achados) > 1 else achados[0][0]
+        papeis.setdefault(item['papel'], []).append((registrado, item.get('peso', 3)))
         if item.get('rasteiro'):
             rasteiros.append(item['nome'])
 

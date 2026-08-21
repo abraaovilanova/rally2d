@@ -485,7 +485,7 @@
 
         // Os postos à mão vêm por cima, um a um, para poder marcar o selecionado.
         postos().forEach((p, i) => {
-          const r = bioma().recortes[p.sprite];
+          const r = recorte(p.sprite);
           if (!r) return;
           desenharPosto(p, r);
           if (i === selecionado) marcar(p, r);
@@ -495,6 +495,12 @@
 
         if (pincel) fantasma();
         document.getElementById('hud-zoom').textContent = vista.z.toFixed(2) + '×';
+      }
+
+      /** Um recorte, ou o primeiro quadro dele quando o nome é de um objeto animado. */
+      function recorte(nome) {
+        const r = bioma().recortes;
+        return r[nome] ?? r[nome + '-0'];
       }
 
       function desenharPosto(p, r, alpha = 1) {
@@ -544,7 +550,7 @@
 
       let ponteiro = { x: 0, y: 0 };
       function fantasma() {
-        const r = bioma().recortes[pincel];
+        const r = recorte(pincel);
         if (!r) return;
         const p = paraMundo(ponteiro.x, ponteiro.y);
         ctx.save();
@@ -649,7 +655,7 @@
         const lista = postos();
         for (let i = lista.length - 1; i >= 0; i--) {
           const q = lista[i];
-          const r = bioma().recortes[q.sprite];
+          const r = recorte(q.sprite);
           if (!r) continue;
           const w = r.w * PROP_SCALE * q.escala;
           const h = r.h * PROP_SCALE * q.escala;

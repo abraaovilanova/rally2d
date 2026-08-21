@@ -2,13 +2,15 @@
   "sheets": {
     "deserto": "assets/world/deserto.png",
     "gelo-floresta": "assets/world/gelo-floresta.png",
-    "deserto-teste": "assets/world/deserto-teste.png"
+    "deserto-teste": "assets/world/deserto-teste.png",
+    "deserto-v2": "assets/world/deserto-v2.png"
   },
   "biomas": {
     "deserto": {
-      "folha": "deserto-teste",
-      "chao": "sand",
-      "leito": "dirt",
+      "folha": "deserto-v2",
+      "escala": 0.5,
+      "chao": "terrenoAreia",
+      "leito": "leito1",
       "largada": "largada",
       "chegada": "chegada",
       "beira": [
@@ -21,7 +23,17 @@
         "flagBlue",
         "fence",
         "guardrail",
-        "tires"
+        "tires",
+        "checkeredFlag",
+        "brazilFlag",
+        "pedrinhas",
+        "rachadura",
+        "capimSeco",
+        "cranio",
+        "marcaPneu",
+        "galhoSeco",
+        "mancha",
+        "pneuEnterrado"
       ],
       "pesos": [
         5,
@@ -33,171 +45,232 @@
         2,
         2,
         2,
-        2
+        2,
+        1,
+        1,
+        6,
+        5,
+        6,
+        2,
+        4,
+        4,
+        2,
+        3
       ],
       "publico": [
-        "fan1"
+        "torcedor1",
+        "torcedor2",
+        "torcedor3",
+        "torcedor4"
       ],
-      "plateia": "crowd",
+      "rasteiros": [
+        "pedrinhas",
+        "rachadura",
+        "marcaPneu",
+        "galhoSeco",
+        "mancha"
+      ],
+      "plateia": "plateia",
       "recortes": {
-        "largada": {
-          "x": 22,
-          "y": 30,
-          "w": 200,
-          "h": 81
-        },
-        "chegada": {
-          "x": 589,
-          "y": 19,
-          "w": 179,
-          "h": 81
-        },
-        "cactus": {
-          "x": 4,
-          "y": 772,
-          "w": 48,
-          "h": 86
-        },
-        "bush": {
-          "x": 1298,
-          "y": 348,
-          "w": 74,
-          "h": 71
-        },
-        "rocks": {
-          "x": 14,
-          "y": 486,
-          "w": 140,
-          "h": 111
-        },
-        "smallRocks": {
-          "x": 1103,
-          "y": 507,
-          "w": 116,
-          "h": 62
-        },
-        "cone": {
-          "x": 233,
-          "y": 516,
-          "w": 52,
-          "h": 62
-        },
-        "flagYellow": {
-          "x": 412,
-          "y": 493,
-          "w": 54,
-          "h": 91
-        },
-        "flagBlue": {
-          "x": 598,
-          "y": 492,
-          "w": 52,
-          "h": 89
-        },
-        "fence": {
-          "x": 726,
-          "y": 515,
-          "w": 145,
-          "h": 62
-        },
-        "guardrail": {
-          "x": 918,
-          "y": 508,
-          "w": 121,
-          "h": 71
-        },
-        "tires": {
-          "x": 1279,
-          "y": 189,
-          "w": 115,
-          "h": 87
-        },
-        "startSign": {
-          "x": 974,
-          "y": 203,
-          "w": 88,
-          "h": 67
-        },
-        "finishSign": {
-          "x": 1133,
-          "y": 203,
-          "w": 88,
-          "h": 67
-        },
-        "checkeredFlag": {
-          "x": 635,
-          "y": 151,
-          "w": 119,
-          "h": 150
-        },
-        "brazilFlag": {
-          "x": 821,
-          "y": 25,
-          "w": 74,
-          "h": 105
-        },
-        "crowd": {
-          "x": 1266,
-          "y": 633,
-          "w": 131,
-          "h": 118
-        },
-        "fan1": {
-          "x": 60,
-          "y": 772,
-          "w": 48,
-          "h": 100
-        },
-        "fan2": {
-          "x": 237,
-          "y": 656,
-          "w": 41,
-          "h": 100
-        },
-        "fan3": {
-          "x": 401,
-          "y": 629,
-          "w": 100,
-          "h": 127
-        },
-        "fan4": {
-          "x": 583,
-          "y": 638,
-          "w": 65,
-          "h": 118
-        },
-        "fan5": {
-          "x": 757,
-          "y": 627,
-          "w": 78,
-          "h": 130
-        },
-        "fan6": {
-          "x": 952,
-          "y": 633,
-          "w": 55,
-          "h": 121
-        },
-        "fan7": {
-          "x": 1126,
-          "y": 633,
-          "w": 69,
-          "h": 123
-        },
-        "sand": {
-          "x": 755,
-          "y": 315,
+        "terrenoAreia": {
+          "x": 2,
+          "y": 2,
           "w": 140,
           "h": 138
         },
-        "dirt": {
-          "x": 20,
-          "y": 318,
+        "leito1": {
+          "x": 144,
+          "y": 2,
           "w": 132,
           "h": 134
+        },
+        "torcedor2-0": {
+          "x": 278,
+          "y": 2,
+          "w": 52,
+          "h": 114
+        },
+        "fence": {
+          "x": 332,
+          "y": 2,
+          "w": 128,
+          "h": 110
+        },
+        "torcedor4-0": {
+          "x": 462,
+          "y": 2,
+          "w": 37,
+          "h": 107
+        },
+        "guardrail": {
+          "x": 501,
+          "y": 2,
+          "w": 130,
+          "h": 106
+        },
+        "torcedor3-0": {
+          "x": 633,
+          "y": 2,
+          "w": 48,
+          "h": 106
+        },
+        "torcedor1-0": {
+          "x": 683,
+          "y": 2,
+          "w": 48,
+          "h": 100
+        },
+        "checkeredFlag": {
+          "x": 733,
+          "y": 2,
+          "w": 56,
+          "h": 98
+        },
+        "chegada": {
+          "x": 791,
+          "y": 2,
+          "w": 148,
+          "h": 96
+        },
+        "brazilFlag": {
+          "x": 941,
+          "y": 2,
+          "w": 68,
+          "h": 95
+        },
+        "torcedor1-1": {
+          "x": 1011,
+          "y": 2,
+          "w": 31,
+          "h": 92
+        },
+        "largada": {
+          "x": 1044,
+          "y": 2,
+          "w": 143,
+          "h": 88
+        },
+        "cactus": {
+          "x": 1189,
+          "y": 2,
+          "w": 48,
+          "h": 86
+        },
+        "plateia": {
+          "x": 1239,
+          "y": 2,
+          "w": 82,
+          "h": 86
+        },
+        "torcedor4-1": {
+          "x": 1323,
+          "y": 2,
+          "w": 34,
+          "h": 86
+        },
+        "torcedor3-1": {
+          "x": 2,
+          "y": 142,
+          "w": 52,
+          "h": 85
+        },
+        "rocks": {
+          "x": 56,
+          "y": 142,
+          "w": 88,
+          "h": 79
+        },
+        "flagYellow": {
+          "x": 146,
+          "y": 142,
+          "w": 50,
+          "h": 74
+        },
+        "torcedor2-1": {
+          "x": 198,
+          "y": 142,
+          "w": 55,
+          "h": 73
+        },
+        "tires": {
+          "x": 255,
+          "y": 142,
+          "w": 57,
+          "h": 71
+        },
+        "bush": {
+          "x": 314,
+          "y": 142,
+          "w": 76,
+          "h": 68
+        },
+        "flagBlue": {
+          "x": 392,
+          "y": 142,
+          "w": 48,
+          "h": 66
+        },
+        "rachadura": {
+          "x": 442,
+          "y": 142,
+          "w": 56,
+          "h": 59
+        },
+        "cone": {
+          "x": 500,
+          "y": 142,
+          "w": 38,
+          "h": 57
+        },
+        "smallRocks": {
+          "x": 540,
+          "y": 142,
+          "w": 65,
+          "h": 56
+        },
+        "pedrinhas": {
+          "x": 607,
+          "y": 142,
+          "w": 56,
+          "h": 48
+        },
+        "cranio": {
+          "x": 665,
+          "y": 142,
+          "w": 40,
+          "h": 45
+        },
+        "mancha": {
+          "x": 707,
+          "y": 142,
+          "w": 48,
+          "h": 43
+        },
+        "pneuEnterrado": {
+          "x": 757,
+          "y": 142,
+          "w": 58,
+          "h": 42
+        },
+        "marcaPneu": {
+          "x": 817,
+          "y": 142,
+          "w": 37,
+          "h": 41
+        },
+        "galhoSeco": {
+          "x": 856,
+          "y": 142,
+          "w": 47,
+          "h": 41
+        },
+        "capimSeco": {
+          "x": 905,
+          "y": 142,
+          "w": 38,
+          "h": 30
         }
-      },
-      "escala": 0.5
+      }
     },
     "floresta": {
       "folha": "gelo-floresta",
