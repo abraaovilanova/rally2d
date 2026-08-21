@@ -52,6 +52,13 @@ interface Scenery {
   crowd: string;
   /** Tamanho na tela = pixels do sprite × isto. */
   propScale: number;
+  /**
+   * Os recortes que ficam deitados no chão — marca de pneu, rachadura, mancha. Não são
+   * painéis em pé, então não têm o que projetar: dar sombra a eles é a sombra flutuar.
+   */
+  rasteiros: readonly string[];
+  /** Nome base → recortes numerados, para o que tem mais de um quadro. */
+  quadros: Map<string, string[]>;
 }
 
 interface Sheet {
@@ -67,6 +74,29 @@ const SHEETS: Record<string, Sheet> = {
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
 const PROP_SCALE_ANTIGA = 0.55;
+
+/**
+ * `torcedor1-0` e `torcedor1-1` são o mesmo objeto em dois momentos. A convenção é o
+ * sufixo numerado, que é o que o empacotador de folha escreve — assim um objeto ganha
+ * quadros sem ganhar campo nenhum no arquivo.
+ */
+function agruparQuadros(nomes: readonly string[]): Map<string, string[]> {
+  const mapa = new Map<string, string[]>();
+
+  for (const nome of nomes) {
+    const casa = /^(.+)-(\d+)$/.exec(nome);
+    if (!casa) continue;
+    const lista = mapa.get(casa[1]) ?? [];
+    lista[Number(casa[2])] = nome;
+    mapa.set(casa[1], lista);
+  }
+
+  // Um objeto de um quadro só não é animação; some do mapa para não custar nada.
+  for (const [base, lista] of mapa) {
+    if (lista.filter(Boolean).length < 2) mapa.delete(base);
+  }
+  return mapa;
+}
 
 const SCENERY: Record<string, Scenery> = Object.fromEntries(
   Object.entries(cenario.biomas).map(([id, b]) => [
@@ -86,6 +116,8 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       // convivem, cada Bioma carrega a sua escala — e o campo morre quando o último
       // Bioma antigo for refeito.
       propScale: 'escala' in b ? (b.escala as number) : PROP_SCALE_ANTIGA,
+      rasteiros: 'rasteiros' in b ? (b.rasteiros as string[]) : [],
+      quadros: agruparQuadros(Object.keys(b.recortes)),
     },
   ]),
 );
@@ -97,6 +129,11 @@ export interface Prop {
   y: number;
   scale: number;
   flip: boolean;
+  /**
+   * Em que ponto do ciclo este objeto começa, de 0 a 1. Vem da Semente: sem ela o
+   * público inteiro acena junto, e um estádio piscando em uníssono é pior que um parado.
+   */
+  fase: number;
 }
 
 export function preloadScenery(): void {
@@ -218,7 +255,9 @@ export function sceneryOf(stage: Stage): Prop[] {
   const cached = byStage.get(stage.id);
   if (cached) return cached;
 
-  const props = [...proceduraisDe(stage), ...postosDe(stage)];
+  // Ordenados pelo pé: em 3/4, quem está mais abaixo na tela está mais perto de quem
+  // olha, e tem de tapar quem está atrás. Feito uma vez por Etapa, não por quadro.
+  const props = [...proceduraisDe(stage), ...postosDe(stage)].sort((a, b) => a.y - b.y);
   byStage.set(stage.id, props);
   return props;
 }
@@ -236,6 +275,8 @@ export function postosDe(stage: Stage): Prop[] {
     y: p.y,
     scale: (SCENERY[stage.biome.id]?.propScale ?? PROP_SCALE_ANTIGA) * p.escala,
     flip: p.espelhado,
+    // Posto à mão não tem Semente; a fase sai da posição, que é fixa e única.
+    fase: ((p.x * 7 + p.y * 13) % 100) / 100,
   }));
 }
 
@@ -268,6 +309,7 @@ function buildProps(stage: Stage): Prop[] {
       y,
       scale: scenery.propScale * rng.range(0.85, 1.15),
       flip: rng.next() < 0.5,
+      fase: rng.next(),
     });
   }
 
@@ -304,6 +346,7 @@ function addCrowd(
       y: center[i].y + n.y * away * side,
       scale: scenery.propScale * rng.range(0.8, 1.0),
       flip: side > 0,
+      fase: rng.next(),
     });
   }
 }
@@ -329,6 +372,9 @@ function occupiedCells(stage: Stage): Set<string> {
   return cells;
 }
 
+/** Quantas vezes por segundo um objeto de dois quadros troca de quadro. */
+const QUADROS_POR_SEGUNDO = 4;
+
 /** Desenha os objetos visíveis. O sprite fica em pé, apoiado no ponto do mundo. */
 export function drawProps(
   ctx: CanvasRenderingContext2D,
@@ -337,6 +383,7 @@ export function drawProps(
   cam: Vec,
   width: number,
   height: number,
+  tempo = performance.now() / 1000,
 ): void {
   const scenery = SCENERY[biomeId];
   if (scenery === undefined) return;
@@ -346,8 +393,40 @@ export function drawProps(
   for (const prop of props) {
     if (prop.x < cam.x - 200 || prop.x > cam.x + width + 200) continue;
     if (prop.y < cam.y - 300 || prop.y > cam.y + height + 200) continue;
-    drawSprite(ctx, scenery, prop.sprite, prop.x, prop.y, prop.scale, prop.flip);
+
+    const nome = quadroAgora(scenery, prop, tempo);
+    const s = scenery.sprites[nome];
+    if (s === undefined) continue;
+
+    if (!scenery.rasteiros.includes(prop.sprite)) sombra(ctx, prop.x, prop.y, s.w * prop.scale);
+    drawSprite(ctx, scenery, nome, prop.x, prop.y, prop.scale, prop.flip);
   }
+}
+
+/** O quadro deste objeto agora. Objeto de um quadro só devolve o próprio nome. */
+function quadroAgora(scenery: Scenery, prop: Prop, tempo: number): string {
+  const lista = scenery.quadros.get(prop.sprite);
+  if (lista === undefined) return prop.sprite;
+
+  const passo = Math.floor(tempo * QUADROS_POR_SEGUNDO + prop.fase * lista.length);
+  return lista[((passo % lista.length) + lista.length) % lista.length] ?? prop.sprite;
+}
+
+/**
+ * A sombra de contato: uma elipse no pé do objeto.
+ *
+ * Painel em pé sobre chão visto de cima flutua sem ela — é o defeito que faz arte boa
+ * parecer colada. Fica aqui, e não desenhada dentro do sprite, porque assim vale para
+ * todos de uma vez, obedece o espelhamento e não congela a direção da luz no desenho.
+ */
+function sombra(ctx: CanvasRenderingContext2D, x: number, y: number, largura: number): void {
+  ctx.save();
+  ctx.globalAlpha = 0.26;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(x, y, largura * 0.42, largura * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function drawSprite(

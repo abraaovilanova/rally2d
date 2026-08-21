@@ -19,18 +19,31 @@ const SHEETS: Record<CarColor, string> = {
   blue: blueSheet,
 };
 
-/** Cada folha tem 8 direções de 64×64, lado a lado. */
+/** Cada folha tem quadros de 64×64 lado a lado; quantos, quem diz é a folha. */
 const FRAME_SIZE = 64;
-const FRAME_COUNT = 8;
 
 /**
- * O quadro 0 aponta para cima e cada quadro seguinte gira 45° no sentido **horário**.
- * Em graus de tela (0 = direita, positivo = para baixo): 45° × índice − 90°.
+ * Acima deste salto entre quadros, o canvas gira o sprite para cobrir o vão.
+ *
+ * É o que separa as duas arte: com 8 direções o vão é de 45°, grande demais para saltar
+ * num jogo cujo coração é o giro, e girar um pouco é o mal menor. Com 16 direções o vão
+ * é de 22,5°, imperceptível a 46px — e aí girar deixa de ser mal menor e passa a ser o
+ * defeito, porque girar um desenho de 3/4 é justamente o que se lê como errado.
+ */
+const VAO_QUE_EXIGE_ROTACAO = 30;
+
+/** Quantas direções esta folha tem. */
+const frameCount = (img: HTMLImageElement) => Math.max(1, Math.round(img.naturalWidth / FRAME_SIZE));
+
+/**
+ * O quadro 0 aponta para cima e cada quadro seguinte gira no sentido **horário**.
+ * Em graus de tela (0 = direita, positivo = para baixo): passo × índice − 90°.
  *
  * Verificado pelos faróis e pelo para-choque dianteiro, visíveis só nos quadros 3, 4 e 5
- * (Carro vindo em direção ao jogador), cujos ângulos medidos crescem com o índice.
+ * da folha de oito (Carro vindo em direção ao jogador), cujos ângulos medidos crescem
+ * com o índice.
  */
-const frameHeadingDeg = (frame: number) => 45 * frame - 90;
+const frameHeadingDeg = (frame: number, total: number) => (360 / total) * frame - 90;
 
 const images = new Map<CarColor, HTMLImageElement>();
 
@@ -56,9 +69,8 @@ export function saveCarColor(color: CarColor): void {
 /**
  * Desenha o Carro na posição e direção dadas.
  *
- * A folha só tem 8 direções, mas o Carro gira continuamente. Escolhemos o quadro mais
- * próximo e giramos o resto (no máximo 22,5°) no canvas: sem isso o Carro andaria aos
- * saltos de 45°, o que num jogo de mira precisa se lê como o controle falhando.
+ * O Carro gira continuamente e a folha é finita: escolhemos o quadro mais próximo, e o
+ * resto depende de quantos quadros a folha tem — ver `VAO_QUE_EXIGE_ROTACAO`.
  * Devolve `false` enquanto a imagem ainda não carregou.
  */
 export function drawCarSprite(
@@ -71,14 +83,17 @@ export function drawCarSprite(
   const img = images.get(color);
   if (!img?.complete || img.naturalWidth === 0) return false;
 
+  const total = frameCount(img);
+  const vao = 360 / total;
   const headingDeg = (heading * 180) / Math.PI;
-  const frame = mod(Math.round((headingDeg + 90) / 45), FRAME_COUNT);
-  const residual = normalizeDeg(headingDeg - frameHeadingDeg(frame));
+  const frame = mod(Math.round((headingDeg + 90) / vao), total);
+  const residual = normalizeDeg(headingDeg - frameHeadingDeg(frame, total));
   const size = FRAME_SIZE * TUNING.carSpriteScale;
+  const gira = TUNING.smoothSpriteRotation && vao > VAO_QUE_EXIGE_ROTACAO;
 
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(TUNING.smoothSpriteRotation ? (residual * Math.PI) / 180 : 0);
+  ctx.rotate(gira ? (residual * Math.PI) / 180 : 0);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(
     img,

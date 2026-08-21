@@ -75,7 +75,7 @@ def main() -> int:
     pasta = Path(sys.argv[2])
     bioma = manifesto['bioma']
 
-    pecas, faltando, papeis = [], [], {}
+    pecas, faltando, papeis, rasteiros = [], [], {}, []
     for item in manifesto['itens']:
         # O tileset Wang e a poeira não são objetos de cenário: têm desenho próprio no
         # jogo e folha própria. Entram no manifesto para a fila não os esquecer.
@@ -89,6 +89,8 @@ def main() -> int:
 
         pecas.extend(achados)
         papeis.setdefault(item['papel'], []).append((achados[0][0], item.get('peso', 3)))
+        if item.get('rasteiro'):
+            rasteiros.append(item['nome'])
 
     if not pecas:
         print('nada gerado ainda em', pasta)
@@ -120,6 +122,8 @@ def main() -> int:
         'beira': [n for n, _ in beira],
         'pesos': [p for _, p in beira],
         'publico': [n for n, _ in papeis.get('publico', [])],
+        # Quem fica deitado no chão não ganha sombra de contato: não há o que projetar.
+        'rasteiros': rasteiros,
         'plateia': um('plateia', antigo.get('plateia', '')),
         'recortes': recortes,
     }

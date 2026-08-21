@@ -120,7 +120,8 @@
       "ocupacao": "quarto",
       "descricao": "few small pebbles scattered on sand",
       "feito": false,
-      "peso": 6
+      "peso": 6,
+      "rasteiro": true
     },
     {
       "nome": "rachadura",
@@ -128,7 +129,8 @@
       "ocupacao": "quarto",
       "descricao": "cracked dry earth patch, thin dark fissures",
       "feito": false,
-      "peso": 5
+      "peso": 5,
+      "rasteiro": true
     },
     {
       "nome": "capimSeco",
@@ -152,7 +154,8 @@
       "ocupacao": "quarto",
       "descricao": "single curved tire track pressed into sand",
       "feito": false,
-      "peso": 4
+      "peso": 4,
+      "rasteiro": true
     },
     {
       "nome": "galhoSeco",
@@ -160,7 +163,8 @@
       "ocupacao": "quarto",
       "descricao": "dead bleached branch lying on the ground",
       "feito": false,
-      "peso": 4
+      "peso": 4,
+      "rasteiro": true
     },
     {
       "nome": "mancha",
@@ -168,7 +172,8 @@
       "ocupacao": "quarto",
       "descricao": "dark oil stain soaked into sand",
       "feito": false,
-      "peso": 2
+      "peso": 2,
+      "rasteiro": true
     },
     {
       "nome": "pneuEnterrado",
