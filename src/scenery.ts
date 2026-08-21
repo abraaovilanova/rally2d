@@ -50,6 +50,8 @@ interface Scenery {
   roadsideWeights: readonly number[];
   fans: readonly string[];
   crowd: string;
+  /** Tamanho na tela = pixels do sprite × isto. */
+  propScale: number;
 }
 
 interface Sheet {
@@ -62,6 +64,9 @@ const SHEETS: Record<string, Sheet> = {
   deserto: { src: desertSheet, image: new Image() },
   'gelo-floresta': { src: iceForestSheet, image: new Image() },
 };
+
+/** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
+const PROP_SCALE_ANTIGA = 0.55;
 
 const SCENERY: Record<string, Scenery> = Object.fromEntries(
   Object.entries(cenario.biomas).map(([id, b]) => [
@@ -77,12 +82,13 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       roadsideWeights: b.pesos,
       fans: b.publico,
       crowd: b.plateia,
+      // A arte refeita nasce já no tamanho final; a antiga não. Enquanto os dois
+      // convivem, cada Bioma carrega a sua escala — e o campo morre quando o último
+      // Bioma antigo for refeito.
+      propScale: 'escala' in b ? (b.escala as number) : PROP_SCALE_ANTIGA,
     },
   ]),
 );
-
-/** Tamanho na tela = pixels do sprite × isto. Calibrado contra a largura da Pista. */
-const PROP_SCALE = 0.55;
 
 /** Um objeto já posicionado no mundo. O ponto é onde ele toca o chão. */
 export interface Prop {
@@ -228,7 +234,7 @@ export function postosDe(stage: Stage): Prop[] {
     sprite: p.sprite,
     x: p.x,
     y: p.y,
-    scale: PROP_SCALE * p.escala,
+    scale: (SCENERY[stage.biome.id]?.propScale ?? PROP_SCALE_ANTIGA) * p.escala,
     flip: p.espelhado,
   }));
 }
@@ -260,7 +266,7 @@ function buildProps(stage: Stage): Prop[] {
       sprite: rng.weighted(scenery.roadside, scenery.roadsideWeights),
       x,
       y,
-      scale: PROP_SCALE * rng.range(0.85, 1.15),
+      scale: scenery.propScale * rng.range(0.85, 1.15),
       flip: rng.next() < 0.5,
     });
   }
@@ -296,7 +302,7 @@ function addCrowd(
           : scenery.fans[Math.floor(rng.range(0, scenery.fans.length))],
       x: center[i].x + n.x * away * side,
       y: center[i].y + n.y * away * side,
-      scale: PROP_SCALE * rng.range(0.8, 1.0),
+      scale: scenery.propScale * rng.range(0.8, 1.0),
       flip: side > 0,
     });
   }
