@@ -52,10 +52,13 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   drawForkSigns(ctx, game, from, to);
   drawNoteMarkers(ctx, game);
   drawFinishLine(ctx, track.main, palette.edge);
-  drawAimLine(ctx, game);
   drawCar(ctx, game, palette.car);
 
   ctx.restore();
+
+  // A mira é desenhada depois do `restore`, em coordenadas de tela: é assim que cada
+  // bloco cai inteiro numa casa da grade de pixels.
+  drawMira(ctx, game, cam);
 
   drawPaceNotes(ctx, game);
   drawHud(ctx, game);
@@ -358,74 +361,122 @@ function corDoAcelerador(t: number, alfa = 1): string {
 }
 
 /**
- * O Ponto de Mira desenhado como uma flecha.
+ * O desenho de um chevron, em pixels de arte. Dois de espessura, ponta à direita.
+ *
+ * É uma tabela e não uma curva porque o resto do jogo é pixel art: uma seta traçada com
+ * linha e ponta arredondada seria a única coisa vetorial na tela, e essa é exatamente a
+ * mistura que o Estilo existe para não ter.
+ */
+const CHEVRON = [
+  '##...',
+  '.##..',
+  '..##.',
+  '...##',
+  '..##.',
+  '.##..',
+  '##...',
+];
+
+/** Tamanho de um pixel de arte da mira, em pixels de tela. */
+const PIXEL_DA_MIRA = 2;
+
+/** Distância entre um chevron e o seguinte, em pixels de tela. */
+const PASSO_DA_MIRA = 17;
+
+/**
+ * O Ponto de Mira desenhado como uma fileira de chevrons.
  *
  * Era uma linha tracejada cuja espessura crescia com o Acelerador — informação verdadeira
- * e ilegível: ninguém compara espessura de linha no meio de uma curva. A flecha diz as
- * mesmas duas coisas de forma direta: **para onde** ela aponta é a direção que o Carro
- * quer, e **a cor** é o quanto ele está andando — vermelho colado, verde esticado.
+ * e ilegível: ninguém compara espessura de linha no meio de uma curva. A fileira diz as
+ * mesmas duas coisas de forma direta, e diz uma terceira de graça: **para onde** os
+ * chevrons apontam é a direção que o Carro quer, **a cor** é o quanto ele anda, e
+ * **quantos** são é o quão longe o cursor está — a fileira cresce junto com o acelerador.
  *
- * A ponta fica no cursor, e é ela que substitui a seta do sistema: o jogo esconde o
- * cursor enquanto corre, porque duas setas na tela seriam uma a mais.
+ * Desenhada em coordenadas de tela, e não de mundo, para cada bloco cair inteiro numa
+ * casa da grade de pixels. Em coordenadas de mundo a câmera fracionária borraria todos.
  */
-function drawAimLine(ctx: CanvasRenderingContext2D, game: Game): void {
+function drawMira(ctx: CanvasRenderingContext2D, game: Game, cam: Vec): void {
   if (game.phase !== 'running') return;
 
   const t = clamp01(throttleOf(game.car, categoryOf(game)));
   const cor = corDoAcelerador(t);
-  const dx = game.aim.x - game.car.x;
-  const dy = game.aim.y - game.car.y;
+  const carro = { x: game.car.x - cam.x, y: game.car.y - cam.y };
+  const mira = { x: game.aim.x - cam.x, y: game.aim.y - cam.y };
+  const dx = mira.x - carro.x;
+  const dy = mira.y - carro.y;
   const distancia = Math.hypot(dx, dy);
 
-  // A zona morta precisa ser visível: dentro dela a direção deixa de responder, e o anel
-  // é a única coisa que diz isso antes de o jogador estranhar o volante.
-  ctx.strokeStyle = cor;
-  ctx.globalAlpha = distancia > TUNING.aimDeadzone ? 0.28 : 0.85;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(game.car.x, game.car.y, TUNING.aimDeadzone, 0, Math.PI * 2);
-  ctx.stroke();
+  ctx.save();
+  ctx.fillStyle = cor;
+
+  // A zona morta, em blocos: dentro dela a direção deixa de responder, e o anel é a única
+  // coisa que diz isso antes de o jogador estranhar o volante. Bloco maior que o do
+  // chevron de propósito — sobre o chão texturado, o de dois pixels sumia.
+  ctx.globalAlpha = distancia > TUNING.aimDeadzone ? 0.5 : 1;
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2;
+    const bx = Math.round(carro.x + Math.cos(a) * TUNING.aimDeadzone);
+    const by = Math.round(carro.y + Math.sin(a) * TUNING.aimDeadzone);
+    ctx.fillRect(bx, by, 3, 3);
+  }
   ctx.globalAlpha = 1;
 
-  if (distancia < 1) return;
+  if (distancia < 1) return ctx.restore();
 
   const ux = dx / distancia;
   const uy = dy / distancia;
-  // Começa na beira da zona morta: dentro dela a haste não significaria direção nenhuma.
-  const de = Math.min(TUNING.aimDeadzone, distancia);
-  const ponta = 9 + t * 9;
-  const ate = Math.max(de, distancia - ponta * 0.7);
-
-  ctx.strokeStyle = cor;
-  ctx.lineWidth = 2 + t * 3;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(game.car.x + ux * de, game.car.y + uy * de);
-  ctx.lineTo(game.car.x + ux * ate, game.car.y + uy * ate);
-  ctx.stroke();
-
-  ctx.save();
-  ctx.translate(game.aim.x, game.aim.y);
-  ctx.fillStyle = cor;
 
   if (distancia <= TUNING.aimDeadzone) {
-    // Dentro da zona morta o Ponto de Mira controla só o Acelerador. Uma ponta apontando
+    // Dentro da zona morta o Ponto de Mira controla só o Acelerador. Um chevron apontando
     // para algum lado prometeria uma direção que o volante não vai obedecer.
-    ctx.beginPath();
-    ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-    ctx.fill();
-  } else {
-    ctx.rotate(Math.atan2(uy, ux));
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-ponta, ponta * 0.5);
-    ctx.lineTo(-ponta * 0.62, 0);
-    ctx.lineTo(-ponta, -ponta * 0.5);
-    ctx.closePath();
-    ctx.fill();
+    bloco(ctx, mira.x, mira.y);
+    bloco(ctx, mira.x + PIXEL_DA_MIRA, mira.y);
+    bloco(ctx, mira.x, mira.y + PIXEL_DA_MIRA);
+    bloco(ctx, mira.x + PIXEL_DA_MIRA, mira.y + PIXEL_DA_MIRA);
+    return ctx.restore();
   }
 
+  // A fileira anda para a frente enquanto se acelera: é o que separa "estou a fundo" de
+  // "estou parado apontando para longe" num relance, sem ler número nenhum.
+  const marcha = (performance.now() / 1000) * (18 + t * 46);
+  const primeiro = TUNING.aimDeadzone + PASSO_DA_MIRA * 0.6;
+  const inicio = primeiro + (marcha % PASSO_DA_MIRA);
+
+  for (let d = inicio; d < distancia - 2; d += PASSO_DA_MIRA) {
+    // O último some aos poucos, senão a fileira pisca a cada passo que ela anda.
+    const sobra = (distancia - 2 - d) / PASSO_DA_MIRA;
+    ctx.globalAlpha = sobra < 1 ? sobra : 1;
+    chevron(ctx, carro.x + ux * d, carro.y + uy * d, ux, uy);
+  }
+
+  ctx.globalAlpha = 1;
+  chevron(ctx, mira.x, mira.y, ux, uy);
   ctx.restore();
+}
+
+/** Um bloco de pixel encaixado na grade da tela. */
+function bloco(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+  ctx.fillRect(Math.round(x), Math.round(y), PIXEL_DA_MIRA, PIXEL_DA_MIRA);
+}
+
+/**
+ * Um chevron girado. Cada bloco é posicionado e arredondado por conta própria, em vez de
+ * girar o canvas: girar o canvas suavizaria as bordas, e bloco de pixel art não tem borda
+ * suave — ele cai inteiro numa casa ou na vizinha.
+ */
+function chevron(ctx: CanvasRenderingContext2D, x: number, y: number, ux: number, uy: number): void {
+  const u = PIXEL_DA_MIRA;
+  const meioX = (CHEVRON[0].length - 1) / 2;
+  const meioY = (CHEVRON.length - 1) / 2;
+
+  for (let linha = 0; linha < CHEVRON.length; linha++) {
+    for (let coluna = 0; coluna < CHEVRON[linha].length; coluna++) {
+      if (CHEVRON[linha][coluna] !== '#') continue;
+      const lx = (coluna - meioX) * u;
+      const ly = (linha - meioY) * u;
+      bloco(ctx, x + lx * ux - ly * uy, y + lx * uy + ly * ux);
+    }
+  }
 }
 
 function clamp01(v: number): number {
