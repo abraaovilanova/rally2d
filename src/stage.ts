@@ -6,7 +6,6 @@ export interface Palette {
   track: string;
   edge: string;
   car: string;
-  aim: string;
   text: string;
 }
 
@@ -34,7 +33,6 @@ export const BIOMES: readonly Biome[] = [
       track: '#5d4a30',
       edge: '#e8b04b',
       car: '#f6f2e9',
-      aim: 'rgba(246, 242, 233, 0.35)',
       text: '#f6f2e9',
     },
     weights: { straight: 4, smoothCurve: 3, tightCurve: 2, chicane: 1 },
@@ -49,7 +47,6 @@ export const BIOMES: readonly Biome[] = [
       track: '#22402c',
       edge: '#6fe38a',
       car: '#f2fff5',
-      aim: 'rgba(242, 255, 245, 0.35)',
       text: '#f2fff5',
     },
     weights: { straight: 2, smoothCurve: 3, tightCurve: 3, chicane: 2 },
@@ -64,7 +61,6 @@ export const BIOMES: readonly Biome[] = [
       track: '#22374a',
       edge: '#7fd6ff',
       car: '#eaf6ff',
-      aim: 'rgba(234, 246, 255, 0.35)',
       text: '#eaf6ff',
     },
     weights: { straight: 2, smoothCurve: 2, tightCurve: 4, chicane: 3 },

@@ -46,7 +46,7 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   drawForkSigns(ctx, game, from, to);
   drawNoteMarkers(ctx, game);
   drawFinishLine(ctx, track.main, palette.edge);
-  drawAimLine(ctx, game, palette.aim);
+  drawAimLine(ctx, game);
   drawCar(ctx, game, palette.car);
 
   ctx.restore();
@@ -326,27 +326,104 @@ function drawFinishLine(ctx: CanvasRenderingContext2D, path: Path, color: string
   ctx.setLineDash([]);
 }
 
-function drawAimLine(ctx: CanvasRenderingContext2D, game: Game, color: string): void {
+/**
+ * As cores do Acelerador, do freio ao fundo.
+ *
+ * Verde, amarelo e vermelho porque é o que qualquer um lê sem manual — e porque o
+ * Acelerador é a única coisa do jogo que tem "muito" e "pouco" numa escala só. As três
+ * saem da paleta-mestra e são legíveis nos três Biomas: no gelo claro, na areia e no
+ * verde da floresta.
+ */
+const ACELERADOR = [
+  { t: 0, cor: [255, 95, 86] },
+  { t: 0.5, cor: [255, 193, 77] },
+  { t: 1, cor: [111, 227, 138] },
+] as const;
+
+function corDoAcelerador(t: number, alfa = 1): string {
+  const fim = ACELERADOR.findIndex((p) => t <= p.t);
+  if (fim <= 0) return `rgba(${ACELERADOR[0].cor.join(',')},${alfa})`;
+
+  const a = ACELERADOR[fim - 1];
+  const b = ACELERADOR[fim];
+  const k = (t - a.t) / (b.t - a.t);
+  const c = a.cor.map((v, i) => Math.round(v + (b.cor[i] - v) * k));
+  return `rgba(${c.join(',')},${alfa})`;
+}
+
+/**
+ * O Ponto de Mira desenhado como uma flecha.
+ *
+ * Era uma linha tracejada cuja espessura crescia com o Acelerador — informação verdadeira
+ * e ilegível: ninguém compara espessura de linha no meio de uma curva. A flecha diz as
+ * mesmas duas coisas de forma direta: **para onde** ela aponta é a direção que o Carro
+ * quer, e **a cor** é o quanto ele está andando — vermelho colado, verde esticado.
+ *
+ * A ponta fica no cursor, e é ela que substitui a seta do sistema: o jogo esconde o
+ * cursor enquanto corre, porque duas setas na tela seriam uma a mais.
+ */
+function drawAimLine(ctx: CanvasRenderingContext2D, game: Game): void {
   if (game.phase !== 'running') return;
 
-  // Torna o modelo de controle legível: a linha é a direção que o Carro *quer* e o
-  // seu comprimento é o acelerador; o sprite é a direção que ele *tem*.
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5 + throttleOf(game.car, categoryOf(game)) * 2.5;
-  ctx.setLineDash([6, 8]);
-  ctx.beginPath();
-  ctx.moveTo(game.car.x, game.car.y);
-  ctx.lineTo(game.aim.x, game.aim.y);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  const t = clamp01(throttleOf(game.car, categoryOf(game)));
+  const cor = corDoAcelerador(t);
+  const dx = game.aim.x - game.car.x;
+  const dy = game.aim.y - game.car.y;
+  const distancia = Math.hypot(dx, dy);
 
-  // A zona morta precisa ser visível: dentro dela a direção deixa de responder.
-  ctx.globalAlpha = 0.25;
-  ctx.lineWidth = 1;
+  // A zona morta precisa ser visível: dentro dela a direção deixa de responder, e o anel
+  // é a única coisa que diz isso antes de o jogador estranhar o volante.
+  ctx.strokeStyle = cor;
+  ctx.globalAlpha = distancia > TUNING.aimDeadzone ? 0.28 : 0.85;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.arc(game.car.x, game.car.y, TUNING.aimDeadzone, 0, Math.PI * 2);
   ctx.stroke();
   ctx.globalAlpha = 1;
+
+  if (distancia < 1) return;
+
+  const ux = dx / distancia;
+  const uy = dy / distancia;
+  // Começa na beira da zona morta: dentro dela a haste não significaria direção nenhuma.
+  const de = Math.min(TUNING.aimDeadzone, distancia);
+  const ponta = 9 + t * 9;
+  const ate = Math.max(de, distancia - ponta * 0.7);
+
+  ctx.strokeStyle = cor;
+  ctx.lineWidth = 2 + t * 3;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(game.car.x + ux * de, game.car.y + uy * de);
+  ctx.lineTo(game.car.x + ux * ate, game.car.y + uy * ate);
+  ctx.stroke();
+
+  ctx.save();
+  ctx.translate(game.aim.x, game.aim.y);
+  ctx.fillStyle = cor;
+
+  if (distancia <= TUNING.aimDeadzone) {
+    // Dentro da zona morta o Ponto de Mira controla só o Acelerador. Uma ponta apontando
+    // para algum lado prometeria uma direção que o volante não vai obedecer.
+    ctx.beginPath();
+    ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.rotate(Math.atan2(uy, ux));
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-ponta, ponta * 0.5);
+    ctx.lineTo(-ponta * 0.62, 0);
+    ctx.lineTo(-ponta, -ponta * 0.5);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function clamp01(v: number): number {
+  return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
 function drawCar(ctx: CanvasRenderingContext2D, game: Game, color: string): void {
@@ -588,7 +665,9 @@ function drawSpeedometer(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.fillRect(x, y, w, h);
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = throttle > 0.75 ? '#ff5a5a' : throttle > 0.4 ? '#ffc14d' : '#7ce38b';
+  // A mesma escala da flecha da mira, e de propósito: dois medidores do mesmo Acelerador
+  // com cores opostas — e era isso que acontecia — não informam, confundem.
+  ctx.fillStyle = corDoAcelerador(throttle);
   ctx.fillRect(x, y, w * throttle, h);
 
   ctx.fillStyle = game.stage.biome.palette.text;

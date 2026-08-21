@@ -76,6 +76,10 @@ function loop(game: Game): void {
     const dt = Math.min((now - last) / 1000, 1 / 30);
     last = now;
 
+    // Enquanto corre, a seta do sistema some: a mira já é uma seta, e duas na tela
+    // seriam uma a mais. Fora da Corrida ela volta, porque o Grid é feito de botões.
+    canvas.style.cursor = game.phase === 'running' ? 'none' : 'crosshair';
+
     const cam = cameraAt(game, canvas);
     updateGame(game, { x: mouse.x + cam.x, y: mouse.y + cam.y }, dt);
     render(ctx, game);
