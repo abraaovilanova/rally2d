@@ -700,6 +700,14 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   const palette = game.stage.biome.palette;
   const best = game.bestTime === null ? '—' : formatTime(game.bestTime);
 
+  // Uma sombra atrás de tudo o que é HUD. O chão deixou de ser uma cor tingida e virou
+  // arte: na neve ele é quase branco, e texto claro sobre ele sumia por completo. A
+  // sombra resolve para qualquer chão, presente ou futuro, sem escurecer a arte.
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 1;
+
   ctx.fillStyle = palette.text;
   ctx.font = '600 34px system-ui, sans-serif';
   ctx.textAlign = 'left';
@@ -724,6 +732,8 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.globalAlpha = 0.5;
   ctx.fillRect(0, ctx.canvas.height - 5, ctx.canvas.width * done, 5);
   ctx.globalAlpha = 1;
+
+  ctx.restore();
 
   // O Grid e a Conclusão são telas de DOM (`ui.ts`): têm lista de Ranking e campo de
   // texto, que canvas não desenha bem. Aqui fica só a Batida, que precisa ser instantânea.

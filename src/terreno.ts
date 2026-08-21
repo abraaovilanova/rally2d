@@ -12,16 +12,20 @@ import type { Stage } from './stage';
  * ter batido. Por isso ele pode ser puro desenho, sem uma linha sequer no modelo.
  */
 
-/** Quantos tipos de chão um Bioma encosta. Três, encaixados um dentro do outro. */
-export const NIVEIS = 3;
-
 /**
+ * Quantos tipos de chão um Bioma encosta é decidido pelo Bioma: um tileset desenha a
+ * transição entre **dois** terrenos, então N tilesets dão N+1 tipos de chão.
+ *
  * Os níveis são **encaixados**, não vizinhos quaisquer: o nível 2 só aparece dentro de
- * regiões do nível 1, porque os dois saem de faixas do mesmo campo contínuo. É isso que
- * garante que só existam encontros 0–1 e 1–2 — os únicos para os quais há transição
- * desenhada. Um encontro 0–2 exigiria um terceiro tileset que ninguém gerou.
+ * regiões do nível 1, porque todos saem de faixas do mesmo campo contínuo. É isso que
+ * garante que só existam encontros entre níveis vizinhos — os únicos para os quais há
+ * transição desenhada. Um encontro 0–2 exigiria um tileset que ninguém gerou.
  */
-const FAIXAS = [0.42, 0.72];
+const FAIXAS: Record<number, number[]> = {
+  1: [0.55],
+  2: [0.42, 0.72],
+  3: [0.36, 0.6, 0.8],
+};
 
 /** Tamanho da célula do Terreno em pixels de mundo. Uma célula = um ladrilho. */
 export const CELULA = 96;
@@ -78,11 +82,11 @@ function sementeDe(stage: Stage): number {
   return semente | 0;
 }
 
-/** O nível do Terreno num **vértice** da grade, de 0 a 2. */
-export function nivelNoVertice(stage: Stage, vx: number, vy: number): number {
+/** O nível do Terreno num **vértice** da grade, de 0 ao número de pares. */
+export function nivelNoVertice(stage: Stage, vx: number, vy: number, pares: number): number {
   const v = campo(sementeDe(stage), vx, vy);
   let nivel = 0;
-  for (const faixa of FAIXAS) if (v >= faixa) nivel++;
+  for (const faixa of FAIXAS[pares] ?? FAIXAS[2]) if (v >= faixa) nivel++;
   return nivel;
 }
 
@@ -106,12 +110,12 @@ export interface Ladrilho {
 
 const BIT = [8, 4, 1, 2]; // noroeste, nordeste, sudeste, sudoeste
 
-export function ladrilhoDaCelula(stage: Stage, cx: number, cy: number): Ladrilho {
+export function ladrilhoDaCelula(stage: Stage, cx: number, cy: number, pares: number): Ladrilho {
   const cantos = [
-    nivelNoVertice(stage, cx, cy),
-    nivelNoVertice(stage, cx + 1, cy),
-    nivelNoVertice(stage, cx + 1, cy + 1),
-    nivelNoVertice(stage, cx, cy + 1),
+    nivelNoVertice(stage, cx, cy, pares),
+    nivelNoVertice(stage, cx + 1, cy, pares),
+    nivelNoVertice(stage, cx + 1, cy + 1, pares),
+    nivelNoVertice(stage, cx, cy + 1, pares),
   ];
 
   const menor = Math.min(...cantos);

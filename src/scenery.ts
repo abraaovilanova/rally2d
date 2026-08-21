@@ -1,7 +1,9 @@
-import desertSheet from '../assets/world/deserto.png';
 import desertTerrainSheet from '../assets/world/deserto-terreno.png';
 import desertV2Sheet from '../assets/world/deserto-v2.png';
-import iceForestSheet from '../assets/world/gelo-floresta.png';
+import forestTerrainSheet from '../assets/world/floresta-terreno.png';
+import forestV2Sheet from '../assets/world/floresta-v2.png';
+import iceTerrainSheet from '../assets/world/gelo-terreno.png';
+import iceV2Sheet from '../assets/world/gelo-v2.png';
 import cenario from './cenario.json';
 import { CELULA, ladrilhoDaCelula } from './terreno';
 import etapas from './cenario-etapas.json';
@@ -80,14 +82,21 @@ interface Sheet {
   image: HTMLImageElement;
 }
 
-/** As folhas de verdade, resolvidas pelo bundler; o JSON só diz qual é qual pelo nome. */
+/**
+ * As folhas de verdade, resolvidas pelo bundler; o JSON só diz qual é qual pelo nome.
+ *
+ * As folhas antigas — `deserto.png` e `gelo-floresta.png` — continuam no repositório mas
+ * saíram daqui: nenhum Bioma as usa desde que os três foram refeitos.
+ */
 const SHEETS: Record<string, Sheet> = {
-  deserto: { src: desertSheet, image: new Image() },
-  'gelo-floresta': { src: iceForestSheet, image: new Image() },
   // O Deserto refeito. O chão e o leito ainda são os antigos, recortados para dentro
   // dela: os ladrilhos novos são os últimos da fila.
   'deserto-v2': { src: desertV2Sheet, image: new Image() },
   'deserto-terreno': { src: desertTerrainSheet, image: new Image() },
+  'floresta-v2': { src: forestV2Sheet, image: new Image() },
+  'floresta-terreno': { src: forestTerrainSheet, image: new Image() },
+  'gelo-v2': { src: iceV2Sheet, image: new Image() },
+  'gelo-terreno': { src: iceTerrainSheet, image: new Image() },
 };
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
@@ -116,6 +125,25 @@ function agruparQuadros(nomes: readonly string[]): Map<string, string[]> {
   return mapa;
 }
 
+/**
+ * Lê um campo que pode não existir no arquivo, sem deixar o compilador estreitar o tipo
+ * do Bioma para `never` quando todos por acaso o têm. O arquivo é dado, e dado muda.
+ */
+function campo<T>(b: object, nome: string, padrao: T): T {
+  return nome in b ? ((b as Record<string, unknown>)[nome] as T) : padrao;
+}
+
+/** O tileset do Terreno como está no arquivo: por nome de folha, não por imagem. */
+interface Tileset {
+  folha: string;
+  tile: number;
+  pares: number;
+}
+
+function montarTerreno(t: Tileset | null): Scenery['terreno'] {
+  return t ? { sheet: SHEETS[t.folha], tile: t.tile, pares: t.pares } : null;
+}
+
 const SCENERY: Record<string, Scenery> = Object.fromEntries(
   Object.entries(cenario.biomas).map(([id, b]) => [
     id,
@@ -124,7 +152,7 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       sprites: b.recortes as Record<string, Rect>,
       ground: b.chao,
       bed: b.leito,
-      beds: 'leitos' in b ? (b.leitos as string[]) : [b.leito],
+      beds: campo<string[]>(b, 'leitos', [b.leito]),
       largada: b.largada,
       chegada: b.chegada,
       roadside: b.beira,
@@ -134,19 +162,12 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       // A arte refeita nasce já no tamanho final; a antiga não. Enquanto os dois
       // convivem, cada Bioma carrega a sua escala — e o campo morre quando o último
       // Bioma antigo for refeito.
-      propScale: 'escala' in b ? (b.escala as number) : PROP_SCALE_ANTIGA,
-      rasteiros: 'rasteiros' in b ? (b.rasteiros as string[]) : [],
-      terreno:
-        'terreno' in b
-          ? {
-              sheet: SHEETS[(b.terreno as { folha: string }).folha],
-              tile: (b.terreno as { tile: number }).tile,
-              pares: (b.terreno as { pares: number }).pares,
-            }
-          : null,
+      propScale: campo(b, 'escala', PROP_SCALE_ANTIGA),
+      rasteiros: campo<string[]>(b, 'rasteiros', []),
+      terreno: montarTerreno(campo<Tileset | null>(b, 'terreno', null)),
       quadros: agruparQuadros(Object.keys(b.recortes)),
-      efeitos: 'efeitos' in b ? (b.efeitos as string[]) : [],
-      espelharLadrilho: 'espelhar' in b ? (b.espelhar as boolean) : true,
+      efeitos: campo<string[]>(b, 'efeitos', []),
+      espelharLadrilho: campo(b, 'espelhar', true),
     },
   ]),
 );
@@ -262,7 +283,7 @@ export function drawTerreno(
 
   for (let cy = de.y; cy <= ate.y; cy++) {
     for (let cx = de.x; cx <= ate.x; cx++) {
-      const { par, forma } = ladrilhoDaCelula(stage, cx, cy);
+      const { par, forma } = ladrilhoDaCelula(stage, cx, cy, terreno.pares);
       ctx.drawImage(
         terreno.sheet.image,
         (forma % 4) * t,

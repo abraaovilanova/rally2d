@@ -1,10 +1,11 @@
 {
   "sheets": {
-    "deserto": "assets/world/deserto.png",
-    "gelo-floresta": "assets/world/gelo-floresta.png",
-    "deserto-teste": "assets/world/deserto-teste.png",
     "deserto-v2": "assets/world/deserto-v2.png",
-    "deserto-terreno": "assets/world/deserto-terreno.png"
+    "deserto-terreno": "assets/world/deserto-terreno.png",
+    "floresta-terreno": "assets/world/floresta-terreno.png",
+    "gelo-terreno": "assets/world/gelo-terreno.png",
+    "floresta-v2": "assets/world/floresta-v2.png",
+    "gelo-v2": "assets/world/gelo-v2.png"
   },
   "biomas": {
     "deserto": {
@@ -306,271 +307,507 @@
       }
     },
     "floresta": {
-      "folha": "gelo-floresta",
+      "terreno": {
+        "folha": "floresta-terreno",
+        "tile": 96,
+        "pares": 1
+      },
+      "folha": "floresta-v2",
+      "escala": 0.5,
+      "espelhar": false,
       "chao": "moss",
-      "leito": "soil",
+      "leito": "leito1",
+      "leitos": [
+        "leito1",
+        "leito2",
+        "leito3"
+      ],
       "largada": "largada",
       "chegada": "chegada",
       "beira": [
-        "pines",
-        "trees",
-        "rocks",
-        "tires",
-        "signTrail",
-        "signWood",
-        "flag",
-        "podium"
+        "pinheiro",
+        "arvore",
+        "arbusto",
+        "samambaia",
+        "pedras",
+        "tronco",
+        "toco",
+        "cogumelos",
+        "placaTrilha",
+        "placaBosque",
+        "bandeiraVerde",
+        "bandeiraBranca",
+        "cerca",
+        "pneus",
+        "cone"
       ],
       "pesos": [
         6,
         6,
+        5,
+        5,
+        3,
+        3,
+        3,
         3,
         2,
         2,
         2,
-        1,
-        1
+        2,
+        2,
+        2,
+        2
       ],
       "publico": [
-        "hiker",
-        "ranger",
-        "biker"
+        "torcedor1",
+        "torcedor2",
+        "torcedor3",
+        "torcedor4"
       ],
-      "plateia": "crowd",
+      "rasteiros": [],
+      "plateia": "plateia",
+      "efeitos": [],
       "recortes": {
+        "pinheiro": {
+          "x": 2,
+          "y": 2,
+          "w": 102,
+          "h": 145
+        },
+        "cerca": {
+          "x": 106,
+          "y": 2,
+          "w": 148,
+          "h": 143
+        },
+        "arvore": {
+          "x": 256,
+          "y": 2,
+          "w": 114,
+          "h": 130
+        },
         "largada": {
-          "x": 11,
-          "y": 5,
-          "w": 206,
-          "h": 140
+          "x": 372,
+          "y": 2,
+          "w": 136,
+          "h": 128
         },
-        "chegada": {
-          "x": 571,
-          "y": 12,
-          "w": 202,
-          "h": 129
+        "leito1": {
+          "x": 510,
+          "y": 2,
+          "w": 128,
+          "h": 128
         },
-        "signTrail": {
-          "x": 257,
-          "y": 35,
-          "w": 126,
-          "h": 105
+        "leito2": {
+          "x": 640,
+          "y": 2,
+          "w": 128,
+          "h": 128
         },
-        "signWood": {
-          "x": 421,
-          "y": 40,
-          "w": 121,
-          "h": 100
+        "leito3": {
+          "x": 770,
+          "y": 2,
+          "w": 128,
+          "h": 128
         },
-        "flag": {
-          "x": 820,
-          "y": 24,
-          "w": 75,
-          "h": 106
-        },
-        "podium": {
-          "x": 946,
-          "y": 46,
-          "w": 140,
-          "h": 73
-        },
-        "tires": {
-          "x": 1274,
-          "y": 44,
-          "w": 123,
-          "h": 91
-        },
-        "pines": {
-          "x": 791,
-          "y": 156,
-          "w": 149,
-          "h": 149
-        },
-        "trees": {
-          "x": 942,
-          "y": 153,
-          "w": 150,
-          "h": 148
-        },
-        "rocks": {
-          "x": 1102,
-          "y": 173,
-          "w": 143,
-          "h": 115
-        },
-        "hiker": {
-          "x": 56,
-          "y": 641,
-          "w": 65,
-          "h": 121
-        },
-        "ranger": {
-          "x": 223,
-          "y": 637,
-          "w": 71,
-          "h": 126
-        },
-        "biker": {
-          "x": 395,
-          "y": 636,
-          "w": 89,
+        "tronco": {
+          "x": 900,
+          "y": 2,
+          "w": 136,
           "h": 125
         },
-        "crowd": {
-          "x": 1265,
-          "y": 632,
-          "w": 133,
-          "h": 121
+        "torcedor2-0": {
+          "x": 1038,
+          "y": 2,
+          "w": 52,
+          "h": 113
         },
-        "moss": {
-          "x": 527,
-          "y": 152,
-          "w": 93,
-          "h": 155
+        "placaTrilha": {
+          "x": 1092,
+          "y": 2,
+          "w": 63,
+          "h": 105
         },
-        "soil": {
-          "x": 626,
-          "y": 152,
-          "w": 156,
-          "h": 155
+        "chegada": {
+          "x": 1157,
+          "y": 2,
+          "w": 119,
+          "h": 101
+        },
+        "torcedor1-0": {
+          "x": 1278,
+          "y": 2,
+          "w": 58,
+          "h": 98
+        },
+        "torcedor3-0": {
+          "x": 1338,
+          "y": 2,
+          "w": 53,
+          "h": 97
+        },
+        "torcedor4-0": {
+          "x": 2,
+          "y": 149,
+          "w": 46,
+          "h": 97
+        },
+        "plateia": {
+          "x": 50,
+          "y": 149,
+          "w": 129,
+          "h": 94
+        },
+        "pedras": {
+          "x": 181,
+          "y": 149,
+          "w": 84,
+          "h": 88
+        },
+        "torcedor1-1": {
+          "x": 267,
+          "y": 149,
+          "w": 55,
+          "h": 87
+        },
+        "samambaia": {
+          "x": 324,
+          "y": 149,
+          "w": 90,
+          "h": 82
+        },
+        "toco": {
+          "x": 416,
+          "y": 149,
+          "w": 84,
+          "h": 79
+        },
+        "placaBosque": {
+          "x": 502,
+          "y": 149,
+          "w": 74,
+          "h": 78
+        },
+        "arbusto": {
+          "x": 578,
+          "y": 149,
+          "w": 78,
+          "h": 75
+        },
+        "torcedor2-1": {
+          "x": 658,
+          "y": 149,
+          "w": 54,
+          "h": 71
+        },
+        "torcedor3-1": {
+          "x": 714,
+          "y": 149,
+          "w": 62,
+          "h": 71
+        },
+        "bandeiraVerde": {
+          "x": 778,
+          "y": 149,
+          "w": 47,
+          "h": 70
+        },
+        "pneus": {
+          "x": 827,
+          "y": 149,
+          "w": 54,
+          "h": 68
+        },
+        "torcedor4-1": {
+          "x": 883,
+          "y": 149,
+          "w": 34,
+          "h": 60
+        },
+        "cone": {
+          "x": 919,
+          "y": 149,
+          "w": 44,
+          "h": 52
+        },
+        "cogumelos": {
+          "x": 965,
+          "y": 149,
+          "w": 40,
+          "h": 44
+        },
+        "bandeiraBranca": {
+          "x": 1007,
+          "y": 149,
+          "w": 23,
+          "h": 43
         }
       }
     },
     "gelo": {
-      "folha": "gelo-floresta",
+      "terreno": {
+        "folha": "gelo-terreno",
+        "tile": 96,
+        "pares": 1
+      },
+      "folha": "gelo-v2",
+      "escala": 0.5,
+      "espelhar": false,
       "chao": "snow",
-      "leito": "tracks",
+      "leito": "leito1",
+      "leitos": [
+        "leito1",
+        "leito2",
+        "leito3"
+      ],
       "largada": "largada",
       "chegada": "chegada",
       "beira": [
-        "bareTree",
-        "crystals",
-        "snowBush",
-        "cubes",
-        "signIce",
-        "signValley",
-        "flag",
-        "podium"
+        "pinheiroNeve",
+        "arvoreSeca",
+        "arbustoNeve",
+        "cristais",
+        "blocosGelo",
+        "pedrasGelo",
+        "monteNeve",
+        "placaGelo",
+        "placaVale",
+        "bandeiraAzul",
+        "bandeiraBranca",
+        "cerca",
+        "pneus",
+        "cone",
+        "rachaduraGelo",
+        "marcaNeve",
+        "pedrinhasNeve",
+        "galhoNeve"
       ],
       "pesos": [
+        6,
+        5,
         5,
         5,
         4,
         3,
+        4,
         2,
         2,
-        1,
-        1
+        2,
+        2,
+        3,
+        2,
+        2,
+        5,
+        5,
+        4,
+        4
       ],
       "publico": [
-        "parka",
-        "sculptor",
-        "snowmobile",
-        "seated"
+        "torcedor1",
+        "torcedor2",
+        "torcedor3",
+        "torcedor4"
       ],
-      "plateia": "crowd",
+      "rasteiros": [
+        "rachaduraGelo",
+        "marcaNeve",
+        "pedrinhasNeve",
+        "galhoNeve"
+      ],
+      "plateia": "plateia",
+      "efeitos": [],
       "recortes": {
         "largada": {
-          "x": 10,
-          "y": 310,
-          "w": 211,
-          "h": 145
+          "x": 2,
+          "y": 2,
+          "w": 142,
+          "h": 140
         },
-        "chegada": {
-          "x": 562,
-          "y": 310,
-          "w": 201,
-          "h": 141
+        "arvoreSeca": {
+          "x": 146,
+          "y": 2,
+          "w": 126,
+          "h": 128
         },
-        "signIce": {
-          "x": 261,
-          "y": 339,
-          "w": 92,
-          "h": 116
+        "leito1": {
+          "x": 274,
+          "y": 2,
+          "w": 128,
+          "h": 128
         },
-        "signValley": {
-          "x": 392,
-          "y": 342,
-          "w": 129,
-          "h": 105
+        "leito2": {
+          "x": 404,
+          "y": 2,
+          "w": 128,
+          "h": 128
         },
-        "flag": {
-          "x": 819,
-          "y": 330,
-          "w": 76,
+        "leito3": {
+          "x": 534,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "pinheiroNeve": {
+          "x": 664,
+          "y": 2,
+          "w": 72,
+          "h": 127
+        },
+        "torcedor1-0": {
+          "x": 738,
+          "y": 2,
+          "w": 67,
+          "h": 118
+        },
+        "cerca": {
+          "x": 807,
+          "y": 2,
+          "w": 160,
+          "h": 114
+        },
+        "torcedor3-1": {
+          "x": 969,
+          "y": 2,
+          "w": 67,
+          "h": 113
+        },
+        "torcedor3-0": {
+          "x": 1038,
+          "y": 2,
+          "w": 45,
           "h": 112
         },
-        "podium": {
-          "x": 937,
-          "y": 355,
-          "w": 144,
-          "h": 80
+        "cristais": {
+          "x": 1085,
+          "y": 2,
+          "w": 111,
+          "h": 105
         },
-        "cubes": {
-          "x": 1267,
-          "y": 337,
-          "w": 131,
+        "placaGelo": {
+          "x": 1198,
+          "y": 2,
+          "w": 53,
           "h": 104
         },
-        "bareTree": {
-          "x": 881,
-          "y": 459,
-          "w": 98,
-          "h": 147
+        "torcedor2-0": {
+          "x": 1253,
+          "y": 2,
+          "w": 50,
+          "h": 103
         },
-        "snowBush": {
-          "x": 1002,
-          "y": 513,
-          "w": 70,
-          "h": 76
+        "torcedor1-1": {
+          "x": 1305,
+          "y": 2,
+          "w": 58,
+          "h": 102
         },
-        "crystals": {
-          "x": 1106,
-          "y": 471,
-          "w": 136,
-          "h": 138
+        "chegada": {
+          "x": 2,
+          "y": 144,
+          "w": 126,
+          "h": 90
         },
-        "parka": {
-          "x": 578,
-          "y": 636,
-          "w": 71,
-          "h": 125
+        "torcedor4-0": {
+          "x": 130,
+          "y": 144,
+          "w": 77,
+          "h": 90
         },
-        "sculptor": {
-          "x": 747,
-          "y": 637,
-          "w": 107,
-          "h": 123
+        "pedrasGelo": {
+          "x": 209,
+          "y": 144,
+          "w": 110,
+          "h": 83
         },
-        "snowmobile": {
-          "x": 902,
-          "y": 633,
-          "w": 159,
-          "h": 130
+        "bandeiraAzul": {
+          "x": 321,
+          "y": 144,
+          "w": 51,
+          "h": 82
         },
-        "seated": {
-          "x": 1118,
-          "y": 632,
-          "w": 83,
-          "h": 131
+        "blocosGelo": {
+          "x": 374,
+          "y": 144,
+          "w": 54,
+          "h": 74
         },
-        "crowd": {
-          "x": 1265,
-          "y": 632,
-          "w": 133,
-          "h": 121
+        "plateia": {
+          "x": 430,
+          "y": 144,
+          "w": 110,
+          "h": 74
         },
-        "snow": {
-          "x": 528,
-          "y": 469,
-          "w": 117,
-          "h": 146
+        "pneus": {
+          "x": 542,
+          "y": 144,
+          "w": 46,
+          "h": 68
         },
-        "tracks": {
-          "x": 411,
-          "y": 469,
-          "w": 105,
-          "h": 147
+        "rachaduraGelo": {
+          "x": 590,
+          "y": 144,
+          "w": 16,
+          "h": 64
+        },
+        "bandeiraBranca": {
+          "x": 608,
+          "y": 144,
+          "w": 42,
+          "h": 58
+        },
+        "monteNeve": {
+          "x": 652,
+          "y": 144,
+          "w": 76,
+          "h": 56
+        },
+        "cone": {
+          "x": 730,
+          "y": 144,
+          "w": 32,
+          "h": 55
+        },
+        "placaVale": {
+          "x": 764,
+          "y": 144,
+          "w": 50,
+          "h": 53
+        },
+        "arbustoNeve": {
+          "x": 816,
+          "y": 144,
+          "w": 61,
+          "h": 52
+        },
+        "torcedor4-1": {
+          "x": 879,
+          "y": 144,
+          "w": 36,
+          "h": 46
+        },
+        "marcaNeve": {
+          "x": 917,
+          "y": 144,
+          "w": 28,
+          "h": 43
+        },
+        "torcedor2-1": {
+          "x": 947,
+          "y": 144,
+          "w": 24,
+          "h": 43
+        },
+        "galhoNeve": {
+          "x": 973,
+          "y": 144,
+          "w": 47,
+          "h": 41
+        },
+        "pedrinhasNeve": {
+          "x": 1022,
+          "y": 144,
+          "w": 32,
+          "h": 20
         }
       }
     }

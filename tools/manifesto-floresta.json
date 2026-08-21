@@ -1,0 +1,201 @@
+{
+  "bioma": "floresta",
+  "folha": "assets/world/floresta-v2.png",
+  "escala": 0.5,
+  "itens": [
+    {
+      "nome": "largada",
+      "papel": "largada",
+      "ocupacao": "quadro",
+      "descricao": "forest trail start gantry arch of rough timber poles over a dirt trail, hanging cloth banner reading LARGADA, moss on the wood",
+      "feito": false
+    },
+    {
+      "nome": "chegada",
+      "papel": "chegada",
+      "ocupacao": "quadro",
+      "descricao": "forest trail finish gantry arch of rough timber poles, checkered cloth banner reading CHEGADA, moss on the wood",
+      "feito": false
+    },
+    {
+      "nome": "pinheiro",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "tall dark green pine tree seen from a high angle, dense needled canopy",
+      "feito": false,
+      "peso": 6
+    },
+    {
+      "nome": "arvore",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "broad leafy deciduous tree with a round green canopy, brown trunk",
+      "feito": false,
+      "peso": 6
+    },
+    {
+      "nome": "arbusto",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "dense round green forest shrub with broad leaves, fills the frame",
+      "feito": false,
+      "peso": 5
+    },
+    {
+      "nome": "samambaia",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "cluster of green ferns with arching fronds, fills the frame",
+      "feito": false,
+      "peso": 5
+    },
+    {
+      "nome": "pedras",
+      "papel": "beira",
+      "ocupacao": "dois-tercos",
+      "descricao": "cluster of grey granite boulders covered in green moss",
+      "feito": false,
+      "peso": 3
+    },
+    {
+      "nome": "tronco",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "fallen mossy tree trunk lying on the forest floor, bark peeling",
+      "feito": false,
+      "peso": 3
+    },
+    {
+      "nome": "toco",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "cut tree stump with visible growth rings and moss on the bark",
+      "feito": false,
+      "peso": 3
+    },
+    {
+      "nome": "cogumelos",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "small cluster of red capped mushrooms with white spots",
+      "feito": false,
+      "peso": 3
+    },
+    {
+      "nome": "placaTrilha",
+      "papel": "beira",
+      "ocupacao": "dois-tercos",
+      "descricao": "wooden trail signpost with an arrow board reading FLORESTA, weathered planks",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "placaBosque",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "wooden rally sign board on two posts reading BOSQUE, moss on the frame",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "bandeiraVerde",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "green marshal flag on a thin metal pole",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "bandeiraBranca",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "white marshal flag on a thin metal pole",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "cerca",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "rustic wooden fence section of rough logs, three rails, moss and lichen",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "pneus",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "stack of worn racing tires, three high, wet with mud",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "cone",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "orange traffic cone with reflective stripe, splashed with mud",
+      "feito": false,
+      "peso": 2
+    },
+    {
+      "nome": "plateia",
+      "papel": "plateia",
+      "ocupacao": "quadro",
+      "descricao": "dense crowd of twenty rally spectators in raincoats packed shoulder to shoulder in a solid block, front row facing the viewer, fills the entire frame",
+      "feito": false
+    },
+    {
+      "nome": "torcedor1",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "rally spectator, hiker in a green jacket and backpack, arms down / arm raised cheering",
+      "feito": false,
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor2",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "rally spectator, forest ranger with a map and wide brim hat, standing / waving the map",
+      "feito": false,
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor3",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "rally spectator, teenager on a mountain bike beside the trail, still / arm raised cheering",
+      "feito": false,
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor4",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "rally spectator, woman in a raincoat holding an umbrella, standing / umbrella raised cheering",
+      "feito": false,
+      "quadros": 2
+    },
+    {
+      "nome": "leito1",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "packed trail surface, smooth",
+      "feito": true
+    },
+    {
+      "nome": "leito2",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "trail with deep tire ruts",
+      "feito": true
+    },
+    {
+      "nome": "leito3",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "trail scattered with debris",
+      "feito": true
+    }
+  ]
+}
