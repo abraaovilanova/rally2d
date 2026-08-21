@@ -57,7 +57,12 @@ export function driveCar(
 
   // O deslocamento persegue a direção do Carro. Em chão seco alcança dentro do quadro;
   // com Aderência baixa fica para trás, e o Carro anda de lado até recuperar.
-  const chase = TUNING.slipResponse * grip * dt;
+  //
+  // Ao **cubo**, e não direto: com a resposta proporcional à Aderência, mesmo o Gelo
+  // perseguia a 3 rad/s contra um giro de 2,6 — o deslocamento alcançava a direção dentro
+  // do quadro e a Derrapagem simplesmente nunca acontecia, em nenhum Bioma. O expoente é
+  // o que separa "escorrega um pouco" de "escorrega muito" em vez de deixar tudo agarrado.
+  const chase = TUNING.slipResponse * grip ** 3 * dt;
   const lag = shortestAngle(car.heading - car.drift);
   car.drift += Math.max(-chase, Math.min(chase, lag));
 

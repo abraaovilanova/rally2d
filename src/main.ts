@@ -1,6 +1,8 @@
 import { CAR_COLORS, preloadCars } from './carSprite';
 import { CATEGORY_IDS, type CategoryId } from './category';
 import { categoryOf, createGame, openGrid, restartProgression, retry, setCarColor, setCategory, startRace, updateGame, type Game } from './game';
+import { atualizarMotor, ligarMotor } from './motor';
+import { alternarSom, liberarSom, tocarTrilha } from './musica';
 import { readMode, saveMode } from './player';
 import { cameraAt, render } from './render';
 import { preloadScenery } from './scenery';
@@ -43,6 +45,15 @@ async function boot(): Promise<void> {
 }
 
 function listen(game: Game): void {
+  // O navegador só deixa tocar som depois de um gesto do jogador, e a recusa é silenciosa:
+  // sem isto o jogo pareceria simplesmente não ter música.
+  for (const gesto of ['mousedown', 'keydown'] as const) {
+    window.addEventListener(gesto, () => {
+      liberarSom();
+      ligarMotor();
+    });
+  }
+
   // Grid e Conclusão são botões de DOM; aqui só a Batida, que precisa de um gesto rápido.
   window.addEventListener('mousedown', () => {
     if (game.phase === 'crashed') retry(game);
@@ -51,6 +62,7 @@ function listen(game: Game): void {
   window.addEventListener('keydown', (e) => {
     const key = e.key.toUpperCase();
 
+    if (key === 'M') alternarSom();
     if (key === 'R' && game.phase === 'crashed') retry(game);
     if (key === 'G') openGrid(game);
     if (e.key === ' ' && game.phase === 'grid') startRace(game);
@@ -80,8 +92,13 @@ function loop(game: Game): void {
     // seriam uma a mais. Fora da Corrida ela volta, porque o Grid é feito de botões.
     canvas.style.cursor = game.phase === 'running' ? 'none' : 'crosshair';
 
+    // A Trilha é do Bioma: quem troca de prova troca de música, e repetir a mesma prova
+    // não recomeça a que já está tocando.
+    tocarTrilha(game.stage.biome.id);
+
     const cam = cameraAt(game, canvas);
     updateGame(game, { x: mouse.x + cam.x, y: mouse.y + cam.y }, dt);
+    atualizarMotor(game, dt);
     render(ctx, game);
     syncUI(game);
 

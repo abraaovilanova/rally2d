@@ -28,6 +28,10 @@ export const TUNING = {
    *
    * Alto de propósito: em chão seco (Aderência 1) a direção alcança dentro do quadro e
    * o Carro dirige exatamente como sempre dirigiu. Derrapar é a exceção, não a regra.
+   *
+   * A Aderência entra elevada ao cubo — ver `driveCar`. Comparar com a taxa de giro da
+   * Categoria (2,4 a 2,9 rad/s) diz em que Bioma o Carro de fato escorrega: acima dela
+   * não escorrega nunca, abaixo escorrega sempre.
    */
   slipResponse: 6,
 

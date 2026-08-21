@@ -1,6 +1,7 @@
 import { CATEGORIES, CATEGORY_IDS, minTurnRadius, type CategoryId } from './category';
 import { advance, openGrid, selectStage, setCategory, setMode, startRace, type Game } from './game';
 import { readBoard, submitTime, type Board } from './leaderboard';
+import { alternarSom, somLigado } from './musica';
 import { readName, saveName, type Mode } from './player';
 import { formatTime } from './records';
 import { BIOMES, SELECTABLE_LAPS } from './stage';
@@ -101,6 +102,8 @@ function drawGrid(game: Game): void {
           <span data-toggle-mode class="link">${
             game.mode === 'online' ? 'jogando online — mudar para offline' : 'jogando offline — mudar para online'
           }</span>
+          <span class="separador">·</span>
+          <span data-som class="link">som ${somLigado() ? 'ligado' : 'mudo'} (M)</span>
         </p>
       </div>
     </div>
@@ -116,6 +119,10 @@ function drawGrid(game: Game): void {
   root.querySelector<HTMLElement>('[data-toggle-mode]')!.onclick = () => {
     setMode(game, game.mode === 'online' ? 'offline' : 'online');
     painted = '';
+  };
+  root.querySelector<HTMLElement>('[data-som]')!.onclick = (e) => {
+    alternarSom();
+    (e.target as HTMLElement).textContent = `som ${somLigado() ? 'ligado' : 'mudo'} (M)`;
   };
 
   if (game.mode === 'online') loadBoard(game);

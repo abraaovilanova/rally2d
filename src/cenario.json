@@ -1105,6 +1105,552 @@
           "h": 43
         }
       }
+    },
+    "lamacal": {
+      "terreno": {
+        "folha": "floresta-terreno",
+        "tile": 96,
+        "pares": 1
+      },
+      "folha": "floresta-v2",
+      "escala": 0.5,
+      "densidade": 0.92,
+      "espelhar": false,
+      "chao": "leito1",
+      "leito": "leito1",
+      "leitos": [
+        "leito1",
+        "leito2",
+        "leito3"
+      ],
+      "largada": "largada",
+      "chegada": "chegada",
+      "beira": [
+        "pinheiro",
+        "arvore",
+        "arbusto",
+        "samambaia",
+        "pedras",
+        "tronco",
+        "toco",
+        "cogumelos",
+        "placaTrilha",
+        "placaBosque",
+        "bandeiraVerde",
+        "bandeiraBranca",
+        "cerca",
+        "pneus",
+        "cone"
+      ],
+      "pesos": [
+        16,
+        13,
+        8,
+        7,
+        3,
+        4,
+        4,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "publico": [
+        "torcedor1",
+        "torcedor2",
+        "torcedor3",
+        "torcedor4"
+      ],
+      "rasteiros": [],
+      "plateia": "plateia",
+      "efeitos": [
+        "poeira"
+      ],
+      "recortes": {
+        "pinheiro": {
+          "x": 2,
+          "y": 2,
+          "w": 102,
+          "h": 145
+        },
+        "cerca": {
+          "x": 106,
+          "y": 2,
+          "w": 148,
+          "h": 143
+        },
+        "arvore": {
+          "x": 256,
+          "y": 2,
+          "w": 114,
+          "h": 130
+        },
+        "largada": {
+          "x": 372,
+          "y": 2,
+          "w": 136,
+          "h": 128
+        },
+        "leito1": {
+          "x": 510,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "leito2": {
+          "x": 640,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "leito3": {
+          "x": 770,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "tronco": {
+          "x": 900,
+          "y": 2,
+          "w": 136,
+          "h": 125
+        },
+        "torcedor2-0": {
+          "x": 1038,
+          "y": 2,
+          "w": 52,
+          "h": 113
+        },
+        "placaTrilha": {
+          "x": 1092,
+          "y": 2,
+          "w": 63,
+          "h": 105
+        },
+        "chegada": {
+          "x": 1157,
+          "y": 2,
+          "w": 119,
+          "h": 101
+        },
+        "torcedor1-0": {
+          "x": 1278,
+          "y": 2,
+          "w": 58,
+          "h": 98
+        },
+        "torcedor3-0": {
+          "x": 1338,
+          "y": 2,
+          "w": 53,
+          "h": 97
+        },
+        "torcedor4-0": {
+          "x": 2,
+          "y": 149,
+          "w": 46,
+          "h": 97
+        },
+        "plateia": {
+          "x": 50,
+          "y": 149,
+          "w": 129,
+          "h": 94
+        },
+        "pedras": {
+          "x": 181,
+          "y": 149,
+          "w": 84,
+          "h": 88
+        },
+        "torcedor1-1": {
+          "x": 267,
+          "y": 149,
+          "w": 55,
+          "h": 87
+        },
+        "samambaia": {
+          "x": 324,
+          "y": 149,
+          "w": 90,
+          "h": 82
+        },
+        "toco": {
+          "x": 416,
+          "y": 149,
+          "w": 84,
+          "h": 79
+        },
+        "placaBosque": {
+          "x": 502,
+          "y": 149,
+          "w": 74,
+          "h": 78
+        },
+        "poeira": {
+          "x": 578,
+          "y": 149,
+          "w": 78,
+          "h": 78
+        },
+        "arbusto": {
+          "x": 658,
+          "y": 149,
+          "w": 78,
+          "h": 75
+        },
+        "torcedor2-1": {
+          "x": 738,
+          "y": 149,
+          "w": 54,
+          "h": 71
+        },
+        "torcedor3-1": {
+          "x": 794,
+          "y": 149,
+          "w": 62,
+          "h": 71
+        },
+        "bandeiraVerde": {
+          "x": 858,
+          "y": 149,
+          "w": 47,
+          "h": 70
+        },
+        "pneus": {
+          "x": 907,
+          "y": 149,
+          "w": 54,
+          "h": 68
+        },
+        "torcedor4-1": {
+          "x": 963,
+          "y": 149,
+          "w": 34,
+          "h": 60
+        },
+        "cone": {
+          "x": 999,
+          "y": 149,
+          "w": 44,
+          "h": 52
+        },
+        "cogumelos": {
+          "x": 1045,
+          "y": 149,
+          "w": 40,
+          "h": 44
+        },
+        "bandeiraBranca": {
+          "x": 1087,
+          "y": 149,
+          "w": 23,
+          "h": 43
+        }
+      }
+    },
+    "dunas": {
+      "terreno": {
+        "folha": "deserto-terreno",
+        "tile": 96,
+        "pares": 2
+      },
+      "folha": "deserto-v2",
+      "escala": 0.5,
+      "densidade": 0.55,
+      "espelhar": false,
+      "chao": "terrenoAreia",
+      "leito": "leito1",
+      "leitos": [
+        "leito1",
+        "leito2",
+        "leito3"
+      ],
+      "largada": "largada",
+      "chegada": "chegada",
+      "beira": [
+        "cactus",
+        "bush",
+        "rocks",
+        "smallRocks",
+        "cone",
+        "flagYellow",
+        "flagBlue",
+        "fence",
+        "guardrail",
+        "tires",
+        "checkeredFlag",
+        "brazilFlag",
+        "pedrinhas",
+        "rachadura",
+        "capimSeco",
+        "cranio",
+        "marcaPneu",
+        "galhoSeco",
+        "mancha",
+        "pneuEnterrado"
+      ],
+      "pesos": [
+        5,
+        5,
+        3,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        6,
+        5,
+        6,
+        2,
+        4,
+        4,
+        2,
+        3
+      ],
+      "publico": [
+        "torcedor1",
+        "torcedor2",
+        "torcedor3",
+        "torcedor4"
+      ],
+      "rasteiros": [
+        "pedrinhas",
+        "rachadura",
+        "marcaPneu",
+        "galhoSeco",
+        "mancha"
+      ],
+      "plateia": "plateia",
+      "efeitos": [
+        "poeira"
+      ],
+      "recortes": {
+        "terrenoAreia": {
+          "x": 2,
+          "y": 2,
+          "w": 140,
+          "h": 138
+        },
+        "leito1": {
+          "x": 144,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "leito2": {
+          "x": 274,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "leito3": {
+          "x": 404,
+          "y": 2,
+          "w": 128,
+          "h": 128
+        },
+        "torcedor2-0": {
+          "x": 534,
+          "y": 2,
+          "w": 52,
+          "h": 114
+        },
+        "fence": {
+          "x": 588,
+          "y": 2,
+          "w": 128,
+          "h": 110
+        },
+        "torcedor4-0": {
+          "x": 718,
+          "y": 2,
+          "w": 37,
+          "h": 107
+        },
+        "guardrail": {
+          "x": 757,
+          "y": 2,
+          "w": 130,
+          "h": 106
+        },
+        "torcedor3-0": {
+          "x": 889,
+          "y": 2,
+          "w": 48,
+          "h": 106
+        },
+        "torcedor1-0": {
+          "x": 939,
+          "y": 2,
+          "w": 48,
+          "h": 100
+        },
+        "checkeredFlag": {
+          "x": 989,
+          "y": 2,
+          "w": 56,
+          "h": 98
+        },
+        "chegada": {
+          "x": 1047,
+          "y": 2,
+          "w": 148,
+          "h": 96
+        },
+        "brazilFlag": {
+          "x": 1197,
+          "y": 2,
+          "w": 68,
+          "h": 95
+        },
+        "torcedor1-1": {
+          "x": 1267,
+          "y": 2,
+          "w": 31,
+          "h": 92
+        },
+        "largada": {
+          "x": 2,
+          "y": 142,
+          "w": 143,
+          "h": 88
+        },
+        "cactus": {
+          "x": 147,
+          "y": 142,
+          "w": 48,
+          "h": 86
+        },
+        "plateia": {
+          "x": 197,
+          "y": 142,
+          "w": 82,
+          "h": 86
+        },
+        "torcedor4-1": {
+          "x": 281,
+          "y": 142,
+          "w": 34,
+          "h": 86
+        },
+        "torcedor3-1": {
+          "x": 317,
+          "y": 142,
+          "w": 52,
+          "h": 85
+        },
+        "rocks": {
+          "x": 371,
+          "y": 142,
+          "w": 88,
+          "h": 79
+        },
+        "flagYellow": {
+          "x": 461,
+          "y": 142,
+          "w": 50,
+          "h": 74
+        },
+        "torcedor2-1": {
+          "x": 513,
+          "y": 142,
+          "w": 55,
+          "h": 73
+        },
+        "tires": {
+          "x": 570,
+          "y": 142,
+          "w": 57,
+          "h": 71
+        },
+        "bush": {
+          "x": 629,
+          "y": 142,
+          "w": 76,
+          "h": 68
+        },
+        "poeira": {
+          "x": 707,
+          "y": 142,
+          "w": 72,
+          "h": 68
+        },
+        "flagBlue": {
+          "x": 781,
+          "y": 142,
+          "w": 48,
+          "h": 66
+        },
+        "rachadura": {
+          "x": 831,
+          "y": 142,
+          "w": 56,
+          "h": 59
+        },
+        "cone": {
+          "x": 889,
+          "y": 142,
+          "w": 38,
+          "h": 57
+        },
+        "smallRocks": {
+          "x": 929,
+          "y": 142,
+          "w": 65,
+          "h": 56
+        },
+        "pedrinhas": {
+          "x": 996,
+          "y": 142,
+          "w": 56,
+          "h": 48
+        },
+        "cranio": {
+          "x": 1054,
+          "y": 142,
+          "w": 40,
+          "h": 45
+        },
+        "mancha": {
+          "x": 1096,
+          "y": 142,
+          "w": 48,
+          "h": 43
+        },
+        "pneuEnterrado": {
+          "x": 1146,
+          "y": 142,
+          "w": 58,
+          "h": 42
+        },
+        "marcaPneu": {
+          "x": 1206,
+          "y": 142,
+          "w": 37,
+          "h": 41
+        },
+        "galhoSeco": {
+          "x": 1245,
+          "y": 142,
+          "w": 47,
+          "h": 41
+        },
+        "capimSeco": {
+          "x": 1294,
+          "y": 142,
+          "w": 38,
+          "h": 30
+        }
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import { slipOf, throttleOf } from './car';
 import { CAR_COLORS, CAR_SWATCHES, drawCarSprite } from './carSprite';
+import { drawClima } from './clima';
 import { categoryOf, currentPath, progress, type Game } from './game';
 import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
@@ -55,6 +56,10 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   drawCar(ctx, game, palette.car);
 
   ctx.restore();
+
+  // O Clima fica entre o mundo e a interface, e antes da noite: chuva atrás do escuro é
+  // chuva que não se vê.
+  drawClima(ctx, game.stage, performance.now() / 1000);
 
   // A noite entra entre o mundo e a interface: escurece o que foi desenhado, e não o que
   // o jogador precisa ler para dirigir.

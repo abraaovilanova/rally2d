@@ -1,3 +1,4 @@
+import type { Clima } from './clima';
 import { TUNING } from './tuning';
 import { buildTrack, type SegmentWeights, type Track } from './track';
 
@@ -26,6 +27,8 @@ export interface Biome {
   noite?: boolean;
   /** Quanto o chão é sombreado pelo próprio relevo, de 0 a 1. */
   relevo?: number;
+  /** O que cai ou voa entre a câmera e o mundo. Desenho, não Aderência. */
+  clima?: Clima;
 }
 
 export const BIOMES: readonly Biome[] = [
@@ -69,7 +72,9 @@ export const BIOMES: readonly Biome[] = [
     },
     weights: { straight: 2, smoothCurve: 2, tightCurve: 4, chicane: 2 },
     // Cascalho solto de estrada de serra: escorrega menos que gelo e mais que asfalto.
-    grip: 0.78,
+    // Abaixo de 0,74 a perseguição cai sob a taxa de giro e a traseira começa a sair —
+    // é o que separa "estrada de terra" de "estrada de terra à noite".
+    grip: 0.72,
     puddles: false,
     /**
      * A Montanha corre de noite. Não é enfeite de paleta: à noite o jogador só vê o que
@@ -83,6 +88,54 @@ export const BIOMES: readonly Biome[] = [
      * dimensão para isso.
      */
     relevo: 1,
+  },
+  {
+    id: 'lamacal',
+    name: 'Lamaçal',
+    palette: {
+      background: '#141a16',
+      track: '#3a3026',
+      edge: '#8fe3a8',
+      car: '#eef6f0',
+      text: '#e8f2ea',
+    },
+    weights: { straight: 3, smoothCurve: 3, tightCurve: 3, chicane: 2 },
+    /** Chão encharcado: a Aderência mais baixa do jogo fora do Gelo. */
+    grip: 0.62,
+    puddles: true,
+    clima: {
+      cor: 'rgba(196, 224, 232, 0.5)',
+      densidade: 0.42,
+      angulo: Math.PI / 2 + 0.28,
+      velocidade: 1250,
+      risco: 22,
+      veu: 'rgba(120, 150, 160, 0.12)',
+    },
+  },
+  {
+    id: 'dunas',
+    name: 'Dunas',
+    palette: {
+      background: '#2a1a12',
+      track: '#7a5636',
+      edge: '#ffb347',
+      car: '#fff3e2',
+      text: '#ffeeda',
+    },
+    weights: { straight: 4, smoothCurve: 4, tightCurve: 2, chicane: 1 },
+    /** Areia solta e funda: escorrega pouco, mas escorrega o tempo todo. */
+    grip: 0.86,
+    puddles: false,
+    /** A duna é feita de relevo — sem ele, é um deserto plano com outro nome. */
+    relevo: 0.7,
+    clima: {
+      cor: 'rgba(255, 224, 170, 0.42)',
+      densidade: 0.3,
+      angulo: 0.14,
+      velocidade: 1500,
+      risco: 34,
+      veu: 'rgba(214, 150, 70, 0.08)',
+    },
   },
   {
     id: 'gelo',

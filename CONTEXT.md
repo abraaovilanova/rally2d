@@ -13,8 +13,8 @@ tempos não são comparáveis entre si.
 
 ## Bioma (Biome)
 
-A identidade visual de uma **Etapa** — uma paleta de cores — junto com o catálogo base de
-**Segmentos** que dá à sua **Pista** um caráter próprio. O Bioma nunca é jogado diretamente; ele é
+A identidade de uma **Etapa** — paleta, **Clima**, **Trilha**, e quanto o chão dele agarra — junto com
+o catálogo base de **Segmentos** que dá à sua **Pista** um caráter próprio. O Bioma nunca é jogado diretamente; ele é
 jogado através de uma Etapa.
 
 ## Volta (Lap)
@@ -137,6 +137,11 @@ A diferença entre a direção que o **Carro** aponta e a direção em que ele d
 Frear não desfaz uma Derrapagem em curso, e é isso que a torna uma decisão de traçado: o preço se paga
 na entrada, escolhendo por onde passar, não no meio.
 
+Não é um pouco em todo chão: existe um ponto de **Aderência** abaixo do qual o Carro perde a traseira
+e acima do qual ele não perde nunca. O ponto é onde o deslocamento passa a alcançar a direção mais
+devagar do que o Carro gira — daí para baixo cada Bioma escorrega mais, e daí para cima todos são
+igualmente firmes.
+
 ## Poça (Puddle)
 
 Um trecho de **Aderência** baixa dentro de uma **Etapa**, nascido da **Semente** como tudo mais. Fica
@@ -145,6 +150,22 @@ sem sair da linha não seria uma decisão.
 
 É o oposto do **Gelo**, onde a Aderência baixa é do **Bioma** inteiro e não existe por onde desviar —
 lá a Derrapagem é a Etapa, não um lugar dela.
+
+## Clima (Weather)
+
+O que cai ou voa entre quem olha e o mundo: a chuva do Lamaçal, a areia soprada das Dunas.
+
+Clima é desenho, e só. Ele **não** mexe na **Aderência** — o Lamaçal escorrega porque a Aderência dele
+é baixa, não porque chove. Se as duas coisas fossem a mesma, não haveria como ter chuva sobre chão
+firme, e a primeira Etapa que pedisse isso quebraria as duas.
+
+## Trilha (Soundtrack)
+
+A música de um **Bioma**. É dele e não da **Corrida**: a mesma prova soa igual em toda **Tentativa**, e
+trocar de prova troca de música.
+
+Uma **Batida** não interrompe a Trilha. Interromper seria pontuar o erro, e o jogo já devolve o
+jogador à largada sem cerimônia.
 
 ## Segmento (Segment)
 
