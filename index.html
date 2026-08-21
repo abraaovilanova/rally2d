@@ -11,15 +11,227 @@
         height: 100%;
         overflow: hidden;
         background: #0b0d10;
+        font-family: system-ui, sans-serif;
       }
       canvas {
         display: block;
         cursor: crosshair;
       }
+
+      /* Grid, menu de modo e conclusão. O canvas continua desenhando atrás. */
+      #ui {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: rgba(6, 8, 11, 0.82);
+        color: #eef2f6;
+        overflow-y: auto;
+        cursor: default;
+      }
+      #ui[hidden] {
+        display: none;
+      }
+
+      .panel {
+        width: min(720px, 92vw);
+        padding: 32px 0;
+        text-align: center;
+      }
+      .panel h1 {
+        margin: 0 0 8px;
+        font-size: 40px;
+        letter-spacing: -0.02em;
+      }
+      .panel h1.finish {
+        font-size: 64px;
+        font-variant-numeric: tabular-nums;
+      }
+      .eyebrow {
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.5;
+      }
+      .lede {
+        margin: 0 0 22px;
+        opacity: 0.7;
+        min-height: 20px;
+      }
+      .record {
+        color: #ffc14d;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+
+      .modes {
+        display: grid;
+        gap: 12px;
+      }
+      .modes button {
+        display: grid;
+        gap: 4px;
+        padding: 18px 22px;
+        text-align: left;
+        border: 1px solid rgba(238, 242, 246, 0.18);
+        border-radius: 10px;
+        background: rgba(238, 242, 246, 0.04);
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      .modes button:hover {
+        border-color: rgba(238, 242, 246, 0.5);
+      }
+      .modes span {
+        font-size: 14px;
+        opacity: 0.6;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .card {
+        padding: 14px;
+        border: 1px solid rgba(238, 242, 246, 0.16);
+        border-radius: 10px;
+        background: rgba(238, 242, 246, 0.03);
+        cursor: pointer;
+        text-align: left;
+      }
+      .card:hover {
+        border-color: rgba(238, 242, 246, 0.45);
+      }
+      .card.chosen {
+        border-color: #ffc14d;
+        background: rgba(255, 193, 77, 0.08);
+      }
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 26px;
+      }
+      .card dl {
+        margin: 0 0 10px;
+        font-size: 13px;
+      }
+      .card dl div {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+      }
+      .card dt {
+        opacity: 0.5;
+      }
+      .card dd {
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .card p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.4;
+        opacity: 0.55;
+      }
+
+      .board {
+        margin: 22px 0;
+        min-height: 40px;
+        font-size: 14px;
+        opacity: 0.85;
+      }
+      .board table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+      }
+      .board td {
+        padding: 5px 8px;
+        border-bottom: 1px solid rgba(238, 242, 246, 0.07);
+        text-align: left;
+      }
+      .board td:first-child {
+        width: 44px;
+        opacity: 0.45;
+      }
+      .board td:last-child {
+        text-align: right;
+      }
+      .board tr.mine {
+        color: #ffc14d;
+        font-weight: 600;
+      }
+      .board .total,
+      .board .empty,
+      .board .warn {
+        margin: 8px 0 0;
+        font-size: 13px;
+        opacity: 0.45;
+      }
+      .board .warn {
+        color: #ff9b9b;
+        opacity: 0.75;
+      }
+
+      .naming {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+      .naming input {
+        padding: 10px 12px;
+        border: 1px solid rgba(238, 242, 246, 0.3);
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+      }
+      .naming button {
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 8px;
+        background: #ffc14d;
+        color: #16181c;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .go {
+        width: 100%;
+        padding: 16px;
+        border: 0;
+        border-radius: 10px;
+        background: #eef2f6;
+        color: #0b0d10;
+        font: inherit;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .go:hover {
+        background: #fff;
+      }
+      .foot {
+        margin: 14px 0 0;
+        font-size: 13px;
+        opacity: 0.5;
+      }
+      .link {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .link:hover {
+        opacity: 0.8;
+      }
     </style>
-    <script type="module" crossorigin src="/rally2d/assets/index-BnwpIS9E.js"></script>
+    <script type="module" crossorigin src="/rally2d/assets/index-D-FIs2dz.js"></script>
   </head>
   <body>
     <canvas id="game"></canvas>
+    <div id="ui" hidden></div>
   </body>
 </html>
