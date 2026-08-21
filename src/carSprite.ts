@@ -1,6 +1,8 @@
 import blueSheet from '../assets/Pixel Cars The 1st Car/pixel cars 8 animations-Sheet blue.png';
 import greenSheet from '../assets/Pixel Cars The 1st Car/pixel cars 8 animations-Sheet green.png';
-import redSheet from '../assets/Pixel Cars The 1st Car/pixel cars 8 animations-Sheet red.png';
+// Em teste: o vermelho é o carro novo, o verde e o azul continuam os antigos — dá para
+// comparar os dois em jogo trocando de cor com as teclas 1, 2 e 3.
+import redSheet from '../assets/Pixel Cars The 1st Car/rally-grupo-b-red.png';
 import { TUNING } from './tuning';
 
 export const CAR_COLORS = ['red', 'green', 'blue'] as const;
@@ -19,8 +21,8 @@ const SHEETS: Record<CarColor, string> = {
   blue: blueSheet,
 };
 
-/** Cada folha tem quadros de 64×64 lado a lado; quantos, quem diz é a folha. */
-const FRAME_SIZE = 64;
+/** Os quadros são quadrados e ficam lado a lado; o tamanho deles é a altura da folha. */
+const frameSize = (img: HTMLImageElement) => img.naturalHeight;
 
 /**
  * Acima deste salto entre quadros, o canvas gira o sprite para cobrir o vão.
@@ -33,7 +35,7 @@ const FRAME_SIZE = 64;
 const VAO_QUE_EXIGE_ROTACAO = 30;
 
 /** Quantas direções esta folha tem. */
-const frameCount = (img: HTMLImageElement) => Math.max(1, Math.round(img.naturalWidth / FRAME_SIZE));
+const frameCount = (img: HTMLImageElement) => Math.max(1, Math.round(img.naturalWidth / frameSize(img)));
 
 /**
  * O quadro 0 aponta para cima e cada quadro seguinte gira no sentido **horário**.
@@ -83,12 +85,13 @@ export function drawCarSprite(
   const img = images.get(color);
   if (!img?.complete || img.naturalWidth === 0) return false;
 
+  const lado = frameSize(img);
   const total = frameCount(img);
   const vao = 360 / total;
   const headingDeg = (heading * 180) / Math.PI;
   const frame = mod(Math.round((headingDeg + 90) / vao), total);
   const residual = normalizeDeg(headingDeg - frameHeadingDeg(frame, total));
-  const size = FRAME_SIZE * TUNING.carSpriteScale;
+  const size = TUNING.carScreenSize;
   const gira = TUNING.smoothSpriteRotation && vao > VAO_QUE_EXIGE_ROTACAO;
 
   ctx.save();
@@ -97,10 +100,10 @@ export function drawCarSprite(
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(
     img,
-    frame * FRAME_SIZE,
+    frame * lado,
     0,
-    FRAME_SIZE,
-    FRAME_SIZE,
+    lado,
+    lado,
     -size / 2,
     -size / 2,
     size,

@@ -1,11 +1,12 @@
 {
   "sheets": {
     "deserto": "assets/world/deserto.png",
-    "gelo-floresta": "assets/world/gelo-floresta.png"
+    "gelo-floresta": "assets/world/gelo-floresta.png",
+    "deserto-teste": "assets/world/deserto-teste.png"
   },
   "biomas": {
     "deserto": {
-      "folha": "deserto",
+      "folha": "deserto-teste",
       "chao": "sand",
       "leito": "dirt",
       "largada": "largada",
@@ -35,13 +36,7 @@
         2
       ],
       "publico": [
-        "fan1",
-        "fan2",
-        "fan3",
-        "fan4",
-        "fan5",
-        "fan6",
-        "fan7"
+        "fan1"
       ],
       "plateia": "crowd",
       "recortes": {
@@ -58,10 +53,10 @@
           "h": 81
         },
         "cactus": {
-          "x": 1150,
-          "y": 338,
-          "w": 58,
-          "h": 96
+          "x": 4,
+          "y": 772,
+          "w": 48,
+          "h": 86
         },
         "bush": {
           "x": 1298,
@@ -148,10 +143,10 @@
           "h": 118
         },
         "fan1": {
-          "x": 51,
-          "y": 643,
-          "w": 69,
-          "h": 117
+          "x": 60,
+          "y": 772,
+          "w": 48,
+          "h": 100
         },
         "fan2": {
           "x": 237,
@@ -201,7 +196,8 @@
           "w": 132,
           "h": 134
         }
-      }
+      },
+      "escala": 0.5
     },
     "floresta": {
       "folha": "gelo-floresta",

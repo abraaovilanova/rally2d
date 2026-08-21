@@ -1,4 +1,5 @@
 import desertSheet from '../assets/world/deserto.png';
+import desertTestSheet from '../assets/world/deserto-teste.png';
 import iceForestSheet from '../assets/world/gelo-floresta.png';
 import cenario from './cenario.json';
 import etapas from './cenario-etapas.json';
@@ -70,6 +71,8 @@ interface Sheet {
 const SHEETS: Record<string, Sheet> = {
   deserto: { src: desertSheet, image: new Image() },
   'gelo-floresta': { src: iceForestSheet, image: new Image() },
+  // Em teste: a folha do Deserto com o cacto e o espectador novos numa faixa extra.
+  'deserto-teste': { src: desertTestSheet, image: new Image() },
 };
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */

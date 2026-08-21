@@ -50,11 +50,15 @@ export const TUNING = {
   carRadius: 9,
 
   /**
-   * Escala do sprite de 64px. Calibrada para a largura do carro desenhado bater com o
-   * diâmetro de colisão (2 × carRadius): um sprite maior que a colisão faz o jogador
-   * perder sem entender o motivo. Se aumentar aqui, aumente `carRadius` junto.
+   * Tamanho do Carro na tela, em px, seja qual for a resolução da folha.
+   *
+   * É tamanho e não escala de propósito: as folhas têm resoluções diferentes — a antiga
+   * tem quadros de 64px, a nova de 136 — e o que precisa ficar constante é o Carro na
+   * tela, calibrado contra o diâmetro de colisão (2 × carRadius). Um sprite maior que a
+   * colisão faz o jogador perder sem entender o motivo. Se aumentar aqui, aumente
+   * `carRadius` junto.
    */
-  carSpriteScale: 0.72,
+  carScreenSize: 46,
 
   /**
    * Gira o sprite no canvas para cobrir os ângulos entre os 8 quadros da folha.
