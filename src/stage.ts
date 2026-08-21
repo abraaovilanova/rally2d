@@ -22,6 +22,10 @@ export interface Biome {
   grip: number;
   /** O Bioma tem Poças — trechos soltos de Aderência baixa, que dá para desviar. */
   puddles: boolean;
+  /** A Etapa corre de noite: só se vê o que os faróis do Carro alcançam. */
+  noite?: boolean;
+  /** Quanto o chão é sombreado pelo próprio relevo, de 0 a 1. */
+  relevo?: number;
 }
 
 export const BIOMES: readonly Biome[] = [
@@ -52,6 +56,33 @@ export const BIOMES: readonly Biome[] = [
     weights: { straight: 2, smoothCurve: 3, tightCurve: 3, chicane: 2 },
     grip: 1,
     puddles: true,
+  },
+  {
+    id: 'montanha',
+    name: 'Montanha',
+    palette: {
+      background: '#0a0c14',
+      track: '#2a2c34',
+      edge: '#ffc14d',
+      car: '#f2f4ff',
+      text: '#e6e9f2',
+    },
+    weights: { straight: 2, smoothCurve: 2, tightCurve: 4, chicane: 2 },
+    // Cascalho solto de estrada de serra: escorrega menos que gelo e mais que asfalto.
+    grip: 0.78,
+    puddles: false,
+    /**
+     * A Montanha corre de noite. Não é enfeite de paleta: à noite o jogador só vê o que
+     * os faróis alcançam, e o que estiver além disso ele precisa **saber** — é a Etapa em
+     * que o caderno do navegador deixa de ser conforto e vira o único jeito de correr.
+     */
+    noite: true,
+    /**
+     * O relevo: a mesma altura que decide o Terreno passa a ser sombreada, e o chão deixa
+     * de ser plano. É o que dá a impressão de subir e descer sem o jogo ter uma terceira
+     * dimensão para isso.
+     */
+    relevo: 1,
   },
   {
     id: 'gelo',

@@ -82,6 +82,24 @@ function sementeDe(stage: Stage): number {
   return semente | 0;
 }
 
+/**
+ * A altura do chão num ponto do mundo, de 0 a 1.
+ *
+ * É o **mesmo** campo que escolhe o ladrilho, lido em coordenadas de mundo em vez de
+ * célula. Isso não é economia: é o que faz o sombreado do relevo cair exatamente sobre a
+ * mancha de terreno que ele explica — a encosta escurece onde o chão de fato muda.
+ */
+export function alturaEm(stage: Stage, x: number, y: number): number {
+  const semente = sementeDe(stage);
+  const largo = campo(semente, x / CELULA, y / CELULA);
+
+  // Uma oitava fina só para o sombreado: dá espinhaço e barranco a uma encosta que, na
+  // escala do ladrilho, seria uma rampa lisa. Não entra na escolha do Terreno de
+  // propósito — mancha de chão do tamanho de um pedregulho seria ruído, não terreno.
+  const fino = campo(semente ^ 0x5f3a, x / (CELULA * 0.32), y / (CELULA * 0.32));
+  return largo * 0.78 + fino * 0.22;
+}
+
 /** O nível do Terreno num **vértice** da grade, de 0 ao número de pares. */
 export function nivelNoVertice(stage: Stage, vx: number, vy: number, pares: number): number {
   const v = campo(sementeDe(stage), vx, vy);

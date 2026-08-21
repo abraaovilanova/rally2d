@@ -1,0 +1,208 @@
+{
+  "bioma": "montanha",
+  "folha": "assets/world/montanha-v2.png",
+  "escala": 0.5,
+  "densidade": 0.7,
+  "observacao": "Arte emprestada dos outros biomas ate a geracao propria. A noite, a olho nu, quase nada disto e visto de perto o bastante para denunciar.",
+  "itens": [
+    {
+      "nome": "largada",
+      "papel": "largada",
+      "ocupacao": "quadro",
+      "descricao": "mountain night start gantry"
+    },
+    {
+      "nome": "chegada",
+      "papel": "chegada",
+      "ocupacao": "quadro",
+      "descricao": "mountain night finish gantry"
+    },
+    {
+      "nome": "pinheiro",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "pine tree on a mountain slope",
+      "peso": 10
+    },
+    {
+      "nome": "arvoreSeca",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "bare wind-beaten tree",
+      "peso": 6
+    },
+    {
+      "nome": "rochedo",
+      "papel": "beira",
+      "ocupacao": "dois-tercos",
+      "descricao": "large rock outcrop",
+      "peso": 8
+    },
+    {
+      "nome": "pedras",
+      "papel": "beira",
+      "ocupacao": "dois-tercos",
+      "descricao": "mossy boulders",
+      "peso": 6
+    },
+    {
+      "nome": "cascalho",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "loose gravel and small stones",
+      "peso": 6
+    },
+    {
+      "nome": "monteNeve",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "patch of old snow",
+      "peso": 4
+    },
+    {
+      "nome": "tronco",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "fallen trunk at the roadside",
+      "peso": 3
+    },
+    {
+      "nome": "guardrail",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "metal guardrail on the drop side",
+      "peso": 6
+    },
+    {
+      "nome": "cerca",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "wooden fence at the roadside",
+      "peso": 3
+    },
+    {
+      "nome": "pneus",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "stack of tires marking the corner",
+      "peso": 4
+    },
+    {
+      "nome": "cone",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "traffic cone",
+      "peso": 3
+    },
+    {
+      "nome": "placaSerra",
+      "papel": "beira",
+      "ocupacao": "dois-tercos",
+      "descricao": "mountain road signpost",
+      "peso": 3
+    },
+    {
+      "nome": "bandeiraAmarela",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "yellow marshal flag",
+      "peso": 2
+    },
+    {
+      "nome": "bandeiraBranca",
+      "papel": "beira",
+      "ocupacao": "metade",
+      "descricao": "white marshal flag",
+      "peso": 2
+    },
+    {
+      "nome": "arvore",
+      "papel": "beira",
+      "ocupacao": "quadro",
+      "descricao": "broad tree",
+      "peso": 4
+    },
+    {
+      "nome": "mancha",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "oil stain on the road",
+      "peso": 3,
+      "rasteiro": true
+    },
+    {
+      "nome": "pedrinhas",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "scattered pebbles",
+      "peso": 5,
+      "rasteiro": true
+    },
+    {
+      "nome": "rachadura",
+      "papel": "beira",
+      "ocupacao": "quarto",
+      "descricao": "crack in the roadbed",
+      "peso": 4,
+      "rasteiro": true
+    },
+    {
+      "nome": "plateia",
+      "papel": "plateia",
+      "ocupacao": "quadro",
+      "descricao": "crowd of spectators in the cold"
+    },
+    {
+      "nome": "torcedor1",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "spectator in a parka",
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor2",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "spectator in a parka",
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor3",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "spectator in a parka",
+      "quadros": 2
+    },
+    {
+      "nome": "torcedor4",
+      "papel": "publico",
+      "ocupacao": "dois-tercos",
+      "descricao": "spectator in a parka",
+      "quadros": 2
+    },
+    {
+      "nome": "leito1",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "mountain road surface"
+    },
+    {
+      "nome": "leito2",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "mountain road with ruts"
+    },
+    {
+      "nome": "leito3",
+      "papel": "leito",
+      "ocupacao": "ladrilho",
+      "descricao": "cracked mountain road"
+    },
+    {
+      "nome": "poeira",
+      "papel": "efeito",
+      "ocupacao": "metade",
+      "descricao": "gravel dust"
+    }
+  ]
+}

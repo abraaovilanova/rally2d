@@ -127,9 +127,15 @@ function drawGrid(game: Game): void {
  */
 function surfaceHint(game: Game): string {
   const biome = game.stage.biome;
-  if (biome.grip < 1) return ' · pista escorregadia';
-  if (biome.puddles) return ' · poças na pista';
-  return '';
+  const avisos: string[] = [];
+
+  // A noite vem primeiro: escorregar é uma dificuldade, não enxergar é outra ordem de
+  // problema — é a única em que o jogador precisa mudar de instrumento.
+  if (biome.noite) avisos.push('de noite · só o farol');
+  if (biome.grip < 1) avisos.push('pista escorregadia');
+  if (biome.puddles) avisos.push('poças na pista');
+
+  return avisos.length ? ' · ' + avisos.join(' · ') : '';
 }
 
 /**

@@ -58,6 +58,18 @@ export const TUNING = {
   /** Tamanho de um sopro na tela ao nascer, em px. Ele cresce até o dobro antes de morrer. */
   poeiraTamanho: 34,
 
+  /**
+   * Até onde o farol alcança, em px. É a alavanca de dificuldade da noite: abaixo do que
+   * o Carro percorre no tempo de reação, a Etapa vira sorteio em vez de prova.
+   */
+  alcanceDoFarol: 430,
+
+  /** Abertura de cada facho, em radianos. */
+  aberturaDoFarol: 0.62,
+
+  /** Raio da auréola em volta do Carro, em px, para ele não sumir ao girar. */
+  auroraDoCarro: 62,
+
   /** Raio de colisão do Carro, em px. */
   carRadius: 9,
 

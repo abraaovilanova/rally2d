@@ -185,6 +185,28 @@ de que todo objeto **toque o chão** em vez de flutuar sobre ele.
 Existe porque arte boa vinda de fontes diferentes fica ruim junta — e porque sem regra escrita cada
 peça nova volta um pouco diferente da anterior. É a diferença entre ter assets e ter um conjunto.
 
+## Noite (Night)
+
+A condição de uma **Etapa** em que o jogador só vê o que os faróis do **Carro** alcançam. Não é uma
+paleta escura: o que está fora do facho é invisível, não apenas mais escuro.
+
+Muda o instrumento com que se corre. De dia a **Pista** é lida pelos olhos e o **Caderno de Notas** é
+conforto; de noite o facho mostra o presente e o caderno é o único que fala do que vem — a curva que
+chega antes de o farol alcançá-la só existe se ela foi anunciada.
+
+O facho gira com o **Carro**, e não com a **Pista**: no meio de uma curva ele aponta para fora dela.
+Essa é a dificuldade, e é a mesma tensão de sempre vista por outro lado — quem entra rápido demais
+deixa de ver para onde está indo.
+
+## Relevo (Relief)
+
+A impressão de que o chão de um **Bioma** sobe e desce. Sai da mesma altura que decide o **Terreno**,
+agora sombreada: encosta virada para a luz clareia, encosta virada para o outro lado escurece.
+
+É só luz. Nada do modelo tem altura — a **Pista** continua plana, a **Borda** continua onde estava, e
+a **Batida** não sabe que existe montanha. Um jogo visto de cima não tem a terceira dimensão para
+mostrar subida; o que ele tem é sombra.
+
 ## Terreno (Terrain)
 
 O chão de um **Bioma**, fora da **Pista**. Não é uma textura só: são tipos de chão que se encostam,

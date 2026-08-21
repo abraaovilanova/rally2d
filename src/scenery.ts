@@ -4,8 +4,9 @@ import forestTerrainSheet from '../assets/world/floresta-terreno.png';
 import forestV2Sheet from '../assets/world/floresta-v2.png';
 import iceTerrainSheet from '../assets/world/gelo-terreno.png';
 import iceV2Sheet from '../assets/world/gelo-v2.png';
+import mountainV2Sheet from '../assets/world/montanha-v2.png';
 import cenario from './cenario.json';
-import { CELULA, ladrilhoDaCelula } from './terreno';
+import { alturaEm, CELULA, ladrilhoDaCelula } from './terreno';
 import etapas from './cenario-etapas.json';
 import { normalAt, type Vec } from './path';
 import { createRng, seedFromStageId } from './rng';
@@ -102,6 +103,7 @@ const SHEETS: Record<string, Sheet> = {
   'floresta-terreno': { src: forestTerrainSheet, image: new Image() },
   'gelo-v2': { src: iceV2Sheet, image: new Image() },
   'gelo-terreno': { src: iceTerrainSheet, image: new Image() },
+  'montanha-v2': { src: mountainV2Sheet, image: new Image() },
 };
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
@@ -305,6 +307,80 @@ export function drawTerreno(
   }
 
   return true;
+}
+
+/** Um pixel do mapa de relevo cobre este tanto de mundo. */
+const PASSO_DO_RELEVO = 14;
+
+/** A luz que modela o relevo vem do alto à esquerda, como a de todo o resto do Estilo. */
+const LUZ = { x: -0.7071, y: -0.7071 };
+
+let relevoCanvas: HTMLCanvasElement | null = null;
+
+/**
+ * O relevo: o chão sombreado pela própria altura, para ele deixar de ser plano.
+ *
+ * Um jogo visto de cima não tem terceira dimensão para mostrar subida — o que ele tem é
+ * luz. Sombreando a encosta a partir da inclinação do mesmo campo que decide o Terreno, o
+ * chão passa a subir e descer sem nada no modelo mudar: continua tudo plano para a Pista,
+ * para a Borda e para a Batida.
+ *
+ * Desenhado num mapa de baixa resolução e esticado **com** suavização — é o oposto da
+ * regra do resto do jogo, e de propósito: sombra de encosta é a única coisa aqui que não
+ * tem borda, e um degrau de pixel nela se leria como parede.
+ */
+export function drawRelevo(
+  ctx: CanvasRenderingContext2D,
+  stage: Stage,
+  cam: Vec,
+  width: number,
+  height: number,
+): void {
+  const forca = stage.biome.relevo ?? 0;
+  if (forca <= 0) return;
+
+  const largura = Math.ceil(width / PASSO_DO_RELEVO) + 1;
+  const altura = Math.ceil(height / PASSO_DO_RELEVO) + 1;
+
+  relevoCanvas ??= document.createElement('canvas');
+  const mapa = relevoCanvas;
+  if (mapa.width !== largura || mapa.height !== altura) {
+    mapa.width = largura;
+    mapa.height = altura;
+  }
+
+  const mctx = mapa.getContext('2d');
+  if (!mctx) return;
+
+  const imagem = mctx.createImageData(largura, altura);
+  const dados = imagem.data;
+
+  for (let j = 0; j < altura; j++) {
+    for (let i = 0; i < largura; i++) {
+      const x = cam.x + i * PASSO_DO_RELEVO;
+      const y = cam.y + j * PASSO_DO_RELEVO;
+
+      // A inclinação, por diferença nos dois eixos. O produto dela com a direção da luz é
+      // o quanto esta encosta está virada para ela.
+      const dx = alturaEm(stage, x + PASSO_DO_RELEVO, y) - alturaEm(stage, x - PASSO_DO_RELEVO, y);
+      const dy = alturaEm(stage, x, y + PASSO_DO_RELEVO) - alturaEm(stage, x, y - PASSO_DO_RELEVO);
+      const face = (dx * LUZ.x + dy * LUZ.y) * 46;
+
+      const p = (j * largura + i) * 4;
+      const claro = face > 0;
+      dados[p] = claro ? 255 : 0;
+      dados[p + 1] = claro ? 250 : 0;
+      dados[p + 2] = claro ? 230 : 12;
+      dados[p + 3] = Math.min(175, Math.abs(face) * 255) * forca;
+    }
+  }
+
+  mctx.putImageData(imagem, 0, 0);
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(mapa, cam.x, cam.y, largura * PASSO_DO_RELEVO, altura * PASSO_DO_RELEVO);
+  ctx.restore();
 }
 
 /** O chão do Bioma, já em coordenadas de mundo (chamar dentro do translate da câmera). */

@@ -6,7 +6,7 @@ import type { Path, Vec } from './path';
 import { formatTime } from './records';
 import { sopros } from './poeira';
 import { isOffRoute } from './route';
-import { bedCount, drawGates, drawGround, drawPoeira, drawProps, drawTerreno, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
+import { bedCount, drawGates, drawGround, drawPoeira, drawProps, drawRelevo, drawTerreno, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
 import { seedFromStageId } from './rng';
 import { puddlesOf, type Puddle } from './surface';
 import type { Stage } from './stage';
@@ -56,6 +56,10 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
 
   ctx.restore();
 
+  // A noite entra entre o mundo e a interface: escurece o que foi desenhado, e não o que
+  // o jogador precisa ler para dirigir.
+  drawNoite(ctx, game, cam);
+
   // A mira é desenhada depois do `restore`, em coordenadas de tela: é assim que cada
   // bloco cai inteiro numa casa da grade de pixels.
   drawMira(ctx, game, cam);
@@ -90,6 +94,9 @@ export function drawScene(
   }
 
   const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
+
+  // O relevo vai sobre o chão e sob a Pista: a Pista é plana e não sobe encosta nenhuma.
+  drawRelevo(ctx, stage, cam, width, height);
 
   drawLeito(ctx, stage, from, to, surface);
   drawBranches(ctx, stage, from, to, surface);
@@ -358,6 +365,78 @@ function corDoAcelerador(t: number, alfa = 1): string {
   const k = (t - a.t) / (b.t - a.t);
   const c = a.cor.map((v, i) => Math.round(v + (b.cor[i] - v) * k));
   return `rgba(${c.join(',')},${alfa})`;
+}
+
+let noiteCanvas: HTMLCanvasElement | null = null;
+
+/**
+ * A noite, e os dois faróis que abrem um buraco nela.
+ *
+ * A escuridão é uma camada por cima do mundo inteiro, e os faróis são o que se apaga
+ * dela — não luz somada, mas escuro subtraído. É o que faz o que está fora do facho
+ * ficar de fato invisível em vez de só escuro, que é a diferença entre correr de noite e
+ * correr com um filtro azul por cima.
+ *
+ * O que sobra dentro do facho é a Pista imediata. O resto da Etapa o jogador tem de
+ * **saber**: de noite o caderno do navegador deixa de ser conforto e vira o instrumento.
+ */
+function drawNoite(ctx: CanvasRenderingContext2D, game: Game, cam: Vec): void {
+  if (!game.stage.biome.noite) return;
+
+  const { width, height } = ctx.canvas;
+  noiteCanvas ??= document.createElement('canvas');
+  const camada = noiteCanvas;
+  if (camada.width !== width || camada.height !== height) {
+    camada.width = width;
+    camada.height = height;
+  }
+
+  const n = camada.getContext('2d');
+  if (!n) return;
+
+  n.clearRect(0, 0, width, height);
+  n.fillStyle = 'rgba(4, 6, 14, 0.93)';
+  n.fillRect(0, 0, width, height);
+
+  const x = game.car.x - cam.x;
+  const y = game.car.y - cam.y;
+
+  // Os faróis nascem do capô, não do meio do Carro: um facho que sai de trás do para-brisa
+  // ilumina o próprio Carro e entrega que é um truque de tela.
+  const capo = TUNING.carScreenSize * 0.34;
+  const fx = x + Math.cos(game.car.heading) * capo;
+  const fy = y + Math.sin(game.car.heading) * capo;
+
+  n.globalCompositeOperation = 'destination-out';
+
+  for (const lado of [-1, 1]) {
+    const angulo = game.car.heading + lado * 0.16;
+    const alcance = TUNING.alcanceDoFarol;
+    const brilho = n.createRadialGradient(fx, fy, capo, fx, fy, alcance);
+    brilho.addColorStop(0, 'rgba(0,0,0,1)');
+    brilho.addColorStop(0.55, 'rgba(0,0,0,0.85)');
+    brilho.addColorStop(1, 'rgba(0,0,0,0)');
+
+    n.fillStyle = brilho;
+    n.beginPath();
+    n.moveTo(fx, fy);
+    n.arc(fx, fy, alcance, angulo - TUNING.aberturaDoFarol / 2, angulo + TUNING.aberturaDoFarol / 2);
+    n.closePath();
+    n.fill();
+  }
+
+  // Uma auréola curta em volta do Carro: sem ela o jogador perde o próprio carro de vista
+  // no instante em que ele gira, que é justamente o instante em que precisa vê-lo.
+  const perto = n.createRadialGradient(x, y, 0, x, y, TUNING.auroraDoCarro);
+  perto.addColorStop(0, 'rgba(0,0,0,0.9)');
+  perto.addColorStop(1, 'rgba(0,0,0,0)');
+  n.fillStyle = perto;
+  n.beginPath();
+  n.arc(x, y, TUNING.auroraDoCarro, 0, Math.PI * 2);
+  n.fill();
+
+  n.globalCompositeOperation = 'source-over';
+  ctx.drawImage(camada, 0, 0);
 }
 
 /**
