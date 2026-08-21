@@ -23,7 +23,7 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "tall saguaro cactus with two arms, desert plant",
-      "feito": false,
+      "feito": true,
       "peso": 5
     },
     {
@@ -195,7 +195,7 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, man in cap and shorts, arms down / arm raised cheering",
-      "feito": false,
+      "feito": true,
       "quadros": 2
     },
     {
@@ -283,7 +283,7 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "1980s group B rally car, boxy wide-arch hatchback, rear wing, roof scoop, bonnet spotlights, mud flaps, door number, red livery, dirty lower body",
-      "feito": false,
+      "feito": true,
       "direcoes": 8,
       "defasagem": 0,
       "cor": "red"
