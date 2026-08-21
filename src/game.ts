@@ -1,5 +1,7 @@
 import { driveCar, spawnCar, type Car } from './car';
 import { readCarColor, saveCarColor, type CarColor } from './carSprite';
+import { CATEGORIES, readCategory, saveCategory, type Category, type CategoryId } from './category';
+import { saveMode, type Mode } from './player';
 import {
   loadProgression,
   nextOf,
@@ -13,12 +15,20 @@ import type { Vec } from './path';
 import { pathOf, progressOf, START_ROUTE, stepRoute, type Route } from './route';
 import { TUNING } from './tuning';
 
-export type Phase = 'running' | 'crashed' | 'finished';
+/**
+ * A Corrida não começa sozinha: nasce do Grid. Uma Batida devolve o jogador direto à
+ * largada, sem passar por ele — repetir a Tentativa não é uma decisão, é um reflexo.
+ */
+export type Phase = 'grid' | 'running' | 'crashed' | 'finished';
 
 export interface Game {
   progression: Progression;
   /** Preferência do jogador, não estado da Corrida. */
   carColor: CarColor;
+  /** O carro desta Corrida. Trocar de Categoria recomeça a Corrida. */
+  category: CategoryId;
+  /** Online só adiciona o Ranking Mundial; nada do jogo depende de rede. */
+  mode: Mode;
   stage: Stage;
   car: Car;
   /** Ponto de Mira: a posição do cursor no mundo, na última atualização. */
@@ -37,34 +47,73 @@ export interface Game {
   newRecord: boolean;
 }
 
-/** Retoma a Progressão de onde o jogador parou. */
-export function createGame(): Game {
+/** O carro desta Corrida, resolvido. */
+export function categoryOf(game: Game): Category {
+  return CATEGORIES[game.category];
+}
+
+/** Retoma a Progressão de onde o jogador parou, parado no Grid da Etapa atual. */
+export function createGame(mode: Mode): Game {
   const progression = loadProgression();
   const stage = makeStage(progression.biomeIndex, progression.lap);
 
   const game: Game = {
     progression,
     carColor: readCarColor(),
+    category: readCategory(),
+    mode,
     stage,
-    car: startingCar(stage),
+    car: startingCar(stage, CATEGORIES[readCategory()]),
     aim: { x: 0, y: 0 },
-    phase: 'running',
+    phase: 'grid',
     elapsed: 0,
     route: { ...START_ROUTE },
     hitBarrier: false,
     attempts: 1,
-    bestTime: readBestTime(stage.id),
+    bestTime: null,
     newRecord: false,
   };
 
-  resetRace(game);
+  resetRace(game, 'grid');
   return game;
+}
+
+/** Larga: a única transição que sai do Grid. */
+export function startRace(game: Game): void {
+  if (game.phase !== 'grid') return;
+  game.phase = 'running';
+  game.elapsed = 0;
+}
+
+/** Volta ao Grid de propósito, para trocar de Categoria ou de Modo sem bater. */
+export function openGrid(game: Game): void {
+  resetRace(game, 'grid');
+}
+
+export function setMode(game: Game, mode: Mode): void {
+  game.mode = mode;
+  saveMode(mode);
+}
+
+/**
+ * Um Tempo pertence à Categoria com que foi feito, do começo ao fim: trocar no meio de
+ * uma Corrida a joga fora e recomeça. A Progressão não é afetada — a Categoria é o carro
+ * do momento, e o progresso é do jogador.
+ */
+export function setCategory(game: Game, category: CategoryId): void {
+  if (game.category === category) return;
+  game.category = category;
+  saveCategory(category);
+
+  const attempts = game.attempts;
+  resetRace(game, game.phase === 'grid' ? 'grid' : 'running');
+  game.attempts = attempts;
 }
 
 /** Nova Tentativa na mesma Etapa. Uma Batida nunca faz retroceder na Progressão. */
 export function retry(game: Game): void {
   const attempts = game.attempts + 1;
-  resetRace(game);
+  resetRace(game, 'running');
   game.attempts = attempts;
 }
 
@@ -88,14 +137,14 @@ export function setCarColor(game: Game, color: CarColor): void {
 
 function enterStage(game: Game, stage: Stage): void {
   game.stage = stage;
-  game.bestTime = readBestTime(stage.id);
-  resetRace(game);
+  resetRace(game, 'grid');
 }
 
-function resetRace(game: Game): void {
-  game.car = startingCar(game.stage);
+function resetRace(game: Game, phase: Phase): void {
+  game.bestTime = readBestTime(game.stage.id, game.category);
+  game.car = startingCar(game.stage, categoryOf(game));
   game.aim = { x: game.car.x, y: game.car.y };
-  game.phase = 'running';
+  game.phase = phase;
   game.elapsed = 0;
   game.route = { ...START_ROUTE };
   game.hitBarrier = false;
@@ -108,7 +157,7 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
 
   game.elapsed += dt;
   game.aim = aim;
-  driveCar(game.car, aim, dt);
+  driveCar(game.car, aim, dt, categoryOf(game));
 
   // O progresso só pode avançar o que o Carro de fato andou neste quadro. A folga extra
   // cobre as Rotas Alternativas, cujos pontos ficam um pouco mais espaçados que o passo.
@@ -132,8 +181,8 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
   // Conclusão: única forma de produzir um Tempo.
   if (step.finished) {
     game.phase = 'finished';
-    game.newRecord = recordTime(game.stage.id, game.elapsed);
-    game.bestTime = readBestTime(game.stage.id);
+    game.newRecord = recordTime(game.stage.id, game.category, game.elapsed);
+    game.bestTime = readBestTime(game.stage.id, game.category);
   }
 }
 
@@ -147,7 +196,7 @@ export function currentPath(game: Game) {
   return pathOf(game.stage.track, game.route);
 }
 
-function startingCar(stage: Stage): Car {
+function startingCar(stage: Stage, category: Category): Car {
   const [a, b] = stage.track.main.center;
-  return spawnCar(a, Math.atan2(b.y - a.y, b.x - a.x));
+  return spawnCar(a, Math.atan2(b.y - a.y, b.x - a.x), category);
 }

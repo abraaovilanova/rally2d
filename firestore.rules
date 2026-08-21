@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Ranking Mundial. Sem autenticação, por decisão registrada no ADR 0004: o Nome é
+// digitado, não é uma conta. Estas regras não defendem contra trapaça — um tempo
+// impossível passa por elas. Elas defendem contra o Firestore virar armazenamento
+// gratuito de terceiros: só entram documentos com o formato de um Tempo.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /boards/{board}/times/{entry} {
+      allow read: if true;
+
+      allow create: if request.resource.data.keys().hasOnly(['name', 'time', 'stage', 'category', 'at'])
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 16
+                    && request.resource.data.time is number
+                    && request.resource.data.time > 0
+                    && request.resource.data.time < 3600
+                    && request.resource.data.stage is string
+                    && request.resource.data.stage.size() <= 32
+                    && request.resource.data.category in ['A', 'B', 'C'];
+      // `at` fica de fora da validação de propósito. O SDK modular manda
+      // `serverTimestamp()` como uma transformação, não como campo do documento, então
+      // durante a avaliação da regra `request.resource.data.at` é nulo e qualquer
+      // condição sobre ele — inclusive o idiomático `== request.time` — recusa toda
+      // escrita. Verificado contra o projeto real. O campo é gravado corretamente.
+
+      // Um Tempo registrado é registrado. Ninguém edita nem apaga o de ninguém.
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

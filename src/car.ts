@@ -1,3 +1,4 @@
+import type { Category } from './category';
 import { TUNING } from './tuning';
 import type { Vec } from './track';
 
@@ -10,8 +11,8 @@ export interface Car {
   speed: number;
 }
 
-export function spawnCar(at: Vec, heading: number): Car {
-  return { x: at.x, y: at.y, heading, speed: TUNING.carSpeedMin };
+export function spawnCar(at: Vec, heading: number, category: Category): Car {
+  return { x: at.x, y: at.y, heading, speed: category.speedMin };
 }
 
 /**
@@ -22,18 +23,18 @@ export function spawnCar(at: Vec, heading: number): Car {
  * O Carro nunca gira mais rápido que a taxa máxima, então quanto mais rápido ele vai,
  * mais aberta fica a curva que ele consegue fazer. É daí que vem a tensão da corrida.
  */
-export function driveCar(car: Car, aim: Vec, dt: number): void {
+export function driveCar(car: Car, aim: Vec, dt: number, category: Category): void {
   const dx = aim.x - car.x;
   const dy = aim.y - car.y;
   const distance = Math.hypot(dx, dy);
 
-  car.speed = speedFor(distance);
+  car.speed = speedFor(distance, category);
 
   // Dentro da zona morta o vetor de mira é curto demais para ter um ângulo confiável:
   // o Carro segue reto e o jogador controla só a velocidade.
   if (distance > TUNING.aimDeadzone) {
     const wanted = Math.atan2(dy, dx);
-    const maxTurn = ((TUNING.carTurnRate * Math.PI) / 180) * dt;
+    const maxTurn = ((category.turnRate * Math.PI) / 180) * dt;
     const delta = shortestAngle(wanted - car.heading);
     car.heading += Math.max(-maxTurn, Math.min(maxTurn, delta));
   }
@@ -43,13 +44,13 @@ export function driveCar(car: Car, aim: Vec, dt: number): void {
 }
 
 /** 0 na velocidade mínima, 1 na máxima. Útil para o HUD. */
-export function throttleOf(car: Car): number {
-  return (car.speed - TUNING.carSpeedMin) / (TUNING.carSpeedMax - TUNING.carSpeedMin);
+export function throttleOf(car: Car, category: Category): number {
+  return (car.speed - category.speedMin) / (category.speedMax - category.speedMin);
 }
 
-function speedFor(distance: number): number {
+function speedFor(distance: number, category: Category): number {
   const t = clamp01((distance - TUNING.aimNear) / (TUNING.aimFar - TUNING.aimNear));
-  return TUNING.carSpeedMin + t * (TUNING.carSpeedMax - TUNING.carSpeedMin);
+  return category.speedMin + t * (category.speedMax - category.speedMin);
 }
 
 function clamp01(v: number): number {

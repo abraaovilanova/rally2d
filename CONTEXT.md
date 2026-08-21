@@ -38,8 +38,34 @@ indefinidamente, com a **Volta** aumentando a cada ciclo. Não existe derrota pe
 
 ## Corrida (Race)
 
-Uma tentativa única de percorrer a **Pista** de uma **Etapa**, do início até a **Linha de Chegada**.
-Termina de exatamente duas formas: **Conclusão** ou **Batida**.
+Uma tentativa única de percorrer a **Pista** de uma **Etapa**, do início até a **Linha de Chegada**,
+numa **Categoria**. Não começa sozinha: nasce do **Grid**. Termina de exatamente duas formas:
+**Conclusão** ou **Batida**.
+
+## Grid
+
+O estado em que o jogador está antes de largar. Nele escolhe a **Categoria**, vê os números dela, vê
+seu **Melhor Tempo** naquela Etapa e, no **Modo Online**, o **Ranking Mundial** — e só então larga.
+
+O Grid existe uma vez por **Etapa**, não por **Corrida**: uma **Batida** devolve o jogador direto à
+largada, sem passar por ele. A decisão de que carro correr é da Etapa; repetir a Tentativa não é uma
+decisão, é um reflexo.
+
+## Categoria (Class)
+
+O carro que o jogador escolhe no **Grid**. Um pacote fechado — **A**, **B** ou **C** — de velocidade
+mínima, velocidade máxima e taxa de giro. Não existe ajustar um carro: existe escolher entre três.
+
+A regra que mantém as três vivas é uma troca, não uma escala: **quem ganha velocidade perde giro**.
+A Categoria A anda mais e curva menos; a C perdoa. Nenhuma é melhor — cada uma pede uma **Pista**
+diferente.
+
+O **Acelerador** e a **Zona Morta** são idênticos nas três. Se a curva de aceleração mudasse junto,
+Categoria deixaria de ser um carro diferente e passaria a ser um jogo diferente.
+
+Trocar de Categoria não mexe na **Progressão** — ela é uma só, e o carro é do momento. Trocar no meio
+de uma Corrida reinicia a Corrida: um **Tempo** pertence à Categoria com que foi feito, do começo ao
+fim.
 
 ## Tentativa (Attempt)
 
@@ -112,7 +138,8 @@ Semente, e portanto a mesma Pista. É o que torna um **Tempo** comparável a out
 ## Carro (Car)
 
 A entidade controlada pelo jogador. Gira em direção ao **Ponto de Mira** a uma taxa de giro máxima
-e constante, e avança à velocidade que o **Acelerador** determina.
+e constante, e avança à velocidade que o **Acelerador** determina. Suas três velocidades — mínima,
+máxima e taxa de giro — vêm da **Categoria** escolhida no **Grid**.
 
 Como a taxa de giro é constante, o raio que o Carro consegue fazer cresce com a velocidade: ir
 rápido é, por si só, perder capacidade de curva. É daí que vem toda a tensão do jogo.
@@ -151,7 +178,34 @@ O **Carro** cruzou a **Linha de Chegada** sem ter batido. Única forma de produz
 A duração de uma **Corrida** concluída. Menor é melhor. Uma **Batida** não produz um Tempo ruim —
 não produz Tempo nenhum.
 
+Um Tempo só é comparável a outro da mesma **Etapa** e da mesma **Categoria**. A Etapa garante a
+mesma Pista; a Categoria, o mesmo carro. Falta uma das duas e a comparação não significa nada.
+
 ## Melhor Tempo (Best Time)
 
-O menor **Tempo** já registrado para uma **Etapa**. Pertence à Etapa, não ao **Bioma**: comparar
-Melhores Tempos de Etapas diferentes não significa nada.
+O menor **Tempo** já registrado por este jogador, nesta **Etapa**, nesta **Categoria**. É pessoal e
+existe sempre, nos dois **Modos** — não depende de rede, de nome, nem de ninguém mais.
+
+## Ranking Mundial (Leaderboard)
+
+A lista dos **Tempos** de todos os jogadores numa **Etapa** numa **Categoria**, do menor para o
+maior. Só existe no **Modo Online**, e é coisa diferente do **Melhor Tempo**: o Melhor Tempo é seu
+recorde, o Ranking é o mundo.
+
+Cada Conclusão vira uma linha — o mesmo jogador aparece tantas vezes quantas concluir. É um placar
+de fliperama: uma lista de Corridas, não de pessoas.
+
+Cada **Volta** tem seu próprio Ranking, o que é uma consequência aceita: nas Voltas altas o Ranking
+pode ter um nome só.
+
+## Nome (Name)
+
+O que identifica um Tempo no **Ranking Mundial**. Digitado na primeira **Conclusão** e lembrado
+depois. Não é uma conta: não há login, nada impede dois jogadores usarem o mesmo Nome, e o jogo
+aceita isso — o preço de ninguém precisar se cadastrar para correr.
+
+## Modo (Mode)
+
+Escolhido ao abrir o jogo, e trocável no **Grid**. **Offline** é o jogo inteiro, sozinho. **Online**
+é o mesmo jogo mais o **Ranking Mundial**. Online só adiciona; nada do jogo depende de rede, e um
+Tempo feito Offline nunca sobe depois.

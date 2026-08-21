@@ -1,13 +1,11 @@
 import { throttleOf } from './car';
 import { CAR_COLORS, CAR_SWATCHES, drawCarSprite } from './carSprite';
-import { currentPath, progress, type Game } from './game';
+import { categoryOf, currentPath, progress, type Game } from './game';
 import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
-import { nextOf } from './progression';
 import { formatTime } from './records';
 import { isOffRoute } from './route';
 import { drawGates, drawGround, drawProps, hasScenery, sceneryOf, trackFill } from './scenery';
-import { BIOMES } from './stage';
 import type { Track } from './track';
 import { TUNING } from './tuning';
 
@@ -211,7 +209,7 @@ function drawAimLine(ctx: CanvasRenderingContext2D, game: Game, color: string): 
   // Torna o modelo de controle legível: a linha é a direção que o Carro *quer* e o
   // seu comprimento é o acelerador; o sprite é a direção que ele *tem*.
   ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5 + throttleOf(game.car) * 2.5;
+  ctx.lineWidth = 1.5 + throttleOf(game.car, categoryOf(game)) * 2.5;
   ctx.setLineDash([6, 8]);
   ctx.beginPath();
   ctx.moveTo(game.car.x, game.car.y);
@@ -421,7 +419,7 @@ function metresTo(distance: number): number {
  * a regra central do jogo ficaria invisível.
  */
 function drawSpeedometer(ctx: CanvasRenderingContext2D, game: Game): void {
-  const throttle = throttleOf(game.car);
+  const throttle = throttleOf(game.car, categoryOf(game));
   const kmh = Math.round((game.car.speed / TUNING.pixelsPerMeter) * 3.6);
   const x = 24;
   const y = 96;
@@ -475,7 +473,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.font = '400 15px system-ui, sans-serif';
   ctx.globalAlpha = 0.65;
   ctx.fillText(
-    `${game.stage.biome.name}  ·  volta ${game.stage.lap + 1}  ·  melhor ${best}  ·  tentativa ${game.attempts}`,
+    `${game.stage.biome.name}  ·  volta ${game.stage.lap + 1}  ·  cat. ${game.category}  ·  melhor ${best}  ·  tentativa ${game.attempts}`,
     24,
     62,
   );
@@ -491,9 +489,11 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.fillRect(0, ctx.canvas.height - 5, ctx.canvas.width * done, 5);
   ctx.globalAlpha = 1;
 
-  if (game.phase === 'running') return;
+  // O Grid e a Conclusão são telas de DOM (`ui.ts`): têm lista de Ranking e campo de
+  // texto, que canvas não desenha bem. Aqui fica só a Batida, que precisa ser instantânea.
+  if (game.phase !== 'crashed') return;
 
-  const crashed = game.phase === 'crashed';
+  const crashed = true;
   ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -513,15 +513,10 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
     : `${formatTime(game.elapsed)}${game.newRecord ? '  ·  NOVO RECORDE' : `  ·  melhor ${best}`}`;
   ctx.fillText(line, ctx.canvas.width / 2, ctx.canvas.height / 2 - 10);
 
-  const next = nextOf(game.progression);
-  const nextName = BIOMES[next.biomeIndex].name;
-
   ctx.globalAlpha = 0.6;
   ctx.font = '400 17px system-ui, sans-serif';
   ctx.fillText(
-    crashed
-      ? 'clique ou R para tentar de novo'
-      : `clique ou R para seguir  ·  ${nextName}, volta ${next.lap + 1}`,
+    'clique ou R para tentar de novo',
     ctx.canvas.width / 2,
     ctx.canvas.height / 2 + 40,
   );
@@ -529,7 +524,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.font = '400 13px system-ui, sans-serif';
   ctx.globalAlpha = 0.3;
   ctx.fillText(
-    'Esc reinicia a progressão (os recordes ficam)',
+    'G volta ao grid (trocar de categoria)  ·  Esc reinicia a progressão',
     ctx.canvas.width / 2,
     ctx.canvas.height / 2 + 78,
   );

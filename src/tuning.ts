@@ -3,11 +3,10 @@
  * Edite aqui e recarregue.
  */
 export const TUNING = {
-  /** Velocidade do Carro com o cursor colado nele, em px/s. Nunca zero. */
-  carSpeedMin: 110,
-
-  /** Velocidade do Carro com o cursor esticado, em px/s. */
-  carSpeedMax: 430,
+  /**
+   * Velocidade mínima, velocidade máxima e taxa de giro **não** moram aqui: pertencem à
+   * Categoria, em `category.ts`. O que sobra neste arquivo é o que é igual para as três.
+   */
 
   /** Distância da mira, em px, a partir da qual o Carro sai da velocidade mínima. */
   aimNear: 60,
@@ -21,12 +20,6 @@ export const TUNING = {
    * zona morta, frear seria involuntariamente virar.
    */
   aimDeadzone: 40,
-
-  /**
-   * Taxa de giro máxima do Carro, em graus/s. Constante: como o raio de giro é
-   * velocidade ÷ taxa de giro, a velocidade já se pune sozinha alargando a curva.
-   */
-  carTurnRate: 150,
 
   /** Raio de colisão do Carro, em px. */
   carRadius: 9,
