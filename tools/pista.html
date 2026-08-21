@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rally 2D — cenário na pista</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c0e12;
+        --panel: #14181f;
+        --line: rgba(238, 242, 246, 0.14);
+        --text: #eef2f6;
+        --dim: rgba(238, 242, 246, 0.55);
+        --accent: #ffc14d;
+        --ok: #6fe38a;
+        --warn: #ff8a5b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 330px;
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.5 ui-sans-serif, system-ui, sans-serif;
+        overflow: hidden;
+      }
+      .stage {
+        position: relative;
+        overflow: hidden;
+      }
+      canvas#palco {
+        display: block;
+      }
+
+      /* A régua da etapa: onde se anda pelos 23 mil pixels de pista. */
+      .regua {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(12, 14, 18, 0.9);
+      }
+      .regua input[type='range'] {
+        flex: 1;
+        accent-color: var(--accent);
+      }
+      .regua b {
+        font-variant-numeric: tabular-nums;
+        min-width: 52px;
+      }
+      .hud {
+        position: absolute;
+        left: 16px;
+        top: 14px;
+        display: flex;
+        gap: 12px;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(12, 14, 18, 0.85);
+        color: var(--dim);
+        font-variant-numeric: tabular-nums;
+      }
+      .hud b {
+        color: var(--text);
+      }
+      .toast {
+        position: absolute;
+        left: 50%;
+        top: 16px;
+        transform: translateX(-50%);
+        padding: 8px 14px;
+        border-radius: 8px;
+        background: rgba(12, 14, 18, 0.92);
+        border: 1px solid var(--line);
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+        max-width: 60%;
+      }
+      .toast.on {
+        opacity: 1;
+      }
+      .toast.erro {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+
+      .side {
+        border-left: 1px solid var(--line);
+        background: var(--panel);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .side > header {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        gap: 8px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 15px;
+      }
+      h1 a {
+        float: right;
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--dim);
+      }
+      .scroll {
+        overflow-y: auto;
+        padding: 12px 14px 24px;
+      }
+      section {
+        margin-bottom: 16px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      select,
+      input,
+      button {
+        font: inherit;
+        color: inherit;
+        background: rgba(238, 242, 246, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 8px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: rgba(238, 242, 246, 0.45);
+      }
+      button.primary {
+        background: rgba(255, 193, 77, 0.14);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .row + .row {
+        margin-top: 6px;
+      }
+      label.check {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: var(--dim);
+      }
+
+      /* A paleta: os recortes do bioma, do tamanho em que vão para a pista. */
+      .paleta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .paleta figure {
+        margin: 0;
+        display: grid;
+        gap: 3px;
+        justify-items: center;
+        padding: 6px 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        cursor: pointer;
+        background: rgba(238, 242, 246, 0.02);
+      }
+      .paleta figure:hover {
+        border-color: rgba(238, 242, 246, 0.45);
+      }
+      .paleta figure.on {
+        border-color: var(--accent);
+        background: rgba(255, 193, 77, 0.1);
+      }
+      .paleta canvas {
+        width: 100%;
+        height: 52px;
+      }
+      .paleta figcaption {
+        font-size: 10px;
+        color: var(--dim);
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        max-height: 210px;
+        overflow-y: auto;
+      }
+      li {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 3px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-variant-numeric: tabular-nums;
+      }
+      li:hover {
+        background: rgba(238, 242, 246, 0.05);
+      }
+      li.sel {
+        background: rgba(255, 193, 77, 0.12);
+        outline: 1px solid var(--accent);
+      }
+      li .nome {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      li .onde {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .vazio {
+        color: var(--dim);
+      }
+      .ajuda {
+        font-size: 11px;
+        color: var(--dim);
+        line-height: 1.9;
+      }
+      kbd {
+        font: 11px ui-monospace, monospace;
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 0 4px;
+        color: var(--dim);
+      }
+      .aviso {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--warn);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <canvas id="palco"></canvas>
+      <div class="hud">
+        <span>etapa <b id="hud-etapa">—</b></span>
+        <span>mundo <b id="hud-xy">—</b></span>
+        <span>zoom <b id="hud-zoom">—</b></span>
+        <span id="hud-pincel"></span>
+      </div>
+      <div class="regua">
+        <button id="ir-largada" title="Home">largada</button>
+        <input id="posicao" type="range" min="0" max="1000" value="0" />
+        <b id="hud-pos">0%</b>
+        <button id="ir-chegada" title="End">chegada</button>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <aside class="side">
+      <header>
+        <h1>Cenário na pista <a href="./sprites.html">recortes →</a></h1>
+        <div class="row">
+          <select id="bioma" style="flex: 1"></select>
+          <select id="volta"></select>
+          <button id="salvar" class="primary" title="Ctrl+S">Salvar</button>
+        </div>
+        <label class="check">
+          <input id="sem-sorteio" type="checkbox" />
+          só o que eu puser (dispensa o sorteio)
+        </label>
+      </header>
+
+      <div class="scroll">
+        <section>
+          <h2>Pôr na pista</h2>
+          <div class="paleta" id="paleta"></div>
+          <p class="ajuda" style="margin-top: 6px">
+            Clique num recorte e depois na pista. <kbd>Esc</kbd> larga o pincel.
+          </p>
+        </section>
+
+        <section>
+          <h2>Selecionado</h2>
+          <div class="row" id="sel-vazio"><span class="vazio">nada selecionado</span></div>
+          <div id="sel-campos" hidden>
+            <div class="row">
+              <span class="nome" id="sel-nome" style="flex: 1"></span>
+              <button id="apagar" title="Delete">Apagar</button>
+            </div>
+            <div class="row">
+              <label class="check" style="flex: 1">
+                escala
+                <input id="escala" type="number" step="0.05" min="0.1" style="width: 70px" />
+              </label>
+              <button id="espelhar" title="F">Espelhar</button>
+            </div>
+            <p class="aviso" id="aviso"></p>
+          </div>
+        </section>
+
+        <section>
+          <h2>Postos à mão (<span id="conta">0</span>)</h2>
+          <ul id="lista"></ul>
+        </section>
+
+        <section>
+          <h2>Mostrar</h2>
+          <label class="check"><input id="ver-sorteados" type="checkbox" checked /> os sorteados</label>
+          <label class="check"><input id="ver-linha" type="checkbox" /> a linha central</label>
+        </section>
+
+        <section>
+          <h2>Teclas</h2>
+          <p class="ajuda">
+            <kbd>arrastar</kbd> move · <kbd>↑↓←→</kbd> 1px · <kbd>alt</kbd> 10px<br />
+            <kbd>F</kbd> espelha · <kbd>+</kbd> <kbd>−</kbd> escala · <kbd>Del</kbd> apaga<br />
+            <kbd>Ctrl+Z</kbd> desfaz · <kbd>Ctrl+S</kbd> salva · <kbd>roda</kbd> zoom<br />
+            <kbd>espaço+arrastar</kbd> ou <kbd>botão do meio</kbd> passeia
+          </p>
+        </section>
+      </div>
+    </aside>
+
+    <script type="module">
+      // O editor importa o jogo de verdade: a pista, o cenário e o desenho são os mesmos.
+      // Um editor que mostra algo diferente do jogo não serve para posicionar nada.
+      import { BIOMES, makeStage, SELECTABLE_LAPS } from '../src/stage.ts';
+      import { drawScene, windowAround } from '../src/render.ts';
+      import { preloadScenery, hasScenery, proceduraisDe } from '../src/scenery.ts';
+      import { TUNING } from '../src/tuning.ts';
+
+      const PROP_SCALE = 0.55; // igual ao scenery.ts
+
+      let recortes = null; // cenario.json, para a paleta
+      let etapas = {}; // cenario-etapas.json
+      let etapa = null; // a Etapa montada agora
+      let biomeIndex = 0;
+      let lap = 0;
+
+      let pincel = null; // o recorte que o próximo clique põe
+      let selecionado = -1; // índice na lista de postos
+      let historico = [];
+
+      const folhas = new Map();
+      const palco = document.getElementById('palco');
+      const ctx = palco.getContext('2d');
+      const vista = { x: 0, y: 0, z: 0.55 };
+
+      // ------------------------------------------------------------- arquivos
+      async function carregar() {
+        const [a, b] = await Promise.all([fetch('/__cenario'), fetch('/__etapas')]);
+        if (!a.ok || !b.ok) throw new Error('o servidor de desenvolvimento não respondeu');
+        recortes = await a.json();
+        etapas = await b.json();
+
+        await Promise.all(
+          Object.entries(recortes.sheets).map(
+            ([nome, url]) =>
+              new Promise((pronto) => {
+                const img = new Image();
+                img.onload = () => (folhas.set(nome, img), pronto());
+                img.onerror = pronto;
+                img.src = '../' + url;
+              }),
+          ),
+        );
+
+        preloadScenery();
+        // O jogo desenha a folha; ela precisa estar carregada antes do primeiro quadro.
+        await new Promise((pronto) => setTimeout(pronto, 250));
+
+        document.getElementById('bioma').innerHTML = BIOMES.map(
+          (b, i) => `<option value="${i}">${b.name}</option>`,
+        ).join('');
+        document.getElementById('volta').innerHTML = Array.from(
+          { length: SELECTABLE_LAPS },
+          (_, l) => `<option value="${l}">volta ${l + 1}</option>`,
+        ).join('');
+
+        trocarEtapa();
+      }
+
+      async function salvar() {
+        const r = await fetch('/__etapas', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(limpo(), null, 2),
+        });
+        const corpo = await r.json().catch(() => ({}));
+        aviso(r.ok ? 'gravado em src/cenario-etapas.json' : 'falhou: ' + (corpo.erro ?? r.status), !r.ok);
+      }
+
+      /** Etapa sem nada posto e sem dispensa do sorteio não precisa existir no arquivo. */
+      function limpo() {
+        return Object.fromEntries(
+          Object.entries(etapas).filter(([, e]) => e.postos.length > 0 || e.semSorteio),
+        );
+      }
+
+      // --------------------------------------------------------------- estado
+      const daEtapa = () => {
+        etapas[etapa.id] ??= { postos: [] };
+        return etapas[etapa.id];
+      };
+      const postos = () => daEtapa().postos;
+      const atual = () => postos()[selecionado] ?? null;
+      const bioma = () => recortes.biomas[etapa.biome.id];
+
+      function trocarEtapa() {
+        etapa = makeStage(biomeIndex, lap);
+        selecionado = -1;
+        pincel = null;
+        document.getElementById('sem-sorteio').checked = !!etapas[etapa.id]?.semSorteio;
+        document.getElementById('hud-etapa').textContent = etapa.id;
+        paleta();
+        irPara(0);
+        sincronizar();
+      }
+
+      /** Leva a câmera ao ponto da Linha Central, de 0 a 1. */
+      function irPara(t) {
+        const c = etapa.track.main.center;
+        const p = c[Math.round(t * (c.length - 1))];
+        vista.x = palco.width / 2 - p.x * vista.z;
+        vista.y = palco.height / 2 - p.y * vista.z;
+        document.getElementById('posicao').value = String(Math.round(t * 1000));
+        document.getElementById('hud-pos').textContent = Math.round(t * 100) + '%';
+      }
+
+      const paraTela = (x, y) => ({ x: x * vista.z + vista.x, y: y * vista.z + vista.y });
+      const paraMundo = (x, y) => ({ x: (x - vista.x) / vista.z, y: (y - vista.y) / vista.z });
+
+      // -------------------------------------------------------------- desenho
+      function redesenhar() {
+        palco.width = palco.parentElement.clientWidth;
+        palco.height = palco.parentElement.clientHeight;
+        ctx.fillStyle = etapa ? etapa.biome.palette.background : '#0a0c10';
+        ctx.fillRect(0, 0, palco.width, palco.height);
+        if (!etapa) return;
+
+        // A câmera do jogo é uma translação; aqui entra o zoom por cima dela.
+        const cam = paraMundo(0, 0);
+        const larguraMundo = palco.width / vista.z;
+        const alturaMundo = palco.height / vista.z;
+
+        ctx.save();
+        ctx.scale(vista.z, vista.z);
+        ctx.translate(-cam.x, -cam.y);
+
+        const centro = paraMundo(palco.width / 2, palco.height / 2);
+        const perto = maisPerto(centro);
+        const [de, ate] = windowAround(etapa.track.main, perto);
+
+        const sorteados = document.getElementById('ver-sorteados').checked ? proceduraisDe(etapa) : [];
+        drawScene(ctx, etapa, cam, larguraMundo, alturaMundo, de, ate, sorteados);
+
+        if (document.getElementById('ver-linha').checked) linhaCentral(de, ate);
+
+        // Os postos à mão vêm por cima, um a um, para poder marcar o selecionado.
+        postos().forEach((p, i) => {
+          const r = bioma().recortes[p.sprite];
+          if (!r) return;
+          desenharPosto(p, r);
+          if (i === selecionado) marcar(p, r);
+        });
+
+        ctx.restore();
+
+        if (pincel) fantasma();
+        document.getElementById('hud-zoom').textContent = vista.z.toFixed(2) + '×';
+      }
+
+      function desenharPosto(p, r, alpha = 1) {
+        const img = folhas.get(bioma().folha);
+        if (!img) return;
+        const w = r.w * PROP_SCALE * p.escala;
+        const h = r.h * PROP_SCALE * p.escala;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.imageSmoothingEnabled = false;
+        ctx.translate(p.x, p.y);
+        if (p.espelhado) ctx.scale(-1, 1);
+        ctx.drawImage(img, r.x, r.y, r.w, r.h, -w / 2, -h, w, h);
+        ctx.restore();
+      }
+
+      /** O selecionado ganha caixa e uma cruz no ponto em que ele toca o chão. */
+      function marcar(p, r) {
+        const w = r.w * PROP_SCALE * p.escala;
+        const h = r.h * PROP_SCALE * p.escala;
+        ctx.save();
+        ctx.strokeStyle = '#ffc14d';
+        ctx.lineWidth = 2 / vista.z;
+        ctx.strokeRect(p.x - w / 2, p.y - h, w, h);
+        ctx.beginPath();
+        ctx.moveTo(p.x - 7 / vista.z, p.y);
+        ctx.lineTo(p.x + 7 / vista.z, p.y);
+        ctx.moveTo(p.x, p.y - 7 / vista.z);
+        ctx.lineTo(p.x, p.y + 7 / vista.z);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function linhaCentral(de, ate) {
+        const c = etapa.track.main.center;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,193,77,0.5)';
+        ctx.lineWidth = 1.5 / vista.z;
+        ctx.setLineDash([8 / vista.z, 8 / vista.z]);
+        ctx.beginPath();
+        ctx.moveTo(c[de].x, c[de].y);
+        for (let i = de + 1; i <= ate; i++) ctx.lineTo(c[i].x, c[i].y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      let ponteiro = { x: 0, y: 0 };
+      function fantasma() {
+        const r = bioma().recortes[pincel];
+        if (!r) return;
+        const p = paraMundo(ponteiro.x, ponteiro.y);
+        ctx.save();
+        ctx.scale(vista.z, vista.z);
+        const cam = paraMundo(0, 0);
+        ctx.translate(-cam.x, -cam.y);
+        desenharPosto({ ...p, escala: 1, espelhado: false }, r, 0.55);
+        ctx.restore();
+      }
+
+      /** O ponto da Linha Central mais perto de um lugar do mundo. Anda de 8 em 8 pontos. */
+      function maisPerto({ x, y }) {
+        const c = etapa.track.main.center;
+        let melhor = 0;
+        let dist = Infinity;
+        for (let i = 0; i < c.length; i += 8) {
+          const d = (c[i].x - x) ** 2 + (c[i].y - y) ** 2;
+          if (d < dist) {
+            dist = d;
+            melhor = i;
+          }
+        }
+        return melhor;
+      }
+
+      // ------------------------------------------------------------- ponteiro
+      let arrasto = null;
+      let passeio = null;
+      let espaco = false;
+
+      palco.addEventListener('pointerdown', (e) => {
+        if (!etapa) return;
+        palco.setPointerCapture(e.pointerId);
+
+        if (e.button === 1 || espaco) {
+          passeio = { x: e.offsetX - vista.x, y: e.offsetY - vista.y };
+          return;
+        }
+
+        const p = paraMundo(e.offsetX, e.offsetY);
+
+        if (pincel) {
+          empilhar();
+          postos().push({ sprite: pincel, x: Math.round(p.x), y: Math.round(p.y), escala: 1, espelhado: false });
+          selecionado = postos().length - 1;
+          if (!e.shiftKey) pincel = null; // shift mantém o pincel para pôr vários
+          return sincronizar();
+        }
+
+        const achado = acharEm(p);
+        if (achado >= 0) {
+          selecionado = achado;
+          empilhar();
+          const q = atual();
+          arrasto = { dx: p.x - q.x, dy: p.y - q.y };
+        } else {
+          selecionado = -1;
+        }
+        sincronizar();
+      });
+
+      palco.addEventListener('pointermove', (e) => {
+        ponteiro = { x: e.offsetX, y: e.offsetY };
+        if (!etapa) return;
+        const p = paraMundo(e.offsetX, e.offsetY);
+        document.getElementById('hud-xy').textContent = `${Math.round(p.x)}, ${Math.round(p.y)}`;
+
+        if (passeio) {
+          vista.x = e.offsetX - passeio.x;
+          vista.y = e.offsetY - passeio.y;
+        } else if (arrasto) {
+          const q = atual();
+          q.x = Math.round(p.x - arrasto.dx);
+          q.y = Math.round(p.y - arrasto.dy);
+          conferirLugar();
+        }
+        redesenhar();
+      });
+
+      palco.addEventListener('pointerup', () => {
+        if (arrasto) sincronizar();
+        arrasto = null;
+        passeio = null;
+      });
+
+      palco.addEventListener(
+        'wheel',
+        (e) => {
+          e.preventDefault();
+          const antes = paraMundo(e.offsetX, e.offsetY);
+          vista.z = Math.min(4, Math.max(0.08, vista.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+          const depois = paraMundo(e.offsetX, e.offsetY);
+          vista.x += (depois.x - antes.x) * vista.z;
+          vista.y += (depois.y - antes.y) * vista.z;
+          redesenhar();
+        },
+        { passive: false },
+      );
+
+      /** De trás para a frente: quem está por cima na tela é quem o clique pega. */
+      function acharEm(p) {
+        const lista = postos();
+        for (let i = lista.length - 1; i >= 0; i--) {
+          const q = lista[i];
+          const r = bioma().recortes[q.sprite];
+          if (!r) continue;
+          const w = r.w * PROP_SCALE * q.escala;
+          const h = r.h * PROP_SCALE * q.escala;
+          if (p.x >= q.x - w / 2 && p.x <= q.x + w / 2 && p.y >= q.y - h && p.y <= q.y) return i;
+        }
+        return -1;
+      }
+
+      /**
+       * Cenário nunca é obstáculo — mas um objeto em cima da Pista se lê como um, e o
+       * jogador vai desviar de algo que não o mataria. O sorteio evita a Pista sozinho;
+       * quem põe à mão decide, e por isso é avisado em vez de impedido.
+       */
+      function conferirLugar() {
+        const q = atual();
+        const av = document.getElementById('aviso');
+        if (!q) return (av.textContent = '');
+        const c = etapa.track.main.center;
+        const i = maisPerto(q);
+        const d = Math.hypot(c[i].x - q.x, c[i].y - q.y);
+        av.textContent =
+          d < etapa.track.width / 2
+            ? 'está por cima da pista — não é obstáculo, mas o jogador vai desviar dele'
+            : '';
+      }
+
+      // --------------------------------------------------------------- painel
+      function paleta() {
+        const b = bioma();
+        const img = folhas.get(b.folha);
+        const div = document.getElementById('paleta');
+        // O chão e o leito são padrões ladrilhados, não objetos: não se põe um deles na
+        // beira da pista, e tê-los aqui só daria para errar.
+        div.innerHTML = Object.keys(b.recortes)
+          .filter((n) => n !== b.chao && n !== b.leito)
+          .map((n) => `<figure data-sprite="${n}"><canvas></canvas><figcaption>${n}</figcaption></figure>`)
+          .join('');
+
+        for (const fig of div.querySelectorAll('figure')) {
+          const nome = fig.dataset.sprite;
+          const r = b.recortes[nome];
+          const c = fig.querySelector('canvas');
+          c.width = c.clientWidth * 2;
+          c.height = c.clientHeight * 2;
+          const cc = c.getContext('2d');
+          cc.imageSmoothingEnabled = false;
+          if (img) {
+            const esc = Math.min(c.width / r.w, c.height / r.h) * 0.9;
+            cc.drawImage(img, r.x, r.y, r.w, r.h, (c.width - r.w * esc) / 2, (c.height - r.h * esc) / 2, r.w * esc, r.h * esc);
+          }
+          fig.onclick = () => {
+            pincel = pincel === nome ? null : nome;
+            sincronizar();
+          };
+        }
+      }
+
+      function sincronizar() {
+        if (!etapa) return;
+        const q = atual();
+        document.getElementById('sel-vazio').hidden = !!q;
+        document.getElementById('sel-campos').hidden = !q;
+        if (q) {
+          document.getElementById('sel-nome').textContent = q.sprite;
+          document.getElementById('escala').value = q.escala;
+          conferirLugar();
+        }
+
+        document.getElementById('conta').textContent = postos().length;
+        document.getElementById('lista').innerHTML =
+          postos()
+            .map((p, i) => {
+              const t = Math.round((maisPerto(p) / (etapa.track.main.center.length - 1)) * 100);
+              return `<li data-i="${i}" class="${i === selecionado ? 'sel' : ''}">
+                <span class="nome">${p.sprite}</span><span class="onde">${t}%</span></li>`;
+            })
+            .join('') || '<li class="vazio">nada posto nesta etapa</li>';
+
+        for (const li of document.querySelectorAll('li[data-i]')) {
+          li.onclick = () => {
+            selecionado = Number(li.dataset.i);
+            const p = atual();
+            vista.x = palco.width / 2 - p.x * vista.z;
+            vista.y = palco.height / 2 - p.y * vista.z;
+            sincronizar();
+          };
+        }
+
+        for (const fig of document.querySelectorAll('.paleta figure')) {
+          fig.classList.toggle('on', fig.dataset.sprite === pincel);
+        }
+        document.getElementById('hud-pincel').innerHTML = pincel
+          ? `pincel <b>${pincel}</b> — clique na pista`
+          : '';
+
+        redesenhar();
+      }
+
+      // ---------------------------------------------------------- desfazer
+      function empilhar() {
+        historico.push(JSON.stringify(etapas));
+        if (historico.length > 80) historico.shift();
+      }
+
+      function desfazer() {
+        const anterior = historico.pop();
+        if (!anterior) return aviso('nada para desfazer', true);
+        etapas = JSON.parse(anterior);
+        if (selecionado >= postos().length) selecionado = -1;
+        document.getElementById('sem-sorteio').checked = !!etapas[etapa.id]?.semSorteio;
+        sincronizar();
+      }
+
+      let tempo;
+      function aviso(texto, erro = false) {
+        const t = document.getElementById('toast');
+        t.textContent = texto;
+        t.className = 'toast on' + (erro ? ' erro' : '');
+        clearTimeout(tempo);
+        tempo = setTimeout(() => (t.className = 'toast'), 3200);
+      }
+
+      // -------------------------------------------------------------- ligações
+      document.getElementById('bioma').onchange = (e) => {
+        biomeIndex = Number(e.target.value);
+        trocarEtapa();
+      };
+      document.getElementById('volta').onchange = (e) => {
+        lap = Number(e.target.value);
+        trocarEtapa();
+      };
+      document.getElementById('salvar').onclick = salvar;
+      document.getElementById('sem-sorteio').onchange = (e) => {
+        empilhar();
+        daEtapa().semSorteio = e.target.checked;
+        sincronizar();
+      };
+      document.getElementById('posicao').oninput = (e) => {
+        irPara(Number(e.target.value) / 1000);
+        redesenhar();
+      };
+      document.getElementById('ir-largada').onclick = () => (irPara(0), redesenhar());
+      document.getElementById('ir-chegada').onclick = () => (irPara(1), redesenhar());
+      document.getElementById('ver-sorteados').onchange = redesenhar;
+      document.getElementById('ver-linha').onchange = redesenhar;
+      document.getElementById('apagar').onclick = () => {
+        if (!atual()) return;
+        empilhar();
+        postos().splice(selecionado, 1);
+        selecionado = -1;
+        sincronizar();
+      };
+      document.getElementById('espelhar').onclick = () => {
+        if (!atual()) return;
+        empilhar();
+        atual().espelhado = !atual().espelhado;
+        sincronizar();
+      };
+      document.getElementById('escala').onchange = (e) => {
+        if (!atual()) return;
+        empilhar();
+        atual().escala = Math.max(0.1, numero(e.target, 1));
+        sincronizar();
+      };
+
+      /** Campo numérico com vírgula decimal devolve vazio; sem isto a escala volta a 1. */
+      function numero(campo, padrao) {
+        if (Number.isFinite(campo.valueAsNumber)) return campo.valueAsNumber;
+        const n = Number(String(campo.value).replace(',', '.'));
+        return Number.isFinite(n) ? n : padrao;
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.code === 'Space') espaco = true;
+        if (e.ctrlKey && e.key.toLowerCase() === 'z') return (e.preventDefault(), desfazer());
+        if (e.ctrlKey && e.key.toLowerCase() === 's') return (e.preventDefault(), salvar());
+        if (e.key === 'Escape') return ((pincel = null), sincronizar());
+        if (e.key === 'Home') return (irPara(0), redesenhar());
+        if (e.key === 'End') return (irPara(1), redesenhar());
+
+        const q = atual();
+        if (!q) return;
+
+        const passo = e.altKey ? 10 : 1;
+        const eixo = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        if (eixo) {
+          e.preventDefault();
+          empilhar();
+          q.x += eixo[0] * passo;
+          q.y += eixo[1] * passo;
+          return sincronizar();
+        }
+
+        if (e.key === 'Delete') document.getElementById('apagar').click();
+        if (e.key.toLowerCase() === 'f') document.getElementById('espelhar').click();
+        if (e.key === '+' || e.key === '=') {
+          empilhar();
+          q.escala = Math.round((q.escala + 0.1) * 100) / 100;
+          sincronizar();
+        }
+        if (e.key === '-') {
+          empilhar();
+          q.escala = Math.max(0.1, Math.round((q.escala - 0.1) * 100) / 100);
+          sincronizar();
+        }
+      });
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') espaco = false;
+      });
+      window.addEventListener('resize', redesenhar);
+
+      redesenhar();
+      carregar().catch((err) =>
+        aviso('sem o servidor de desenvolvimento: rode `npm run editor`. ' + err.message, true),
+      );
+    </script>
+  </body>
+</html>

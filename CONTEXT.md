@@ -151,6 +151,17 @@ lá a Derrapagem é a Etapa, não um lugar dela.
 A peça de que a **Linha Central** é montada: reta, curva suave, curva fechada, chicane. O catálogo
 de Segmentos e seus pesos vêm do **Bioma**, ajustados pela **Escalada**.
 
+## Cenário (Scenery)
+
+O que se vê de uma **Etapa** além da **Pista**: o chão, a textura do leito, os pórticos de largada e
+chegada, os objetos da beira e quem assiste. É decoração — nenhum objeto de Cenário é **Barreira**
+nem **Borda**, e tocá-lo não é **Batida**.
+
+Vem de dois lugares que se somam. O **sorteio** enche os 23 mil pixels de Pista a partir da
+**Semente**, sem ninguém ter de encostar neles, e desvia da Pista sozinho. O que é **posto à mão**
+no editor de pista vai onde quem põe quiser — inclusive por cima da Pista, já que Cenário não é
+obstáculo. Uma Etapa pode dispensar o sorteio e ficar só com o que foi posto; não existe meio termo.
+
 ## Linha Central (Centerline)
 
 A curva que define o traçado da **Pista**. A Pista é a região a até meia-largura de distância dela.

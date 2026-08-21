@@ -1,6 +1,7 @@
 import desertSheet from '../assets/world/deserto.png';
 import iceForestSheet from '../assets/world/gelo-floresta.png';
 import cenario from './cenario.json';
+import etapas from './cenario-etapas.json';
 import { normalAt, type Vec } from './path';
 import { createRng, seedFromStageId } from './rng';
 import type { Stage } from './stage';
@@ -14,6 +15,12 @@ import type { Stage } from './stage';
  * Os recortes não moram aqui: moram em `cenario.json`, que é o que o editor de sprites
  * (`tools/sprites.html`) lê e grava. Medir recorte de sprite na mão, contando pixel em
  * código, é o tipo de coisa que se faz olhando — e olhando é no editor.
+ *
+ * Os objetos de uma Etapa vêm de dois lugares que se somam: o sorteio, que enche os 23
+ * mil pixels de Pista sem ninguém ter de encostar neles, e o que foi **posto à mão** no
+ * editor de pista (`tools/pista.html`), guardado em `cenario-etapas.json`. Uma Etapa pode
+ * dispensar o sorteio e ficar só com o que foi posto — mas não ao contrário: não existe
+ * "quase à mão".
  */
 
 /** Um recorte da folha de sprites, em pixels da imagem. */
@@ -177,14 +184,53 @@ export function trackFill(ctx: CanvasRenderingContext2D, biomeId: string): Canva
 
 const byStage = new Map<string, Prop[]>();
 
-/** Os objetos de uma Etapa. Saem da mesma Semente: a Etapa é sempre igual a si mesma. */
+/** O que foi posto à mão numa Etapa, no formato do arquivo. */
+interface PostoAMao {
+  sprite: string;
+  x: number;
+  y: number;
+  escala: number;
+  espelhado: boolean;
+}
+
+interface EtapaAMao {
+  /** Dispensa o sorteio: a Etapa fica só com o que foi posto à mão. */
+  semSorteio?: boolean;
+  postos: PostoAMao[];
+}
+
+const A_MAO = etapas as Record<string, EtapaAMao>;
+
+/**
+ * Os objetos de uma Etapa: o que o sorteio pôs mais o que foi posto à mão. Os sorteados
+ * saem da mesma Semente, então a Etapa é sempre igual a si mesma.
+ *
+ * O que é posto à mão não desvia da Pista como o sorteio desvia — quem põe está vendo
+ * onde põe. E continua sem ser obstáculo: a única condição de Batida é a Borda da Pista.
+ */
 export function sceneryOf(stage: Stage): Prop[] {
   const cached = byStage.get(stage.id);
   if (cached) return cached;
 
-  const props = buildProps(stage);
+  const props = [...proceduraisDe(stage), ...postosDe(stage)];
   byStage.set(stage.id, props);
   return props;
+}
+
+/** Só os sorteados. Separado porque o editor de pista precisa distinguir os dois. */
+export function proceduraisDe(stage: Stage): Prop[] {
+  return A_MAO[stage.id]?.semSorteio ? [] : buildProps(stage);
+}
+
+/** Só os postos à mão. */
+export function postosDe(stage: Stage): Prop[] {
+  return (A_MAO[stage.id]?.postos ?? []).map((p) => ({
+    sprite: p.sprite,
+    x: p.x,
+    y: p.y,
+    scale: PROP_SCALE * p.escala,
+    flip: p.espelhado,
+  }));
 }
 
 function buildProps(stage: Stage): Prop[] {

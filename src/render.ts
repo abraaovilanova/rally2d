@@ -5,8 +5,9 @@ import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
 import { formatTime } from './records';
 import { isOffRoute } from './route';
-import { drawGates, drawGround, drawProps, hasScenery, sceneryOf, trackFill } from './scenery';
+import { drawGates, drawGround, drawProps, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
 import { puddlesOf, type Puddle } from './surface';
+import type { Stage } from './stage';
 import type { Track } from './track';
 import { TUNING } from './tuning';
 
@@ -36,21 +37,8 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.save();
   ctx.translate(-cam.x, -cam.y);
 
-  const biomeId = game.stage.biome.id;
-  const scenery = hasScenery(biomeId);
-  if (scenery) drawGround(ctx, biomeId, cam, canvas.width, canvas.height, palette.background);
-
-  const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
-
   const [from, to] = windowAround(track.main, mainIndex);
-  drawPathWindow(ctx, track.main, from, to, surface, palette.edge);
-  drawBranches(ctx, game, from, to, surface);
-  // Sobre o leito e debaixo de tudo o mais: a Poça é chão, não objeto.
-  drawPuddles(ctx, game, cam, canvas.width, canvas.height);
-  if (scenery) {
-    drawGates(ctx, game.stage);
-    drawProps(ctx, biomeId, sceneryOf(game.stage), cam, canvas.width, canvas.height);
-  }
+  drawScene(ctx, game.stage, cam, canvas.width, canvas.height, from, to);
   drawForkSigns(ctx, game, from, to);
   drawNoteMarkers(ctx, game);
   drawFinishLine(ctx, track.main, palette.edge);
@@ -63,7 +51,41 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   drawHud(ctx, game);
 }
 
-function windowAround(path: Path, index: number): [number, number] {
+/**
+ * O mundo de uma Etapa, sem nada da Corrida: chão, Pista, Rotas, Poças, pórticos e
+ * objetos. Está separado porque o editor de pista (`tools/pista.html`) desenha a mesma
+ * coisa — e um editor que mostra algo diferente do jogo não serve para posicionar nada.
+ */
+export function drawScene(
+  ctx: CanvasRenderingContext2D,
+  stage: Stage,
+  cam: Vec,
+  width: number,
+  height: number,
+  from: number,
+  to: number,
+  props: readonly Prop[] = sceneryOf(stage),
+): void {
+  const palette = stage.biome.palette;
+  const biomeId = stage.biome.id;
+  const scenery = hasScenery(biomeId);
+
+  if (scenery) drawGround(ctx, biomeId, cam, width, height, palette.background);
+
+  const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
+
+  drawPathWindow(ctx, stage.track.main, from, to, surface, palette.edge);
+  drawBranches(ctx, stage, from, to, surface);
+  // Sobre o leito e debaixo de tudo o mais: a Poça é chão, não objeto.
+  drawPuddles(ctx, stage, cam, width, height);
+
+  if (scenery) {
+    drawGates(ctx, stage);
+    drawProps(ctx, biomeId, props, cam, width, height);
+  }
+}
+
+export function windowAround(path: Path, index: number): [number, number] {
   return [Math.max(0, index - 200), Math.min(path.center.length - 1, index + 600)];
 }
 
@@ -101,12 +123,12 @@ function drawPathWindow(
  */
 function drawBranches(
   ctx: CanvasRenderingContext2D,
-  game: Game,
+  stage: Stage,
   from: number,
   to: number,
   surface: string | CanvasPattern,
 ): void {
-  const { track, biome } = game.stage;
+  const { track, biome } = stage;
 
   for (const branch of track.branches) {
     const end = branch.rejoinIndex ?? branch.forkIndex + branch.path.center.length;
@@ -201,12 +223,12 @@ function roundedRect(
  */
 function drawPuddles(
   ctx: CanvasRenderingContext2D,
-  game: Game,
+  stage: Stage,
   cam: Vec,
   width: number,
   height: number,
 ): void {
-  const puddles = puddlesOf(game.stage);
+  const puddles = puddlesOf(stage);
   if (puddles.length === 0) return;
 
   for (const puddle of puddles) {
