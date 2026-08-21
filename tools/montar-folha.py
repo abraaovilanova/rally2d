@@ -25,6 +25,12 @@ CENARIO = RAIZ / 'src' / 'cenario.json'
 # próximo pode puxar uma linha do vizinho para dentro do sprite ao desenhar.
 FOLGA = 2
 
+# As chaves que este script é dono e reescreve por inteiro. Todo o resto do Bioma passa.
+PAPEIS_DE_OBJETO = {
+    'folha', 'escala', 'chao', 'leito', 'largada', 'chegada',
+    'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes',
+}
+
 
 def cortar(img: Image.Image) -> Image.Image:
     """Ao que não é transparente. É o "ajustar ao conteúdo" do editor, feito na origem."""
@@ -115,7 +121,10 @@ def main() -> int:
 
     antigo = cenario['biomas'].get(bioma, {})
     beira = papeis.get('beira', [])
+    # O que não é papel de objeto — o tileset do Terreno, por exemplo — sobrevive: quem
+    # escreveu aquilo foi outro script, e este aqui não sabe nada sobre ele.
     cenario['biomas'][bioma] = {
+        **{k: v for k, v in antigo.items() if k not in PAPEIS_DE_OBJETO},
         'folha': nome_folha,
         'escala': manifesto['escala'],
         # O leito e o terreno viram um recorte só cada; a variação entre eles é do jogo.

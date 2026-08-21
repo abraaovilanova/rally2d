@@ -5,7 +5,7 @@ import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
 import { formatTime } from './records';
 import { isOffRoute } from './route';
-import { drawGates, drawGround, drawProps, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
+import { drawGates, drawGround, drawProps, drawTerreno, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
 import { puddlesOf, type Puddle } from './surface';
 import type { Stage } from './stage';
 import type { Track } from './track';
@@ -70,7 +70,11 @@ export function drawScene(
   const biomeId = stage.biome.id;
   const scenery = hasScenery(biomeId);
 
-  if (scenery) drawGround(ctx, biomeId, cam, width, height, palette.background);
+  // O Terreno quando o Bioma já tem tileset; o ladrilho único é o que sobrou para os
+  // Biomas ainda não refeitos.
+  if (!drawTerreno(ctx, stage, cam, width, height) && scenery) {
+    drawGround(ctx, biomeId, cam, width, height, palette.background);
+  }
 
   const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
 

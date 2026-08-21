@@ -1,7 +1,9 @@
 import desertSheet from '../assets/world/deserto.png';
+import desertTerrainSheet from '../assets/world/deserto-terreno.png';
 import desertV2Sheet from '../assets/world/deserto-v2.png';
 import iceForestSheet from '../assets/world/gelo-floresta.png';
 import cenario from './cenario.json';
+import { CELULA, ladrilhoDaCelula } from './terreno';
 import etapas from './cenario-etapas.json';
 import { normalAt, type Vec } from './path';
 import { createRng, seedFromStageId } from './rng';
@@ -53,6 +55,8 @@ interface Scenery {
   crowd: string;
   /** Tamanho na tela = pixels do sprite × isto. */
   propScale: number;
+  /** O tileset de canto do chão, quando o Bioma já tem um. */
+  terreno: { sheet: Sheet; tile: number; pares: number } | null;
   /**
    * Os recortes que ficam deitados no chão — marca de pneu, rachadura, mancha. Não são
    * painéis em pé, então não têm o que projetar: dar sombra a eles é a sombra flutuar.
@@ -74,6 +78,7 @@ const SHEETS: Record<string, Sheet> = {
   // O Deserto refeito. O chão e o leito ainda são os antigos, recortados para dentro
   // dela: os ladrilhos novos são os últimos da fila.
   'deserto-v2': { src: desertV2Sheet, image: new Image() },
+  'deserto-terreno': { src: desertTerrainSheet, image: new Image() },
 };
 
 /** A escala da arte antiga, calibrada à mão contra a largura da Pista. */
@@ -121,6 +126,14 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       // Bioma antigo for refeito.
       propScale: 'escala' in b ? (b.escala as number) : PROP_SCALE_ANTIGA,
       rasteiros: 'rasteiros' in b ? (b.rasteiros as string[]) : [],
+      terreno:
+        'terreno' in b
+          ? {
+              sheet: SHEETS[(b.terreno as { folha: string }).folha],
+              tile: (b.terreno as { tile: number }).tile,
+              pares: (b.terreno as { pares: number }).pares,
+            }
+          : null,
       quadros: agruparQuadros(Object.keys(b.recortes)),
     },
   ]),
@@ -198,6 +211,53 @@ function patternOf(
   const pattern = ctx.createPattern(tile, 'repeat');
   patterns.set(key, pattern);
   return pattern;
+}
+
+/**
+ * O Terreno: o chão desenhado célula a célula, com a transição entre tipos de chão vinda
+ * do tileset de canto. Substitui o ladrilho único onde o Bioma já tem tileset.
+ *
+ * Cada célula é resolvida na hora a partir da Semente — não há mapa guardado. O custo é
+ * um `drawImage` por célula visível, algumas centenas por quadro, o que é barato perto de
+ * guardar um mapa de uma Pista de vinte e três mil pixels.
+ */
+export function drawTerreno(
+  ctx: CanvasRenderingContext2D,
+  stage: Stage,
+  cam: Vec,
+  width: number,
+  height: number,
+): boolean {
+  const scenery = SCENERY[stage.biome.id];
+  const terreno = scenery?.terreno;
+  if (!terreno || !terreno.sheet.image.complete || terreno.sheet.image.naturalWidth === 0) {
+    return false;
+  }
+
+  const t = terreno.tile;
+  const de = { x: Math.floor(cam.x / CELULA), y: Math.floor(cam.y / CELULA) };
+  const ate = { x: Math.ceil((cam.x + width) / CELULA), y: Math.ceil((cam.y + height) / CELULA) };
+
+  ctx.imageSmoothingEnabled = false;
+
+  for (let cy = de.y; cy <= ate.y; cy++) {
+    for (let cx = de.x; cx <= ate.x; cx++) {
+      const { par, forma } = ladrilhoDaCelula(stage, cx, cy);
+      ctx.drawImage(
+        terreno.sheet.image,
+        (forma % 4) * t,
+        (par * 4 + Math.floor(forma / 4)) * t,
+        t,
+        t,
+        cx * CELULA,
+        cy * CELULA,
+        CELULA,
+        CELULA,
+      );
+    }
+  }
+
+  return true;
 }
 
 /** O chão do Bioma, já em coordenadas de mundo (chamar dentro do translate da câmera). */
