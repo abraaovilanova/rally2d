@@ -15,6 +15,12 @@ import { TUNING } from './tuning';
 
 /** Cores de uma Rota Alternativa depois que ela se revela pior que a Pista. */
 const OFF_ROUTE_FILL = 'rgba(0, 0, 0, 0.45)';
+/** Placa de organizador: condensada, caixa alta, pequena. */
+const PLACA = '600 13px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
+
+/** Número cronometrado: monoespaçado, para o dígito não dançar enquanto conta. */
+const NUMERO = (px: number) => `${px}px "Share Tech Mono", ui-monospace, monospace`;
+
 const OFF_ROUTE_EDGE = '#6a6a72';
 
 /** Canto superior esquerdo da câmera, em coordenadas de mundo. */
@@ -514,7 +520,7 @@ function drawCarPicker(ctx: CanvasRenderingContext2D, game: Game): void {
     }
 
     ctx.fillStyle = game.stage.biome.palette.text;
-    ctx.font = '500 11px system-ui, sans-serif';
+    ctx.font = '600 11px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
     ctx.globalAlpha = chosen ? 0.9 : 0.35;
     ctx.fillText(String(i + 1), cx + size / 2 - 3, y + size + 4);
   });
@@ -622,11 +628,11 @@ function drawPaceNotes(ctx: CanvasRenderingContext2D, game: Game): void {
     ctx.restore();
 
     ctx.fillStyle = color;
-    ctx.font = '700 46px system-ui, sans-serif';
+    ctx.font = '46px "Share Tech Mono", ui-monospace, monospace';
     ctx.fillText(String(note.severity), 0, 0);
 
     ctx.fillStyle = game.stage.biome.palette.text;
-    ctx.font = '500 15px system-ui, sans-serif';
+    ctx.font = '15px "Share Tech Mono", ui-monospace, monospace';
     ctx.fillText(
       inside
         ? note.long
@@ -655,13 +661,13 @@ function metresTo(distance: number): number {
 function drawSpeedometer(ctx: CanvasRenderingContext2D, game: Game): void {
   const throttle = throttleOf(game.car, categoryOf(game));
   const kmh = Math.round((game.car.speed / TUNING.pixelsPerMeter) * 3.6);
-  const x = 24;
-  const y = 96;
-  const w = 190;
-  const h = 8;
+  const x = 36;
+  const y = 84;
+  const w = 178;
+  const h = 6;
 
   ctx.fillStyle = game.stage.biome.palette.text;
-  ctx.globalAlpha = 0.15;
+  ctx.globalAlpha = 0.16;
   ctx.fillRect(x, y, w, h);
   ctx.globalAlpha = 1;
 
@@ -671,16 +677,16 @@ function drawSpeedometer(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.fillRect(x, y, w * throttle, h);
 
   ctx.fillStyle = game.stage.biome.palette.text;
-  ctx.font = '600 15px system-ui, sans-serif';
-  ctx.globalAlpha = 0.8;
-  ctx.fillText(`${kmh} km/h`, x, y + 16);
+  ctx.font = NUMERO(22);
+  ctx.fillText(String(kmh), x, y + 12);
+  const largura = ctx.measureText(String(kmh)).width;
+
+  ctx.font = PLACA;
+  ctx.globalAlpha = 0.6;
+  ctx.fillText('KM/H', x + largura + 6, y + 20);
   ctx.globalAlpha = 1;
 }
 
-/**
- * O aviso de rota errada. O asfalto escurecendo é o sinal que se lê sem tirar os olhos
- * da estrada; este texto é a garantia de que ninguém passe segundos sem entender.
- */
 function drawOffRouteWarning(ctx: CanvasRenderingContext2D, game: Game): void {
   if (game.phase !== 'running') return;
   if (!isOffRoute(game.stage.track, game.route, TUNING.routeRevealAt)) return;
@@ -691,35 +697,47 @@ function drawOffRouteWarning(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#ff6b6b';
   ctx.globalAlpha = pulse;
-  ctx.font = '700 30px system-ui, sans-serif';
+  ctx.font = '700 32px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.fillText('FORA DA ROTA', ctx.canvas.width / 2, 28);
   ctx.globalAlpha = 1;
 }
 
+/**
+ * O HUD, no vocabulário do rali: o cronômetro do carnê de tempos e a placa da prova.
+ *
+ * A hierarquia é a de quem está correndo — o tempo é a única coisa que importa e é a
+ * única grande; o resto é ficha, e ficha se lê em caixa alta condensada, pequena.
+ */
 function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   const palette = game.stage.biome.palette;
   const best = game.bestTime === null ? '—' : formatTime(game.bestTime);
+  const x = 24;
 
   // Uma sombra atrás de tudo o que é HUD. O chão deixou de ser uma cor tingida e virou
   // arte: na neve ele é quase branco, e texto claro sobre ele sumia por completo. A
   // sombra resolve para qualquer chão, presente ou futuro, sem escurecer a arte.
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-  ctx.shadowBlur = 6;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+  ctx.shadowBlur = 7;
   ctx.shadowOffsetY = 1;
-
-  ctx.fillStyle = palette.text;
-  ctx.font = '600 34px system-ui, sans-serif';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillText(formatTime(game.elapsed), 24, 20);
 
-  ctx.font = '400 15px system-ui, sans-serif';
-  ctx.globalAlpha = 0.65;
+  // A régua âmbar à esquerda do cronômetro: é a marca do carnê, e é o que separa o tempo
+  // do mundo desenhado atrás dele.
+  ctx.fillStyle = palette.edge;
+  ctx.fillRect(x, 22, 3, 32);
+
+  ctx.fillStyle = palette.text;
+  ctx.font = NUMERO(38);
+  ctx.fillText(formatTime(game.elapsed), x + 12, 18);
+
+  ctx.font = PLACA;
+  ctx.globalAlpha = 0.78;
   ctx.fillText(
-    `${game.stage.biome.name}  ·  volta ${game.stage.lap + 1}  ·  cat. ${game.category}  ·  melhor ${best}  ·  tentativa ${game.attempts}`,
-    24,
-    62,
+    `PE ${game.stage.lap + 1} · ${game.stage.biome.name.toUpperCase()} · CAT. ${game.category} · MELHOR ${best} · TENTATIVA ${game.attempts}`,
+    x + 12,
+    60,
   );
   ctx.globalAlpha = 1;
 
@@ -745,7 +763,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
 
   ctx.textAlign = 'center';
   ctx.fillStyle = crashed ? '#ff6b6b' : palette.edge;
-  ctx.font = '700 56px system-ui, sans-serif';
+  ctx.font = '700 60px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.fillText(
     crashed ? (game.hitBarrier ? 'SEM SAÍDA' : 'BATIDA') : 'CHEGADA',
     ctx.canvas.width / 2,
@@ -753,21 +771,21 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   );
 
   ctx.fillStyle = palette.text;
-  ctx.font = '400 22px system-ui, sans-serif';
+  ctx.font = '20px "Share Tech Mono", ui-monospace, monospace';
   const line = crashed
     ? `sem tempo  ·  ${Math.round(done * 100)}% da pista  ·  tentativa ${game.attempts}`
     : `${formatTime(game.elapsed)}${game.newRecord ? '  ·  NOVO RECORDE' : `  ·  melhor ${best}`}`;
   ctx.fillText(line, ctx.canvas.width / 2, ctx.canvas.height / 2 - 10);
 
   ctx.globalAlpha = 0.6;
-  ctx.font = '400 17px system-ui, sans-serif';
+  ctx.font = '600 16px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.fillText(
     'clique ou R para tentar de novo',
     ctx.canvas.width / 2,
     ctx.canvas.height / 2 + 40,
   );
 
-  ctx.font = '400 13px system-ui, sans-serif';
+  ctx.font = '600 13px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.globalAlpha = 0.3;
   ctx.fillText(
     'G volta ao grid (trocar de categoria)  ·  Esc reinicia a progressão',

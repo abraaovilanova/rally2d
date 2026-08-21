@@ -17,8 +17,12 @@ export function askMode(): Promise<Mode> {
   return new Promise((resolve) => {
     show(`
       <div class="panel">
+        <div class="cabecalho">
+          <span class="eyebrow">Campeonato mundial de rali</span>
+          <span class="eyebrow">Inscrição</span>
+        </div>
         <h1>Rally 2D</h1>
-        <p class="lede">Campeonato mundial. Mesma pista, mesmo carro, o tempo é o que varia.</p>
+        <p class="lede">Mesma pista, mesmo carro, o tempo é o que varia.</p>
         <div class="modes">
           <button data-mode="online">
             <strong>Jogar online</strong>
@@ -67,29 +71,38 @@ function drawGrid(game: Game): void {
   const stage = game.stage;
   const best = game.bestTime === null ? '—' : formatTime(game.bestTime);
 
+  // "PE" é como o rali chama uma prova especial. O Grid é o controle de largada dela.
   show(`
     <div class="panel">
-      <p class="eyebrow">${stage.biome.name} · volta ${stage.lap + 1}${surfaceHint(game)}</p>
-      <h1>Grid</h1>
-      <p class="lede">Escolha a etapa e o carro. Seu melhor aqui na categoria ${game.category}: <b>${best}</b></p>
+      <div class="cabecalho">
+        <span class="eyebrow">PE ${stage.lap + 1} · ${stage.biome.name}${surfaceHint(game)}</span>
+        <span class="eyebrow">Controle de largada</span>
+      </div>
 
+      <h1>Grid</h1>
+      <p class="lede">Escolha a prova e o carro. Seu melhor aqui na categoria ${game.category}: <b>${best}</b></p>
+
+      <p class="eyebrow">Prova especial</p>
       <div class="stages">${stagePicker(game)}</div>
 
+      <p class="eyebrow">Categoria</p>
       <div class="cards">${CATEGORY_IDS.map((id) => card(id, game.category)).join('')}</div>
 
       ${
         game.mode === 'online'
-          ? `<p class="eyebrow board-title">ranking · ${stage.biome.name} volta ${stage.lap + 1} · categoria ${game.category}</p>`
+          ? `<p class="eyebrow board-title">Resultados · ${stage.biome.name} PE ${stage.lap + 1} · categoria ${game.category}</p>`
           : ''
       }
       <div class="board" data-board>${game.mode === 'online' ? 'carregando ranking…' : ''}</div>
 
       <button class="go" data-go>Largar</button>
-      <p class="foot">
-        <span data-toggle-mode class="link">${
-          game.mode === 'online' ? 'jogando online — mudar para offline' : 'jogando offline — mudar para online'
-        }</span>
-      </p>
+      <div class="rodape">
+        <p class="foot">
+          <span data-toggle-mode class="link">${
+            game.mode === 'online' ? 'jogando online — mudar para offline' : 'jogando offline — mudar para online'
+          }</span>
+        </p>
+      </div>
     </div>
   `);
 
@@ -130,7 +143,7 @@ function stagePicker(game: Game): string {
       return `<span class="lap ${chosen ? 'chosen' : ''}" data-stage data-biome="${biomeIndex}" data-lap="${lap}">${lap + 1}</span>`;
     }).join('');
 
-    return `<div class="stage"><b style="color:${biome.palette.edge}">${biome.name}</b><span class="laps">${laps}</span></div>`;
+    return `<div class="stage"><span style="color:${biome.palette.edge}">${biome.name}</span><span class="laps">${laps}</span></div>`;
   }).join('');
 }
 
@@ -182,13 +195,20 @@ function drawFinish(game: Game): void {
 
   show(`
     <div class="panel">
-      <p class="eyebrow">${game.stage.biome.name} · volta ${game.stage.lap + 1} · categoria ${game.category}</p>
+      <div class="cabecalho">
+        <span class="eyebrow">PE ${game.stage.lap + 1} · ${game.stage.biome.name} · categoria ${game.category}</span>
+        <span class="eyebrow">Chegada</span>
+      </div>
+
+      <p class="eyebrow" style="margin-top:22px">Tempo da prova</p>
       <h1 class="finish">${time}</h1>
       <p class="lede">${record}</p>
       <div class="board" data-board>${game.mode === 'offline' ? 'offline: este tempo não sobe para o ranking.' : 'enviando…'}</div>
       <div data-name></div>
-      <button class="go" data-next>Seguir para a próxima etapa</button>
-      <p class="foot"><span class="link" data-grid>voltar ao grid</span></p>
+      <button class="go" data-next>Seguir para a próxima prova</button>
+      <div class="rodape">
+        <p class="foot"><span class="link" data-grid>voltar ao grid</span></p>
+      </div>
     </div>
   `);
 
@@ -259,7 +279,7 @@ function renderBoard(board: Board | null, category: CategoryId): string {
     .join('');
 
   return `<table><tbody>${rows}</tbody></table>
-    <p class="total">${board.total} ${board.total === 1 ? 'volta registrada' : 'voltas registradas'}</p>`;
+    <p class="total">${board.total} ${board.total === 1 ? 'passagem registrada' : 'passagens registradas'}</p>`;
 }
 
 /** O Nome vem de outro jogador e vai para dentro de HTML. */
