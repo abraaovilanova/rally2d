@@ -1,8 +1,9 @@
 import { CATEGORIES, CATEGORY_IDS, minTurnRadius, type CategoryId } from './category';
-import { advance, openGrid, setCategory, setMode, startRace, type Game } from './game';
+import { advance, openGrid, selectStage, setCategory, setMode, startRace, type Game } from './game';
 import { readBoard, submitTime, type Board } from './leaderboard';
 import { readName, saveName, type Mode } from './player';
 import { formatTime } from './records';
+import { BIOMES, SELECTABLE_LAPS } from './stage';
 import { TUNING } from './tuning';
 
 const root = document.querySelector<HTMLDivElement>('#ui')!;
@@ -70,10 +71,17 @@ function drawGrid(game: Game): void {
     <div class="panel">
       <p class="eyebrow">${stage.biome.name} · volta ${stage.lap + 1}</p>
       <h1>Grid</h1>
-      <p class="lede">Escolha o carro. Seu melhor nesta etapa na categoria ${game.category}: <b>${best}</b></p>
+      <p class="lede">Escolha a etapa e o carro. Seu melhor aqui na categoria ${game.category}: <b>${best}</b></p>
+
+      <div class="stages">${stagePicker(game)}</div>
 
       <div class="cards">${CATEGORY_IDS.map((id) => card(id, game.category)).join('')}</div>
 
+      ${
+        game.mode === 'online'
+          ? `<p class="eyebrow board-title">ranking · ${stage.biome.name} volta ${stage.lap + 1} · categoria ${game.category}</p>`
+          : ''
+      }
       <div class="board" data-board>${game.mode === 'online' ? 'carregando ranking…' : ''}</div>
 
       <button class="go" data-go>Largar</button>
@@ -85,6 +93,9 @@ function drawGrid(game: Game): void {
     </div>
   `);
 
+  root.querySelectorAll<HTMLElement>('[data-stage]').forEach((el) => {
+    el.onclick = () => selectStage(game, Number(el.dataset.biome), Number(el.dataset.lap));
+  });
   root.querySelectorAll<HTMLElement>('[data-cat]').forEach((el) => {
     el.onclick = () => setCategory(game, el.dataset.cat as CategoryId);
   });
@@ -95,6 +106,21 @@ function drawGrid(game: Game): void {
   };
 
   if (game.mode === 'online') loadBoard(game);
+}
+
+/**
+ * Cada Etapa é uma Pista diferente e um Ranking diferente — por isso a escolha é
+ * Bioma × Volta, e não só Bioma: "Deserto" não é uma Etapa, "Deserto na volta 2" é.
+ */
+function stagePicker(game: Game): string {
+  return BIOMES.map((biome, biomeIndex) => {
+    const laps = Array.from({ length: SELECTABLE_LAPS }, (_, lap) => {
+      const chosen = game.progression.biomeIndex === biomeIndex && game.progression.lap === lap;
+      return `<span class="lap ${chosen ? 'chosen' : ''}" data-stage data-biome="${biomeIndex}" data-lap="${lap}">${lap + 1}</span>`;
+    }).join('');
+
+    return `<div class="stage"><b style="color:${biome.palette.edge}">${biome.name}</b><span class="laps">${laps}</span></div>`;
+  }).join('');
 }
 
 /**

@@ -124,6 +124,18 @@ export function advance(game: Game): void {
   enterStage(game, makeStage(game.progression.biomeIndex, game.progression.lap));
 }
 
+/**
+ * Escolhe a Etapa direto no Grid. Mexe na Progressão porque ela é uma só: o jogador não
+ * fica com um lugar onde estava e outro onde está correndo — daqui em diante a sequência
+ * segue da Etapa escolhida. Os Melhores Tempos ficam, cada um na sua Etapa.
+ */
+export function selectStage(game: Game, biomeIndex: number, lap: number): void {
+  if (game.progression.biomeIndex === biomeIndex && game.progression.lap === lap) return;
+  game.progression = { biomeIndex, lap };
+  saveProgression(game.progression);
+  enterStage(game, makeStage(biomeIndex, lap));
+}
+
 /** Volta ao início da sequência, preservando os Melhores Tempos. */
 export function restartProgression(game: Game): void {
   game.progression = resetProgression();

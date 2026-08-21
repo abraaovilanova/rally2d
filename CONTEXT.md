@@ -44,8 +44,12 @@ numa **Categoria**. Não começa sozinha: nasce do **Grid**. Termina de exatamen
 
 ## Grid
 
-O estado em que o jogador está antes de largar. Nele escolhe a **Categoria**, vê os números dela, vê
-seu **Melhor Tempo** naquela Etapa e, no **Modo Online**, o **Ranking Mundial** — e só então larga.
+O estado em que o jogador está antes de largar. Nele escolhe a **Etapa** — o **Bioma** e a **Volta**,
+entre as três primeiras — e a **Categoria**, vê os números dela, vê seu **Melhor Tempo** naquela Etapa
+e, no **Modo Online**, o **Ranking Mundial** — e só então larga.
+
+Escolher a Etapa move a **Progressão**: ela é uma só, e daí em diante a sequência segue da Etapa
+escolhida. Os **Melhores Tempos** ficam, cada um na sua Etapa.
 
 O Grid existe uma vez por **Etapa**, não por **Corrida**: uma **Batida** devolve o jogador direto à
 largada, sem passar por ele. A decisão de que carro correr é da Etapa; repetir a Tentativa não é uma

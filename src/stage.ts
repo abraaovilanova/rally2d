@@ -60,6 +60,13 @@ export const BIOMES: readonly Biome[] = [
   },
 ];
 
+/**
+ * As Voltas que o Grid deixa escolher. A Progressão continua indo além delas; o que para
+ * em 3 é a escolha direta — acima disso a Escalada já platôs e a lista viraria uma tabela
+ * infinita de Etapas que ninguém correu.
+ */
+export const SELECTABLE_LAPS = 3;
+
 /** Uma Etapa: o que o jogador de fato joga, e a chave dos seus recordes. */
 export interface Stage {
   id: string;
