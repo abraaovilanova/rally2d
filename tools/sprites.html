@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rally 2D — recortes do cenário</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c0e12;
+        --panel: #14181f;
+        --line: rgba(238, 242, 246, 0.14);
+        --text: #eef2f6;
+        --dim: rgba(238, 242, 246, 0.55);
+        --accent: #ffc14d;
+        --ok: #6fe38a;
+        --warn: #ff8a5b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.5 ui-sans-serif, system-ui, sans-serif;
+        overflow: hidden;
+      }
+
+      /* ------------------------------------------------------------- palco */
+      .stage {
+        position: relative;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        cursor: crosshair;
+      }
+      .hud {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(12, 14, 18, 0.85);
+        font-variant-numeric: tabular-nums;
+        color: var(--dim);
+      }
+      .hud b {
+        color: var(--text);
+      }
+      .toast {
+        position: absolute;
+        left: 50%;
+        top: 16px;
+        transform: translateX(-50%);
+        padding: 8px 14px;
+        border-radius: 8px;
+        background: rgba(12, 14, 18, 0.92);
+        border: 1px solid var(--line);
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+      .toast.on {
+        opacity: 1;
+      }
+      .toast.erro {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+
+      /* ------------------------------------------------------------ painel */
+      .side {
+        border-left: 1px solid var(--line);
+        background: var(--panel);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .side > header {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        gap: 8px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 15px;
+        letter-spacing: -0.01em;
+      }
+      .scroll {
+        overflow-y: auto;
+        padding: 12px 14px 24px;
+      }
+      section {
+        margin-bottom: 18px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      select,
+      input,
+      button {
+        font: inherit;
+        color: inherit;
+        background: rgba(238, 242, 246, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 8px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: rgba(238, 242, 246, 0.45);
+      }
+      button.primary {
+        background: rgba(255, 193, 77, 0.14);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .row + .row {
+        margin-top: 6px;
+      }
+      .grid4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      .grid4 label {
+        display: grid;
+        gap: 2px;
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .grid4 input {
+        width: 100%;
+        font-variant-numeric: tabular-nums;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      li:hover {
+        background: rgba(238, 242, 246, 0.05);
+      }
+      li.sel {
+        background: rgba(255, 193, 77, 0.12);
+        outline: 1px solid var(--accent);
+      }
+      li .nome {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      li .papel {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      li .peso {
+        width: 42px;
+        padding: 1px 4px;
+        font-size: 11px;
+      }
+
+      .previews {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .previews figure {
+        margin: 0;
+        display: grid;
+        gap: 4px;
+      }
+      .previews figcaption {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .previews canvas {
+        width: 100%;
+        height: 118px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #0a0c10;
+      }
+      .aviso {
+        color: var(--warn);
+        font-size: 12px;
+        margin: 6px 0 0;
+      }
+      .ok {
+        color: var(--ok);
+      }
+      kbd {
+        font: 11px ui-monospace, monospace;
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 0 4px;
+        color: var(--dim);
+      }
+      .ajuda {
+        font-size: 11px;
+        color: var(--dim);
+        line-height: 1.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <canvas id="palco"></canvas>
+      <div class="hud">
+        <span>folha <b id="hud-folha">—</b></span>
+        <span>cursor <b id="hud-xy">—</b></span>
+        <span>zoom <b id="hud-zoom">—</b></span>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <aside class="side">
+      <header>
+        <h1>Recortes do cenário</h1>
+        <div class="row">
+          <select id="bioma" style="flex: 1"></select>
+          <button id="salvar" class="primary" title="Ctrl+S">Salvar</button>
+        </div>
+        <div class="row">
+          <button id="novo" style="flex: 1">Novo recorte</button>
+          <button id="copiar" style="flex: 1">Copiar JSON</button>
+        </div>
+      </header>
+
+      <div class="scroll">
+        <section id="sel-box">
+          <h2>Selecionado</h2>
+          <div class="row">
+            <input id="nome" style="flex: 1" placeholder="nome do recorte" />
+            <button id="apagar" title="Delete">Apagar</button>
+          </div>
+          <div class="row grid4" style="margin-top: 6px">
+            <label>x<input id="cx" type="number" /></label>
+            <label>y<input id="cy" type="number" /></label>
+            <label>l<input id="cw" type="number" /></label>
+            <label>a<input id="ch" type="number" /></label>
+          </div>
+          <div class="row">
+            <select id="papel" style="flex: 1"></select>
+            <input id="peso" class="peso" type="number" min="1" title="peso na beira" />
+          </div>
+          <div class="row">
+            <button id="ajustar" style="flex: 1" title="A">Ajustar ao conteúdo</button>
+            <button id="miolo" style="flex: 1" title="M">Miolo opaco</button>
+          </div>
+          <p class="aviso" id="aviso"></p>
+
+          <div class="previews" style="margin-top: 10px">
+            <figure>
+              <canvas id="pv-sprite"></canvas>
+              <figcaption id="cap-sprite">no tamanho do jogo</figcaption>
+            </figure>
+            <figure>
+              <canvas id="pv-tile"></canvas>
+              <figcaption>ladrilhado 2×2 espelhado</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section>
+          <h2>Papéis</h2>
+          <ul id="lista-papeis"></ul>
+        </section>
+
+        <section>
+          <h2>Beira da pista</h2>
+          <ul id="lista-beira"></ul>
+        </section>
+
+        <section>
+          <h2>Público</h2>
+          <ul id="lista-publico"></ul>
+        </section>
+
+        <section>
+          <h2>Sem uso</h2>
+          <ul id="lista-solto"></ul>
+        </section>
+
+        <section>
+          <h2>Teclas</h2>
+          <p class="ajuda">
+            <kbd>arrastar</kbd> move · <kbd>alças</kbd> redimensiona · <kbd>arrastar no vazio</kbd> cria<br />
+            <kbd>↑↓←→</kbd> 1px · <kbd>shift</kbd> tamanho · <kbd>alt</kbd> 10px<br />
+            <kbd>A</kbd> ajustar · <kbd>M</kbd> miolo · <kbd>Del</kbd> apagar<br />
+            <kbd>Ctrl+Z</kbd> desfazer · <kbd>Ctrl+S</kbd> salvar<br />
+            <kbd>roda</kbd> zoom · <kbd>espaço+arrastar</kbd> ou <kbd>botão do meio</kbd> passeia
+          </p>
+        </section>
+      </div>
+    </aside>
+
+    <script type="module">
+      // -------------------------------------------------------------- estado
+      const API = '/__cenario';
+      const PROP_SCALE = 0.55; // igual ao scenery.ts
+      const LARGURA_PISTA = 150; // TUNING.escalationWidths[0], só como régua
+
+      const PAPEIS = [
+        ['', 'sem uso'],
+        ['chao', 'chão'],
+        ['leito', 'leito da pista'],
+        ['largada', 'pórtico de largada'],
+        ['chegada', 'pórtico de chegada'],
+        ['plateia', 'plateia (bloco)'],
+        ['beira', 'beira da pista'],
+        ['publico', 'público'],
+      ];
+
+      let dados = null;
+      let bioma = null;
+      let selecionado = null;
+      let historico = [];
+
+      const folhas = new Map(); // nome -> { img, pixels }
+
+      const palco = document.getElementById('palco');
+      const ctx = palco.getContext('2d');
+      const vista = { x: 0, y: 0, z: 1 };
+
+      // -------------------------------------------------------------- ligação
+      /**
+       * O JSON vem do servidor de desenvolvimento e volta para ele: o editor grava direto
+       * em `src/cenario.json`, senão editar viraria copiar-e-colar, que é o que ele existe
+       * para acabar.
+       */
+      async function carregar() {
+        const r = await fetch(API);
+        if (!r.ok) throw new Error(await r.text());
+        dados = await r.json();
+        bioma = Object.keys(dados.biomas)[0];
+        document.getElementById('bioma').innerHTML = Object.keys(dados.biomas)
+          .map((b) => `<option value="${b}">${b}</option>`)
+          .join('');
+        await Promise.all(Object.entries(dados.sheets).map(([nome, url]) => folha(nome, url)));
+        enquadrar();
+        redesenhar();
+      }
+
+      async function salvar() {
+        const r = await fetch(API, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(dados, null, 2),
+        });
+        aviso(r.ok ? 'gravado em src/cenario.json' : 'falhou: ' + (await r.text()), !r.ok);
+      }
+
+      function folha(nome, url) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            // Os pixels ficam em memória: é deles que sai o "ajustar ao conteúdo".
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth;
+            c.height = img.naturalHeight;
+            const cc = c.getContext('2d', { willReadFrequently: true });
+            cc.drawImage(img, 0, 0);
+            folhas.set(nome, { img, dados: cc.getImageData(0, 0, c.width, c.height) });
+            resolve();
+          };
+          img.onerror = () => {
+            aviso('não achei a folha ' + url, true);
+            resolve();
+          };
+          img.src = '../' + url;
+        });
+      }
+
+      // --------------------------------------------------------------- acesso
+      const bio = () => dados.biomas[bioma];
+      const recortes = () => bio().recortes;
+      const atual = () => (selecionado ? recortes()[selecionado] : null);
+      const folhaAtual = () => folhas.get(bio().folha);
+
+      function papelDe(nome) {
+        const b = bio();
+        for (const chave of ['chao', 'leito', 'largada', 'chegada', 'plateia']) {
+          if (b[chave] === nome) return chave;
+        }
+        if (b.beira.includes(nome)) return 'beira';
+        if (b.publico.includes(nome)) return 'publico';
+        return '';
+      }
+
+      /** Um recorte tem um papel só: entrar num tira do anterior. */
+      function definirPapel(nome, papel) {
+        const b = bio();
+        const antigo = papelDe(nome);
+        if (antigo === papel) return;
+
+        if (antigo === 'beira') {
+          const i = b.beira.indexOf(nome);
+          b.beira.splice(i, 1);
+          b.pesos.splice(i, 1);
+        } else if (antigo === 'publico') {
+          b.publico.splice(b.publico.indexOf(nome), 1);
+        }
+
+        if (papel === 'beira') {
+          b.beira.push(nome);
+          b.pesos.push(3);
+        } else if (papel === 'publico') {
+          b.publico.push(nome);
+        } else if (papel !== '') {
+          // Papel único: quem estava nele fica sem uso, e isso é visível na lista.
+          b[papel] = nome;
+        }
+      }
+
+      // ------------------------------------------------------------- desenho
+      function redimensionar() {
+        palco.width = palco.parentElement.clientWidth;
+        palco.height = palco.parentElement.clientHeight;
+        redesenhar();
+      }
+
+      function enquadrar() {
+        if (!dados) return;
+        const f = folhaAtual();
+        if (!f) return;
+        vista.z = Math.min(palco.width / f.img.naturalWidth, palco.height / f.img.naturalHeight) * 0.92;
+        vista.x = (palco.width - f.img.naturalWidth * vista.z) / 2;
+        vista.y = (palco.height - f.img.naturalHeight * vista.z) / 2;
+      }
+
+      const paraTela = (x, y) => ({ x: x * vista.z + vista.x, y: y * vista.z + vista.y });
+      const paraImagem = (x, y) => ({ x: (x - vista.x) / vista.z, y: (y - vista.y) / vista.z });
+
+      function redesenhar() {
+        ctx.fillStyle = '#0a0c10';
+        if (!dados) return ctx.fillRect(0, 0, palco.width, palco.height);
+        ctx.fillRect(0, 0, palco.width, palco.height);
+        const f = folhaAtual();
+        if (!f) return;
+
+        const w = f.img.naturalWidth;
+        const h = f.img.naturalHeight;
+        const o = paraTela(0, 0);
+
+        // Xadrez atrás da folha: sem ele, transparente e preto são a mesma coisa na tela.
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(o.x, o.y, w * vista.z, h * vista.z);
+        ctx.clip();
+        const passo = 12;
+        for (let y = 0; y < palco.height / passo + 1; y++) {
+          for (let x = 0; x < palco.width / passo + 1; x++) {
+            ctx.fillStyle = (x + y) % 2 ? '#171b21' : '#1e232b';
+            ctx.fillRect(x * passo, y * passo, passo, passo);
+          }
+        }
+        ctx.restore();
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(f.img, o.x, o.y, w * vista.z, h * vista.z);
+
+        for (const [nome, r] of Object.entries(recortes())) {
+          const papel = papelDe(nome);
+          const sel = nome === selecionado;
+          const p = paraTela(r.x, r.y);
+          const cor = sel ? '#ffc14d' : papel === '' ? 'rgba(255,138,91,0.75)' : 'rgba(111,227,138,0.7)';
+
+          ctx.lineWidth = sel ? 2 : 1;
+          ctx.strokeStyle = cor;
+          ctx.strokeRect(p.x + 0.5, p.y + 0.5, r.w * vista.z, r.h * vista.z);
+
+          if (vista.z > 0.35 || sel) {
+            ctx.font = '11px ui-sans-serif, system-ui, sans-serif';
+            const t = ctx.measureText(nome).width;
+            ctx.fillStyle = 'rgba(10,12,16,0.8)';
+            ctx.fillRect(p.x, p.y - 15, t + 8, 15);
+            ctx.fillStyle = cor;
+            ctx.fillText(nome, p.x + 4, p.y - 4);
+          }
+
+          if (sel) {
+            ctx.fillStyle = '#ffc14d';
+            for (const [hx, hy] of alcas(r)) {
+              const q = paraTela(hx, hy);
+              ctx.fillRect(q.x - 4, q.y - 4, 8, 8);
+            }
+          }
+        }
+      }
+
+      /** As oito alças, em coordenadas da imagem. */
+      function alcas(r) {
+        const mx = r.x + r.w / 2;
+        const my = r.y + r.h / 2;
+        return [
+          [r.x, r.y],
+          [mx, r.y],
+          [r.x + r.w, r.y],
+          [r.x + r.w, my],
+          [r.x + r.w, r.y + r.h],
+          [mx, r.y + r.h],
+          [r.x, r.y + r.h],
+          [r.x, my],
+        ];
+      }
+
+      // -------------------------------------------------------------- ponteiro
+      let arrasto = null;
+      let passeio = null;
+      let espaco = false;
+
+      palco.addEventListener('pointerdown', (e) => {
+        if (!dados) return;
+        palco.setPointerCapture(e.pointerId);
+        if (e.button === 1 || espaco) {
+          passeio = { x: e.offsetX - vista.x, y: e.offsetY - vista.y };
+          return;
+        }
+
+        const p = paraImagem(e.offsetX, e.offsetY);
+        const r = atual();
+
+        if (r) {
+          const i = alcas(r).findIndex(([hx, hy]) => Math.abs(hx - p.x) * vista.z < 6 && Math.abs(hy - p.y) * vista.z < 6);
+          if (i >= 0) {
+            empilhar();
+            arrasto = { tipo: 'alca', i, base: { ...r } };
+            return;
+          }
+        }
+
+        const achado = Object.entries(recortes())
+          .reverse()
+          .find(([, q]) => p.x >= q.x && p.x <= q.x + q.w && p.y >= q.y && p.y <= q.y + q.h);
+
+        if (achado) {
+          selecionar(achado[0]);
+          empilhar();
+          arrasto = { tipo: 'mover', dx: p.x - achado[1].x, dy: p.y - achado[1].y };
+        } else {
+          empilhar();
+          arrasto = { tipo: 'criar', x0: Math.round(p.x), y0: Math.round(p.y) };
+        }
+        redesenhar();
+      });
+
+      palco.addEventListener('pointermove', (e) => {
+        const p = paraImagem(e.offsetX, e.offsetY);
+        document.getElementById('hud-xy').textContent = `${Math.floor(p.x)}, ${Math.floor(p.y)}`;
+
+        if (passeio) {
+          vista.x = e.offsetX - passeio.x;
+          vista.y = e.offsetY - passeio.y;
+          redesenhar();
+          return;
+        }
+        if (!arrasto) return;
+
+        if (arrasto.tipo === 'mover') {
+          const r = atual();
+          r.x = Math.round(p.x - arrasto.dx);
+          r.y = Math.round(p.y - arrasto.dy);
+        } else if (arrasto.tipo === 'alca') {
+          esticar(atual(), arrasto.i, Math.round(p.x), Math.round(p.y));
+        } else if (arrasto.tipo === 'criar') {
+          arrasto.x1 = Math.round(p.x);
+          arrasto.y1 = Math.round(p.y);
+          ctx.save();
+          redesenhar();
+          const a = paraTela(Math.min(arrasto.x0, arrasto.x1), Math.min(arrasto.y0, arrasto.y1));
+          ctx.strokeStyle = '#ffc14d';
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(a.x, a.y, Math.abs(arrasto.x1 - arrasto.x0) * vista.z, Math.abs(arrasto.y1 - arrasto.y0) * vista.z);
+          ctx.restore();
+          return;
+        }
+        sincronizar();
+      });
+
+      palco.addEventListener('pointerup', () => {
+        if (arrasto?.tipo === 'criar' && arrasto.x1 !== undefined) {
+          const r = {
+            x: Math.min(arrasto.x0, arrasto.x1),
+            y: Math.min(arrasto.y0, arrasto.y1),
+            w: Math.abs(arrasto.x1 - arrasto.x0),
+            h: Math.abs(arrasto.y1 - arrasto.y0),
+          };
+          if (r.w > 3 && r.h > 3) criar(r);
+        }
+        arrasto = null;
+        passeio = null;
+        sincronizar();
+      });
+
+      palco.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const antes = paraImagem(e.offsetX, e.offsetY);
+        vista.z = Math.min(12, Math.max(0.1, vista.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+        const depois = paraImagem(e.offsetX, e.offsetY);
+        vista.x += (depois.x - antes.x) * vista.z;
+        vista.y += (depois.y - antes.y) * vista.z;
+        redesenhar();
+        document.getElementById('hud-zoom').textContent = vista.z.toFixed(2) + '×';
+      }, { passive: false });
+
+      function esticar(r, i, x, y) {
+        const dir = r.x + r.w;
+        const bai = r.y + r.h;
+        if ([0, 6, 7].includes(i)) {
+          r.w = Math.max(1, dir - x);
+          r.x = Math.min(x, dir - 1);
+        }
+        if ([2, 3, 4].includes(i)) r.w = Math.max(1, x - r.x);
+        if ([0, 1, 2].includes(i)) {
+          r.h = Math.max(1, bai - y);
+          r.y = Math.min(y, bai - 1);
+        }
+        if ([4, 5, 6].includes(i)) r.h = Math.max(1, y - r.y);
+      }
+
+      // ---------------------------------------------------------- conteúdo
+      /**
+       * Ajustar ao conteúdo: encolhe o recorte até a caixa do que não é transparente.
+       * É o que evita passar o dia contando pixel — e o que teria evitado a faixa preta
+       * que apareceu quando um ladrilho levou junto as linhas vazias da borda.
+       */
+      function ajustarConteudo(r, limite = 16) {
+        const px = folhaAtual()?.dados;
+        if (!px) return;
+        let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+
+        for (let y = r.y; y < r.y + r.h; y++) {
+          for (let x = r.x; x < r.x + r.w; x++) {
+            if (px.data[(y * px.width + x) * 4 + 3] > limite) {
+              if (x < x0) x0 = x;
+              if (y < y0) y0 = y;
+              if (x > x1) x1 = x;
+              if (y > y1) y1 = y;
+            }
+          }
+        }
+        if (x1 < 0) return aviso('recorte vazio: não há pixel opaco aí dentro', true);
+        Object.assign(r, { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 });
+      }
+
+      /**
+       * Miolo opaco: corta as linhas e colunas da borda que não são inteiramente opacas.
+       * É o recorte que um ladrilho de chão ou de leito precisa — o padrão repete a borda,
+       * e uma linha semitransparente vira uma costura vazia a cada repetição.
+       */
+      function miolOpaco(r, limite = 32, cobertura = 0.999) {
+        const px = folhaAtual()?.dados;
+        if (!px) return;
+        const opaco = (x, y) => px.data[(y * px.width + x) * 4 + 3] > limite;
+        let { x, y, w, h } = r;
+
+        const linha = (yy) => {
+          let n = 0;
+          for (let i = x; i < x + w; i++) if (opaco(i, yy)) n++;
+          return n / w;
+        };
+        const coluna = (xx) => {
+          let n = 0;
+          for (let i = y; i < y + h; i++) if (opaco(xx, i)) n++;
+          return n / h;
+        };
+
+        while (h > 1 && linha(y) < cobertura) { y++; h--; }
+        while (h > 1 && linha(y + h - 1) < cobertura) h--;
+        while (w > 1 && coluna(x) < cobertura) { x++; w--; }
+        while (w > 1 && coluna(x + w - 1) < cobertura) w--;
+
+        Object.assign(r, { x, y, w, h });
+      }
+
+      /** O aviso que importa: um ladrilho com borda vazada abre faixa no chão do jogo. */
+      function conferirLadrilho(r) {
+        const px = folhaAtual()?.dados;
+        if (!px) return null;
+        const opaco = (x, y) => px.data[(y * px.width + x) * 4 + 3] > 32;
+        let vazios = 0;
+        for (let i = r.x; i < r.x + r.w; i++) {
+          if (!opaco(i, r.y)) vazios++;
+          if (!opaco(i, r.y + r.h - 1)) vazios++;
+        }
+        for (let i = r.y; i < r.y + r.h; i++) {
+          if (!opaco(r.x, i)) vazios++;
+          if (!opaco(r.x + r.w - 1, i)) vazios++;
+        }
+        return vazios;
+      }
+
+      // ---------------------------------------------------------- previsões
+      function previsões() {
+        const r = atual();
+        const f = folhaAtual();
+        const cs = document.getElementById('pv-sprite');
+        const ct = document.getElementById('pv-tile');
+        for (const c of [cs, ct]) {
+          c.width = c.clientWidth * 2;
+          c.height = c.clientHeight * 2;
+          const cc = c.getContext('2d');
+          cc.clearRect(0, 0, c.width, c.height);
+        }
+        if (!r || !f) return;
+
+        // Esquerda: o sprite no tamanho em que o jogo o desenha, com a pista como régua.
+        const c1 = cs.getContext('2d');
+        c1.imageSmoothingEnabled = false;
+        const esc = Math.min(1, (c1.canvas.width * 0.9) / (LARGURA_PISTA * 2));
+        const px = LARGURA_PISTA * 2 * esc;
+        c1.fillStyle = 'rgba(238,242,246,0.07)';
+        c1.fillRect((c1.canvas.width - px) / 2, 0, px, c1.canvas.height);
+        const pw = r.w * PROP_SCALE * 2 * esc;
+        const ph = r.h * PROP_SCALE * 2 * esc;
+        c1.drawImage(f.img, r.x, r.y, r.w, r.h, (c1.canvas.width - pw) / 2, c1.canvas.height - ph - 6, pw, ph);
+        document.getElementById('cap-sprite').textContent =
+          `${Math.round(r.w * PROP_SCALE)}×${Math.round(r.h * PROP_SCALE)} px no jogo · faixa = pista`;
+
+        // Direita: o mesmo ladrilhado 2×2 espelhado que o jogo monta, para ver a costura.
+        const c2 = ct.getContext('2d');
+        c2.imageSmoothingEnabled = false;
+        const tile = document.createElement('canvas');
+        tile.width = r.w * 2;
+        tile.height = r.h * 2;
+        const tc = tile.getContext('2d');
+        for (const [sx, sy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+          tc.save();
+          tc.translate(sx ? r.w * 2 : 0, sy ? r.h * 2 : 0);
+          tc.scale(sx ? -1 : 1, sy ? -1 : 1);
+          tc.drawImage(f.img, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+          tc.restore();
+        }
+        const pat = c2.createPattern(tile, 'repeat');
+        c2.fillStyle = pat;
+        c2.fillRect(0, 0, c2.canvas.width, c2.canvas.height);
+      }
+
+      // ------------------------------------------------------------- listas
+      function sincronizar() {
+        if (!dados) return;
+        const r = atual();
+        document.getElementById('nome').value = selecionado ?? '';
+        for (const [id, k] of [['cx', 'x'], ['cy', 'y'], ['cw', 'w'], ['ch', 'h']]) {
+          document.getElementById(id).value = r ? r[k] : '';
+        }
+
+        const papel = selecionado ? papelDe(selecionado) : '';
+        document.getElementById('papel').value = papel;
+        const peso = document.getElementById('peso');
+        peso.style.visibility = papel === 'beira' ? 'visible' : 'hidden';
+        if (papel === 'beira') peso.value = bio().pesos[bio().beira.indexOf(selecionado)];
+
+        const av = document.getElementById('aviso');
+        av.textContent = '';
+        av.className = 'aviso';
+        if (r && (papel === 'chao' || papel === 'leito')) {
+          const vazios = conferirLadrilho(r);
+          if (vazios > 0) {
+            av.textContent = `${vazios} pixels vazados na borda — o padrão vai abrir faixa. Use "miolo opaco".`;
+          } else {
+            av.textContent = 'borda cheia: ladrilha sem costura vazia.';
+            av.className = 'aviso ok';
+          }
+        }
+
+        listas();
+        previsões();
+        redesenhar();
+        document.getElementById('hud-folha').textContent = bio().folha;
+        document.getElementById('hud-zoom').textContent = vista.z.toFixed(2) + '×';
+      }
+
+      function item(nome, extra = '') {
+        return `<li data-nome="${nome}" class="${nome === selecionado ? 'sel' : ''}">
+          <span class="nome">${nome}</span>${extra}</li>`;
+      }
+
+      function listas() {
+        const b = bio();
+        document.getElementById('lista-papeis').innerHTML = ['chao', 'leito', 'largada', 'chegada', 'plateia']
+          .map((k) => item(b[k], `<span class="papel">${PAPEIS.find(([v]) => v === k)[1]}</span>`))
+          .join('');
+
+        document.getElementById('lista-beira').innerHTML = b.beira
+          .map((n, i) => item(n, `<input class="peso" type="number" min="1" value="${b.pesos[i]}" data-peso="${i}" />`))
+          .join('');
+
+        document.getElementById('lista-publico').innerHTML = b.publico.map((n) => item(n)).join('');
+
+        const soltos = Object.keys(b.recortes).filter((n) => papelDe(n) === '');
+        document.getElementById('lista-solto').innerHTML =
+          soltos.map((n) => item(n)).join('') || '<li style="color:var(--dim)">nenhum</li>';
+
+        for (const li of document.querySelectorAll('li[data-nome]')) {
+          li.onclick = (e) => {
+            if (e.target.dataset.peso === undefined) selecionar(li.dataset.nome);
+          };
+        }
+        for (const input of document.querySelectorAll('input[data-peso]')) {
+          input.onchange = () => {
+            bio().pesos[Number(input.dataset.peso)] = Math.max(1, Number(input.value) || 1);
+          };
+        }
+      }
+
+      function selecionar(nome) {
+        selecionado = nome;
+        const r = atual();
+        if (r) {
+          // Traz o recorte para a tela se ele estiver fora dela.
+          const p = paraTela(r.x + r.w / 2, r.y + r.h / 2);
+          if (p.x < 0 || p.y < 0 || p.x > palco.width || p.y > palco.height) {
+            vista.x += palco.width / 2 - p.x;
+            vista.y += palco.height / 2 - p.y;
+          }
+        }
+        sincronizar();
+      }
+
+      function criar(r) {
+        let n = 1;
+        while (recortes()['novo' + n]) n++;
+        const nome = 'novo' + n;
+        recortes()[nome] = r;
+        ajustarConteudo(r);
+        selecionar(nome);
+        document.getElementById('nome').select();
+      }
+
+      // ------------------------------------------------------- desfazer/erro
+      function empilhar() {
+        historico.push(JSON.stringify(dados));
+        if (historico.length > 80) historico.shift();
+      }
+
+      function desfazer() {
+        const anterior = historico.pop();
+        if (!anterior) return aviso('nada para desfazer', true);
+        dados = JSON.parse(anterior);
+        if (!recortes()[selecionado]) selecionado = null;
+        sincronizar();
+      }
+
+      let tempo;
+      function aviso(texto, erro = false) {
+        const t = document.getElementById('toast');
+        t.textContent = texto;
+        t.className = 'toast on' + (erro ? ' erro' : '');
+        clearTimeout(tempo);
+        tempo = setTimeout(() => (t.className = 'toast'), 2600);
+      }
+
+      // ------------------------------------------------------------ controles
+      document.getElementById('bioma').onchange = (e) => {
+        bioma = e.target.value;
+        selecionado = null;
+        enquadrar();
+        sincronizar();
+      };
+      document.getElementById('salvar').onclick = salvar;
+      document.getElementById('novo').onclick = () => {
+        const p = paraImagem(palco.width / 2, palco.height / 2);
+        empilhar();
+        criar({ x: Math.round(p.x) - 32, y: Math.round(p.y) - 32, w: 64, h: 64 });
+      };
+      document.getElementById('copiar').onclick = async () => {
+        await navigator.clipboard.writeText(JSON.stringify(dados, null, 2));
+        aviso('JSON copiado');
+      };
+      document.getElementById('apagar').onclick = () => {
+        if (!selecionado) return;
+        empilhar();
+        definirPapel(selecionado, '');
+        delete recortes()[selecionado];
+        selecionado = null;
+        sincronizar();
+      };
+      document.getElementById('ajustar').onclick = () => {
+        if (!atual()) return;
+        empilhar();
+        ajustarConteudo(atual());
+        sincronizar();
+      };
+      document.getElementById('miolo').onclick = () => {
+        if (!atual()) return;
+        empilhar();
+        miolOpaco(atual());
+        sincronizar();
+      };
+
+      document.getElementById('papel').innerHTML = PAPEIS.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+      document.getElementById('papel').onchange = (e) => {
+        if (!selecionado) return;
+        empilhar();
+        definirPapel(selecionado, e.target.value);
+        sincronizar();
+      };
+      document.getElementById('peso').onchange = (e) => {
+        const i = bio().beira.indexOf(selecionado);
+        if (i >= 0) bio().pesos[i] = Math.max(1, Number(e.target.value) || 1);
+      };
+
+      document.getElementById('nome').onchange = (e) => {
+        const novo = e.target.value.trim();
+        if (!selecionado || novo === '' || novo === selecionado) return sincronizar();
+        if (recortes()[novo]) return aviso('já existe um recorte com esse nome', true);
+
+        empilhar();
+        const b = bio();
+        const papel = papelDe(selecionado);
+        // Renomear tem de arrastar o papel junto, senão a lista aponta para um nome morto.
+        recortes()[novo] = recortes()[selecionado];
+        delete recortes()[selecionado];
+        if (papel === 'beira') b.beira[b.beira.indexOf(selecionado)] = novo;
+        else if (papel === 'publico') b.publico[b.publico.indexOf(selecionado)] = novo;
+        else if (papel !== '') b[papel] = novo;
+        selecionado = novo;
+        sincronizar();
+      };
+
+      for (const [id, k] of [['cx', 'x'], ['cy', 'y'], ['cw', 'w'], ['ch', 'h']]) {
+        document.getElementById(id).onchange = (e) => {
+          const r = atual();
+          if (!r) return;
+          empilhar();
+          r[k] = Math.max(k === 'w' || k === 'h' ? 1 : 0, Math.round(Number(e.target.value) || 0));
+          sincronizar();
+        };
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.code === 'Space') espaco = true;
+
+        if (e.ctrlKey && e.key.toLowerCase() === 'z') return (e.preventDefault(), desfazer());
+        if (e.ctrlKey && e.key.toLowerCase() === 's') return (e.preventDefault(), salvar());
+
+        const r = atual();
+        if (!r) return;
+
+        const passo = e.altKey ? 10 : 1;
+        const eixo = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        if (eixo) {
+          e.preventDefault();
+          empilhar();
+          if (e.shiftKey) {
+            r.w = Math.max(1, r.w + eixo[0] * passo);
+            r.h = Math.max(1, r.h + eixo[1] * passo);
+          } else {
+            r.x += eixo[0] * passo;
+            r.y += eixo[1] * passo;
+          }
+          return sincronizar();
+        }
+
+        if (e.key === 'Delete') document.getElementById('apagar').click();
+        if (e.key.toLowerCase() === 'a') document.getElementById('ajustar').click();
+        if (e.key.toLowerCase() === 'm') document.getElementById('miolo').click();
+      });
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') espaco = false;
+      });
+      window.addEventListener('resize', redimensionar);
+
+      redimensionar();
+      carregar().catch((err) =>
+        aviso('sem o servidor de desenvolvimento: rode `npm run dev` e abra por ele. ' + err.message, true),
+      );
+    </script>
+  </body>
+</html>

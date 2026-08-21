@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "editor": "vite --open /rally2d/tools/sprites.html"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

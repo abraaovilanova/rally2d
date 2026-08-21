@@ -1,5 +1,6 @@
 import desertSheet from '../assets/world/deserto.png';
 import iceForestSheet from '../assets/world/gelo-floresta.png';
+import cenario from './cenario.json';
 import { normalAt, type Vec } from './path';
 import { createRng, seedFromStageId } from './rng';
 import type { Stage } from './stage';
@@ -9,6 +10,10 @@ import type { Stage } from './stage';
  *
  * É decoração — nada aqui entra no modelo do jogo. Nenhum objeto de Cenário é
  * obstáculo: a única condição de Batida continua sendo a Borda da Pista.
+ *
+ * Os recortes não moram aqui: moram em `cenario.json`, que é o que o editor de sprites
+ * (`tools/sprites.html`) lê e grava. Medir recorte de sprite na mão, contando pixel em
+ * código, é o tipo de coisa que se faz olhando — e olhando é no editor.
  */
 
 /** Um recorte da folha de sprites, em pixels da imagem. */
@@ -19,15 +24,13 @@ interface Rect {
   h: number;
 }
 
-const r = (x: number, y: number, w: number, h: number): Rect => ({ x, y, w, h });
-
 /**
  * O Cenário de um Bioma. Cada Bioma nomeia os seus próprios sprites — um cacto não tem
  * equivalente no gelo — e o que é comum são os papéis: o chão, o leito, os dois pórticos,
  * o que fica na beira e quem assiste.
  */
 interface Scenery {
-  /** A folha de onde todos os recortes vêm. Duas Biomas podem dividir a mesma. */
+  /** A folha de onde todos os recortes vêm. Dois Biomas podem dividir a mesma. */
   sheet: Sheet;
   sprites: Record<string, Rect>;
   /** O chão fora da Pista. */
@@ -47,143 +50,29 @@ interface Sheet {
   image: HTMLImageElement;
 }
 
-const makeSheet = (src: string): Sheet => ({ src, image: new Image() });
-
-const DESERT_SHEET = makeSheet(desertSheet);
-/** Uma folha só, com a Floresta em cima e o Gelo embaixo. */
-const ICE_FOREST_SHEET = makeSheet(iceForestSheet);
-
-/** Medidos na folha `assets/world/deserto.png`. */
-const DESERT_SPRITES = {
-  largada: r(22, 30, 200, 81),
-  chegada: r(589, 19, 179, 81),
-  cactus: r(1150, 338, 58, 96),
-  bush: r(1298, 348, 74, 71),
-  rocks: r(14, 486, 140, 111),
-  smallRocks: r(1103, 507, 116, 62),
-  cone: r(233, 516, 52, 62),
-  flagYellow: r(412, 493, 54, 91),
-  flagBlue: r(598, 492, 52, 89),
-  fence: r(726, 515, 145, 62),
-  guardrail: r(918, 508, 121, 71),
-  tires: r(1279, 189, 115, 87),
-  startSign: r(974, 203, 88, 67),
-  finishSign: r(1133, 203, 88, 67),
-  checkeredFlag: r(635, 151, 119, 150),
-  brazilFlag: r(821, 25, 74, 105),
-  crowd: r(1266, 633, 131, 118),
-  fan1: r(51, 643, 69, 117),
-  fan2: r(237, 656, 41, 100),
-  fan3: r(401, 629, 100, 127),
-  fan4: r(583, 638, 65, 118),
-  fan5: r(757, 627, 78, 130),
-  fan6: r(952, 633, 55, 121),
-  fan7: r(1126, 633, 69, 123),
-  /** Areia lisa, para o chão. */
-  sand: r(755, 315, 140, 138),
-  /** Terra com marcas de pneu, para o leito da Pista. */
-  dirt: r(20, 318, 132, 134),
+/** As folhas de verdade, resolvidas pelo bundler; o JSON só diz qual é qual pelo nome. */
+const SHEETS: Record<string, Sheet> = {
+  deserto: { src: desertSheet, image: new Image() },
+  'gelo-floresta': { src: iceForestSheet, image: new Image() },
 };
 
-/**
- * Medidos na folha `assets/world/gelo-floresta.png`. As duas metades dela são Biomas
- * diferentes; a última fileira, o público, é dividida entre os dois.
- */
-const FOREST_SPRITES = {
-  largada: r(11, 5, 206, 140),
-  chegada: r(571, 12, 202, 129),
-  signTrail: r(257, 35, 126, 105),
-  signWood: r(421, 40, 121, 100),
-  flag: r(820, 24, 75, 106),
-  podium: r(946, 46, 140, 73),
-  tires: r(1274, 44, 123, 91),
-  pines: r(791, 156, 149, 149),
-  trees: r(942, 153, 150, 148),
-  rocks: r(1102, 173, 143, 115),
-  hiker: r(56, 641, 65, 121),
-  ranger: r(223, 637, 71, 126),
-  biker: r(395, 636, 89, 125),
-  crowd: r(1265, 632, 133, 121),
-  /** Musgo, para o chão. */
-  moss: r(527, 152, 93, 155),
-  /** Terra batida entre as samambaias, para o leito da Pista. */
-  soil: r(626, 152, 156, 155),
-};
-
-const ICE_SPRITES = {
-  largada: r(10, 310, 211, 145),
-  chegada: r(562, 310, 201, 141),
-  signIce: r(261, 339, 92, 116),
-  signValley: r(392, 342, 129, 105),
-  flag: r(819, 330, 76, 112),
-  podium: r(937, 355, 144, 80),
-  cubes: r(1267, 337, 131, 104),
-  bareTree: r(881, 459, 98, 147),
-  snowBush: r(1002, 513, 70, 76),
-  crystals: r(1106, 471, 136, 138),
-  parka: r(578, 636, 71, 125),
-  sculptor: r(747, 637, 107, 123),
-  snowmobile: r(902, 633, 159, 130),
-  seated: r(1118, 632, 83, 131),
-  crowd: r(1265, 632, 133, 121),
-  /**
-   * Neve lisa, para o chão. O recorte é o miolo opaco do ladrilho: incluir as linhas
-   * transparentes da borda abriria uma faixa vazia a cada repetição do padrão.
-   */
-  snow: r(528, 469, 117, 146),
-  /** Neve com marcas de pneu, para o leito da Pista. */
-  tracks: r(411, 469, 105, 147),
-};
-
-const SCENERY: Record<string, Scenery> = {
-  deserto: {
-    sheet: DESERT_SHEET,
-    sprites: DESERT_SPRITES,
-    ground: 'sand',
-    bed: 'dirt',
-    largada: 'largada',
-    chegada: 'chegada',
-    roadside: [
-      'cactus',
-      'bush',
-      'rocks',
-      'smallRocks',
-      'cone',
-      'flagYellow',
-      'flagBlue',
-      'fence',
-      'guardrail',
-      'tires',
-    ],
-    roadsideWeights: [5, 5, 3, 4, 2, 2, 2, 2, 2, 2],
-    fans: ['fan1', 'fan2', 'fan3', 'fan4', 'fan5', 'fan6', 'fan7'],
-    crowd: 'crowd',
-  },
-  floresta: {
-    sheet: ICE_FOREST_SHEET,
-    sprites: FOREST_SPRITES,
-    ground: 'moss',
-    bed: 'soil',
-    largada: 'largada',
-    chegada: 'chegada',
-    roadside: ['pines', 'trees', 'rocks', 'tires', 'signTrail', 'signWood', 'flag', 'podium'],
-    roadsideWeights: [6, 6, 3, 2, 2, 2, 1, 1],
-    fans: ['hiker', 'ranger', 'biker'],
-    crowd: 'crowd',
-  },
-  gelo: {
-    sheet: ICE_FOREST_SHEET,
-    sprites: ICE_SPRITES,
-    ground: 'snow',
-    bed: 'tracks',
-    largada: 'largada',
-    chegada: 'chegada',
-    roadside: ['bareTree', 'crystals', 'snowBush', 'cubes', 'signIce', 'signValley', 'flag', 'podium'],
-    roadsideWeights: [5, 5, 4, 3, 2, 2, 1, 1],
-    fans: ['parka', 'sculptor', 'snowmobile', 'seated'],
-    crowd: 'crowd',
-  },
-};
+const SCENERY: Record<string, Scenery> = Object.fromEntries(
+  Object.entries(cenario.biomas).map(([id, b]) => [
+    id,
+    {
+      sheet: SHEETS[b.folha],
+      sprites: b.recortes as Record<string, Rect>,
+      ground: b.chao,
+      bed: b.leito,
+      largada: b.largada,
+      chegada: b.chegada,
+      roadside: b.beira,
+      roadsideWeights: b.pesos,
+      fans: b.publico,
+      crowd: b.plateia,
+    },
+  ]),
+);
 
 /** Tamanho na tela = pixels do sprite × isto. Calibrado contra a largura da Pista. */
 const PROP_SCALE = 0.55;
@@ -198,7 +87,7 @@ export interface Prop {
 }
 
 export function preloadScenery(): void {
-  for (const sheet of [DESERT_SHEET, ICE_FOREST_SHEET]) {
+  for (const sheet of Object.values(SHEETS)) {
     if (sheet.image.src === '') sheet.image.src = sheet.src;
   }
 }
