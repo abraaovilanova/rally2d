@@ -162,6 +162,38 @@ Vem de dois lugares que se somam. O **sorteio** enche os 23 mil pixels de Pista 
 no editor de pista vai onde quem põe quiser — inclusive por cima da Pista, já que Cenário não é
 obstáculo. Uma Etapa pode dispensar o sorteio e ficar só com o que foi posto; não existe meio termo.
 
+## Ponto de Vista (Point of View)
+
+De onde se vê uma **Etapa**, e são duas coisas ao mesmo tempo: o chão — **Pista**, **Terreno**,
+**Linha de Chegada** — é visto **de cima**; tudo o que é objeto — **Carro**, **Cenário**, público,
+pórtico — é desenhado **em 3/4**, em pé, de frente para quem joga.
+
+A divisão não é descuido. A Pista é definida pela **Linha Central** e por uma largura, e é essa
+definição que decide a **Batida**: inclinar o chão mudaria a geometria que mata. Objeto parado nunca
+gira, então pode mentir de graça.
+
+O **Carro** é a exceção que custa: ele é objeto, é 3/4 e gira. Por isso ele tem uma direção
+desenhada para cada ângulo, em vez de uma só girada pelo jogo — girar um desenho de 3/4 é
+exatamente o que se lê como errado.
+
+## Estilo (Style)
+
+O conjunto de regras que faz tudo parecer o mesmo jogo: o **Ponto de Vista**, uma paleta única de
+onde toda a arte tira suas cores, um tamanho de pixel só para todos, a direção da luz, e a exigência
+de que todo objeto **toque o chão** em vez de flutuar sobre ele.
+
+Existe porque arte boa vinda de fontes diferentes fica ruim junta — e porque sem regra escrita cada
+peça nova volta um pouco diferente da anterior. É a diferença entre ter assets e ter um conjunto.
+
+## Terreno (Terrain)
+
+O chão de um **Bioma**, fora da **Pista**. Não é uma textura só: são tipos de chão que se encostam,
+com a passagem de um para o outro desenhada, e as manchas saem da **Semente** — mesma Etapa, mesmo
+chão, sempre.
+
+Terreno não é Pista, e a diferença não é visual: ele não tem **Borda**, e pisar nele não é nada,
+porque não se chega nele sem já ter batido.
+
 ## Linha Central (Centerline)
 
 A curva que define o traçado da **Pista**. A Pista é a região a até meia-largura de distância dela.
