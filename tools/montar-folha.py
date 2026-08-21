@@ -28,7 +28,7 @@ FOLGA = 2
 # As chaves que este script é dono e reescreve por inteiro. Todo o resto do Bioma passa.
 PAPEIS_DE_OBJETO = {
     'folha', 'escala', 'chao', 'leito', 'largada', 'chegada',
-    'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes', 'leitos', 'efeitos', 'espelhar',
+    'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes', 'leitos', 'efeitos', 'espelhar', 'densidade',
 }
 
 
@@ -152,10 +152,13 @@ def main() -> int:
         **{k: v for k, v in antigo.items() if k not in PAPEIS_DE_OBJETO},
         'folha': nome_folha,
         'escala': manifesto['escala'],
+        'densidade': manifesto.get('densidade', 0.55),
         # Os ladrilhos gerados já fecham consigo mesmos: espelhar só produziria losango.
         'espelhar': False,
         # O leito e o terreno viram um recorte só cada; a variação entre eles é do jogo.
-        'chao': um('terreno', antigo.get('chao', '')),
+        # Sem item de terreno, o chão aponta para o leito: o tileset é quem desenha o
+        # chão desses Biomas, e um nome que não existe na folha quebraria a conferência.
+        'chao': um('terreno', um('leito', antigo.get('chao', ''))),
         'leito': um('leito', antigo.get('leito', '')),
         # Todas as variantes do leito: é o jogo que escolhe qual vai em cada trecho.
         'leitos': [n for n, _ in papeis.get('leito', [])],

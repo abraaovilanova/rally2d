@@ -58,6 +58,11 @@ interface Scenery {
   crowd: string;
   /** Tamanho na tela = pixels do sprite × isto. */
   propScale: number;
+  /**
+   * Quão cheia é a beira da Pista, de 0 a 1. Não é enfeite: uma floresta com a densidade
+   * de um deserto não é uma floresta — é um deserto verde.
+   */
+  densidade: number;
   /** O tileset de canto do chão, quando o Bioma já tem um. */
   terreno: { sheet: Sheet; tile: number; pares: number } | null;
   /**
@@ -163,6 +168,7 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       // convivem, cada Bioma carrega a sua escala — e o campo morre quando o último
       // Bioma antigo for refeito.
       propScale: campo(b, 'escala', PROP_SCALE_ANTIGA),
+      densidade: campo(b, 'densidade', 0.55),
       rasteiros: campo<string[]>(b, 'rasteiros', []),
       terreno: montarTerreno(campo<Tileset | null>(b, 'terreno', null)),
       quadros: agruparQuadros(Object.keys(b.recortes)),
@@ -408,7 +414,7 @@ function buildProps(stage: Stage): Prop[] {
 
   const last = center.length - 1;
   for (let i = 12; i < last - 12; i += 9) {
-    if (rng.next() > 0.55) continue;
+    if (rng.next() > scenery.densidade) continue;
 
     const side = rng.next() < 0.5 ? -1 : 1;
     const n = normalAt(center, i);
@@ -599,11 +605,13 @@ function drawSprite(
 }
 
 /**
- * Os pórticos de largada e chegada, em pé sobre a Pista.
+ * Os pórticos de largada e chegada, atravessados sobre a Pista.
  *
- * Ficavam deitados atravessados no traçado, que é convenção de vista de cima. Com o
- * Ponto de Vista misto — chão de cima, objeto em 3/4 — o pórtico é objeto: fica em pé,
- * apoiado no meio da Pista, e o Carro passa por baixo dele.
+ * O pórtico é a única coisa do Cenário que **cruza** a Pista, e é isso que ele precisa
+ * mostrar: o Carro passa por baixo dele. Desenhado como painel em pé, ele acabava
+ * deitado ao longo do traçado em vez de cruzá-lo — dois postes na beira, e nenhum arco
+ * por onde passar. Aqui ele é girado com o traçado, como uma faixa esticada de um lado
+ * ao outro da Pista.
  */
 export function drawGates(ctx: CanvasRenderingContext2D, stage: Stage): void {
   const scenery = SCENERY[stage.biome.id];
@@ -623,7 +631,9 @@ function gate(
   trackWidth: number,
 ): void {
   const i = Math.min(Math.max(index, 1), center.length - 1);
+  const a = center[i - 1];
   const b = center[i];
+  const heading = Math.atan2(b.y - a.y, b.x - a.x);
   const s = scenery.sprites[name];
   // Largo o bastante para atravessar a Pista: o pórtico é o que diz onde ela começa.
   const w = trackWidth * 1.15;
@@ -631,8 +641,10 @@ function gate(
 
   ctx.save();
   ctx.translate(b.x, b.y);
+  // Girado um quarto de volta em relação ao traçado: assim a faixa cruza a Pista em vez
+  // de correr ao lado dela, seja qual for a direção em que a Etapa começa.
+  ctx.rotate(heading + Math.PI / 2);
   ctx.imageSmoothingEnabled = false;
-  // Em pé e apoiado no chão, como todo objeto: não gira com o traçado.
-  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h, w, h);
+  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h / 2, w, h);
   ctx.restore();
 }

@@ -20,28 +20,28 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "tall dark green pine tree seen from a high angle, dense needled canopy",
-      "peso": 6
+      "peso": 16
     },
     {
       "nome": "arvore",
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "broad leafy deciduous tree with a round green canopy, brown trunk",
-      "peso": 6
+      "peso": 13
     },
     {
       "nome": "arbusto",
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "dense round green forest shrub with broad leaves, fills the frame",
-      "peso": 5
+      "peso": 8
     },
     {
       "nome": "samambaia",
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "cluster of green ferns with arching fronds, fills the frame",
-      "peso": 5
+      "peso": 7
     },
     {
       "nome": "pedras",
@@ -55,14 +55,14 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "fallen mossy tree trunk lying on the forest floor, bark peeling",
-      "peso": 3
+      "peso": 4
     },
     {
       "nome": "toco",
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "cut tree stump with visible growth rings and moss on the bark",
-      "peso": 3
+      "peso": 4
     },
     {
       "nome": "cogumelos",
@@ -171,6 +171,13 @@
       "papel": "leito",
       "ocupacao": "ladrilho",
       "descricao": "trail scattered with debris"
+    },
+    {
+      "nome": "poeira",
+      "papel": "efeito",
+      "ocupacao": "metade",
+      "descricao": "mud spray"
     }
-  ]
+  ],
+  "densidade": 0.92
 }

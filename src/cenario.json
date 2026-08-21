@@ -16,6 +16,7 @@
       },
       "folha": "deserto-v2",
       "escala": 0.5,
+      "densidade": 0.55,
       "espelhar": false,
       "chao": "terrenoAreia",
       "leito": "leito1",
@@ -314,8 +315,9 @@
       },
       "folha": "floresta-v2",
       "escala": 0.5,
+      "densidade": 0.92,
       "espelhar": false,
-      "chao": "moss",
+      "chao": "leito1",
       "leito": "leito1",
       "leitos": [
         "leito1",
@@ -342,13 +344,13 @@
         "cone"
       ],
       "pesos": [
-        6,
-        6,
-        5,
-        5,
+        16,
+        13,
+        8,
+        7,
         3,
-        3,
-        3,
+        4,
+        4,
         3,
         2,
         2,
@@ -366,7 +368,9 @@
       ],
       "rasteiros": [],
       "plateia": "plateia",
-      "efeitos": [],
+      "efeitos": [
+        "poeira"
+      ],
       "recortes": {
         "pinheiro": {
           "x": 2,
@@ -488,56 +492,62 @@
           "w": 74,
           "h": 78
         },
-        "arbusto": {
+        "poeira": {
           "x": 578,
+          "y": 149,
+          "w": 78,
+          "h": 78
+        },
+        "arbusto": {
+          "x": 658,
           "y": 149,
           "w": 78,
           "h": 75
         },
         "torcedor2-1": {
-          "x": 658,
+          "x": 738,
           "y": 149,
           "w": 54,
           "h": 71
         },
         "torcedor3-1": {
-          "x": 714,
+          "x": 794,
           "y": 149,
           "w": 62,
           "h": 71
         },
         "bandeiraVerde": {
-          "x": 778,
+          "x": 858,
           "y": 149,
           "w": 47,
           "h": 70
         },
         "pneus": {
-          "x": 827,
+          "x": 907,
           "y": 149,
           "w": 54,
           "h": 68
         },
         "torcedor4-1": {
-          "x": 883,
+          "x": 963,
           "y": 149,
           "w": 34,
           "h": 60
         },
         "cone": {
-          "x": 919,
+          "x": 999,
           "y": 149,
           "w": 44,
           "h": 52
         },
         "cogumelos": {
-          "x": 965,
+          "x": 1045,
           "y": 149,
           "w": 40,
           "h": 44
         },
         "bandeiraBranca": {
-          "x": 1007,
+          "x": 1087,
           "y": 149,
           "w": 23,
           "h": 43
@@ -552,8 +562,9 @@
       },
       "folha": "gelo-v2",
       "escala": 0.5,
+      "densidade": 0.6,
       "espelhar": false,
-      "chao": "snow",
+      "chao": "leito1",
       "leito": "leito1",
       "leitos": [
         "leito1",
@@ -615,7 +626,9 @@
         "galhoNeve"
       ],
       "plateia": "plateia",
-      "efeitos": [],
+      "efeitos": [
+        "poeira"
+      ],
       "recortes": {
         "largada": {
           "x": 2,
@@ -737,74 +750,80 @@
           "w": 110,
           "h": 74
         },
-        "pneus": {
+        "poeira": {
           "x": 542,
+          "y": 144,
+          "w": 73,
+          "h": 69
+        },
+        "pneus": {
+          "x": 617,
           "y": 144,
           "w": 46,
           "h": 68
         },
         "rachaduraGelo": {
-          "x": 590,
+          "x": 665,
           "y": 144,
           "w": 16,
           "h": 64
         },
         "bandeiraBranca": {
-          "x": 608,
+          "x": 683,
           "y": 144,
           "w": 42,
           "h": 58
         },
         "monteNeve": {
-          "x": 652,
+          "x": 727,
           "y": 144,
           "w": 76,
           "h": 56
         },
         "cone": {
-          "x": 730,
+          "x": 805,
           "y": 144,
           "w": 32,
           "h": 55
         },
         "placaVale": {
-          "x": 764,
+          "x": 839,
           "y": 144,
           "w": 50,
           "h": 53
         },
         "arbustoNeve": {
-          "x": 816,
+          "x": 891,
           "y": 144,
           "w": 61,
           "h": 52
         },
         "torcedor4-1": {
-          "x": 879,
+          "x": 954,
           "y": 144,
           "w": 36,
           "h": 46
         },
         "marcaNeve": {
-          "x": 917,
+          "x": 992,
           "y": 144,
           "w": 28,
           "h": 43
         },
         "torcedor2-1": {
-          "x": 947,
+          "x": 1022,
           "y": 144,
           "w": 24,
           "h": 43
         },
         "galhoNeve": {
-          "x": 973,
+          "x": 1048,
           "y": 144,
           "w": 47,
           "h": 41
         },
         "pedrinhasNeve": {
-          "x": 1022,
+          "x": 1097,
           "y": 144,
           "w": 32,
           "h": 20

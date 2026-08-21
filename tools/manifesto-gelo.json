@@ -196,6 +196,13 @@
       "papel": "leito",
       "ocupacao": "ladrilho",
       "descricao": "trail scattered with debris"
+    },
+    {
+      "nome": "poeira",
+      "papel": "efeito",
+      "ocupacao": "metade",
+      "descricao": "snow spray"
     }
-  ]
+  ],
+  "densidade": 0.6
 }
