@@ -687,10 +687,11 @@
         const b = bioma();
         const img = folhas.get(b.folha);
         const div = document.getElementById('paleta');
-        // O chão e o leito são padrões ladrilhados, não objetos: não se põe um deles na
+        // Ladrilho é padrão e efeito é do jogo — nenhum dos dois é objeto que se põe na
         // beira da pista, e tê-los aqui só daria para errar.
+        const naoEObjeto = new Set([b.chao, b.leito, ...(b.leitos ?? []), ...(b.efeitos ?? [])]);
         div.innerHTML = Object.keys(b.recortes)
-          .filter((n) => n !== b.chao && n !== b.leito)
+          .filter((n) => !naoEObjeto.has(n))
           .map((n) => `<figure data-sprite="${n}"><canvas></canvas><figcaption>${n}</figcaption></figure>`)
           .join('');
 

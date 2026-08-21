@@ -7,22 +7,19 @@
       "nome": "largada",
       "papel": "largada",
       "ocupacao": "quadro",
-      "descricao": "ice rally start gantry arch of steel scaffolding covered in frost and icicles, banner reading LARGADA",
-      "feito": false
+      "descricao": "ice rally start gantry arch of steel scaffolding covered in frost and icicles, banner reading LARGADA"
     },
     {
       "nome": "chegada",
       "papel": "chegada",
       "ocupacao": "quadro",
-      "descricao": "ice rally finish gantry arch of steel scaffolding covered in frost, checkered banner reading CHEGADA",
-      "feito": false
+      "descricao": "ice rally finish gantry arch of steel scaffolding covered in frost, checkered banner reading CHEGADA"
     },
     {
       "nome": "pinheiroNeve",
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "tall pine tree heavy with snow on its branches, dark green under white",
-      "feito": false,
       "peso": 6
     },
     {
@@ -30,7 +27,6 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "bare leafless winter tree with dark twisted branches, frost on the bark",
-      "feito": false,
       "peso": 5
     },
     {
@@ -38,7 +34,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "small round shrub buried under snow, only twigs showing, fills the frame",
-      "feito": false,
       "peso": 5
     },
     {
@@ -46,7 +41,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "cluster of pale blue ice crystal spikes rising from the ground",
-      "feito": false,
       "peso": 5
     },
     {
@@ -54,7 +48,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "stack of cut ice blocks, translucent pale blue",
-      "feito": false,
       "peso": 4
     },
     {
@@ -62,7 +55,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "cluster of grey rocks capped with snow and ice",
-      "feito": false,
       "peso": 3
     },
     {
@@ -70,7 +62,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "low mound of packed snow with a wind crust, fills the frame",
-      "feito": false,
       "peso": 4
     },
     {
@@ -78,7 +69,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "metal rally signpost reading GELO, frost and icicles on the frame",
-      "feito": false,
       "peso": 2
     },
     {
@@ -86,7 +76,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "metal rally sign board on two posts reading VALE, snow on top",
-      "feito": false,
       "peso": 2
     },
     {
@@ -94,7 +83,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "blue marshal flag on a thin metal pole, stiff with frost",
-      "feito": false,
       "peso": 2
     },
     {
@@ -102,7 +90,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "white marshal flag on a thin metal pole",
-      "feito": false,
       "peso": 2
     },
     {
@@ -110,7 +97,6 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "snow fence section of wooden slats and wire, half buried in snow",
-      "feito": false,
       "peso": 3
     },
     {
@@ -118,7 +104,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "stack of worn racing tires, three high, capped with snow",
-      "feito": false,
       "peso": 2
     },
     {
@@ -126,7 +111,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "orange traffic cone with reflective stripe, snow on the tip",
-      "feito": false,
       "peso": 2
     },
     {
@@ -134,7 +118,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "thin dark crack running through pale ice",
-      "feito": false,
       "peso": 5,
       "rasteiro": true
     },
@@ -143,7 +126,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "pair of tire tracks pressed into packed snow",
-      "feito": false,
       "peso": 5,
       "rasteiro": true
     },
@@ -152,7 +134,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "few small dark stones poking through a thin layer of snow",
-      "feito": false,
       "peso": 4,
       "rasteiro": true
     },
@@ -161,7 +142,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "fallen bare branch half buried in snow",
-      "feito": false,
       "peso": 4,
       "rasteiro": true
     },
@@ -169,15 +149,13 @@
       "nome": "plateia",
       "papel": "plateia",
       "ocupacao": "quadro",
-      "descricao": "dense crowd of twenty rally spectators in heavy winter parkas packed shoulder to shoulder in a solid block, front row facing the viewer, fills the entire frame",
-      "feito": false
+      "descricao": "dense crowd of twenty rally spectators in heavy winter parkas packed shoulder to shoulder in a solid block, front row facing the viewer, fills the entire frame"
     },
     {
       "nome": "torcedor1",
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, man in a thick hooded parka and gloves, arms down / arm raised cheering",
-      "feito": false,
       "quadros": 2
     },
     {
@@ -185,7 +163,6 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, woman in a ski jacket with goggles on her forehead, standing / arm raised cheering",
-      "feito": false,
       "quadros": 2
     },
     {
@@ -193,7 +170,6 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, child in a bright snowsuit and wool hat, still / both arms raised cheering",
-      "feito": false,
       "quadros": 2
     },
     {
@@ -201,29 +177,25 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, snowmobile rider in helmet standing beside his machine, still / arm raised cheering",
-      "feito": false,
       "quadros": 2
     },
     {
       "nome": "leito1",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "packed trail surface, smooth",
-      "feito": true
+      "descricao": "packed trail surface, smooth"
     },
     {
       "nome": "leito2",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "trail with deep tire ruts",
-      "feito": true
+      "descricao": "trail with deep tire ruts"
     },
     {
       "nome": "leito3",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "trail scattered with debris",
-      "feito": true
+      "descricao": "trail scattered with debris"
     }
   ]
 }

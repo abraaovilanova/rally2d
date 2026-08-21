@@ -8,22 +8,19 @@
       "nome": "largada",
       "papel": "largada",
       "ocupacao": "quadro",
-      "descricao": "rally start gantry arch spanning a dirt road, scaffolding tubes, sponsor banner reading LARGADA, desert dust",
-      "feito": false
+      "descricao": "rally start gantry arch spanning a dirt road, scaffolding tubes, sponsor banner reading LARGADA, desert dust"
     },
     {
       "nome": "chegada",
       "papel": "chegada",
       "ocupacao": "quadro",
-      "descricao": "rally finish gantry arch spanning a dirt road, checkered banner reading CHEGADA, scaffolding tubes",
-      "feito": false
+      "descricao": "rally finish gantry arch spanning a dirt road, checkered banner reading CHEGADA, scaffolding tubes"
     },
     {
       "nome": "cactus",
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "tall saguaro cactus with two arms, desert plant",
-      "feito": true,
       "peso": 5
     },
     {
@@ -31,7 +28,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "dry desert shrub, sparse thorny branches",
-      "feito": false,
       "peso": 5
     },
     {
@@ -39,7 +35,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "cluster of large sandstone boulders",
-      "feito": false,
       "peso": 3
     },
     {
@@ -47,7 +42,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "small scattered sandstone rocks",
-      "feito": false,
       "peso": 4
     },
     {
@@ -55,7 +49,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "orange traffic cone with reflective stripe",
-      "feito": false,
       "peso": 2
     },
     {
@@ -63,7 +56,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "yellow marshal flag on a thin metal pole",
-      "feito": false,
       "peso": 2
     },
     {
@@ -71,7 +63,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "blue marshal flag on a thin metal pole",
-      "feito": false,
       "peso": 2
     },
     {
@@ -79,7 +70,6 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "wooden ranch fence section, three horizontal rails, weathered",
-      "feito": false,
       "peso": 2
     },
     {
@@ -87,7 +77,6 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "metal rally guardrail section on wooden posts",
-      "feito": false,
       "peso": 2
     },
     {
@@ -95,7 +84,6 @@
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "stack of worn racing tires, three high",
-      "feito": false,
       "peso": 2
     },
     {
@@ -103,7 +91,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "checkered flag on a pole, cloth caught in the wind",
-      "feito": false,
       "peso": 1
     },
     {
@@ -111,7 +98,6 @@
       "papel": "beira",
       "ocupacao": "dois-tercos",
       "descricao": "brazilian flag on a pole, cloth caught in the wind",
-      "feito": false,
       "peso": 1
     },
     {
@@ -119,7 +105,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "few small pebbles scattered on sand",
-      "feito": false,
       "peso": 6,
       "rasteiro": true
     },
@@ -128,7 +113,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "cracked dry earth patch, thin dark fissures",
-      "feito": false,
       "peso": 5,
       "rasteiro": true
     },
@@ -137,7 +121,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "tuft of dry desert grass, pale straw color",
-      "feito": false,
       "peso": 6
     },
     {
@@ -145,7 +128,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "bleached cattle skull half buried in sand",
-      "feito": false,
       "peso": 2
     },
     {
@@ -153,7 +135,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "single curved tire track pressed into sand",
-      "feito": false,
       "peso": 4,
       "rasteiro": true
     },
@@ -162,7 +143,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "dead bleached branch lying on the ground",
-      "feito": false,
       "peso": 4,
       "rasteiro": true
     },
@@ -171,7 +151,6 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "dark oil stain soaked into sand",
-      "feito": false,
       "peso": 2,
       "rasteiro": true
     },
@@ -180,22 +159,19 @@
       "papel": "beira",
       "ocupacao": "quarto",
       "descricao": "old tire half buried upright in sand, painted white top",
-      "feito": false,
       "peso": 3
     },
     {
       "nome": "plateia",
       "papel": "plateia",
       "ocupacao": "quadro",
-      "descricao": "dense crowd of rally spectators seen from the front, packed shoulder to shoulder, varied clothes and hats",
-      "feito": false
+      "descricao": "dense crowd of rally spectators seen from the front, packed shoulder to shoulder, varied clothes and hats"
     },
     {
       "nome": "torcedor1",
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, man in cap and shorts, arms down / arm raised cheering",
-      "feito": true,
       "quadros": 2
     },
     {
@@ -203,7 +179,6 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, woman with sunglasses and backpack, arms down / arm raised cheering",
-      "feito": false,
       "quadros": 2
     },
     {
@@ -211,7 +186,6 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, kid on father's shoulders, still / waving",
-      "feito": false,
       "quadros": 2
     },
     {
@@ -219,71 +193,61 @@
       "papel": "publico",
       "ocupacao": "dois-tercos",
       "descricao": "rally spectator, photographer with camera, standing / shooting",
-      "feito": false,
       "quadros": 2
     },
     {
       "nome": "leito1",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "packed dirt rally road surface, smooth, faint tire grooves",
-      "feito": true
+      "descricao": "packed dirt rally road surface, smooth, faint tire grooves"
     },
     {
       "nome": "leito2",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "packed dirt rally road surface with deep tire ruts and loose gravel",
-      "feito": true
+      "descricao": "packed dirt rally road surface with deep tire ruts and loose gravel"
     },
     {
       "nome": "leito3",
       "papel": "leito",
       "ocupacao": "ladrilho",
-      "descricao": "packed dirt rally road surface half covered by wind-blown sand",
-      "feito": true
+      "descricao": "packed dirt rally road surface half covered by wind-blown sand"
     },
     {
       "nome": "terrenoAreia",
       "papel": "terreno",
       "ocupacao": "ladrilho",
-      "descricao": "smooth desert sand, fine wind ripples",
-      "feito": true
+      "descricao": "smooth desert sand, fine wind ripples"
     },
     {
       "nome": "terrenoPedregoso",
       "papel": "terreno",
       "ocupacao": "ladrilho",
-      "descricao": "desert sand strewn with small stones and gravel",
-      "feito": true
+      "descricao": "desert sand strewn with small stones and gravel"
     },
     {
       "nome": "terrenoRachado",
       "papel": "terreno",
       "ocupacao": "ladrilho",
-      "descricao": "dry cracked earth, hard pale clay",
-      "feito": true
+      "descricao": "dry cracked earth, hard pale clay"
     },
     {
       "nome": "transicaoAreiaPedregoso",
       "papel": "tileset",
       "ocupacao": "wang",
-      "descricao": "wang tileset: smooth sand transitioning to stony sand",
-      "feito": true
+      "descricao": "wang tileset: smooth sand transitioning to stony sand"
     },
     {
       "nome": "transicaoPedregosoRachado",
       "papel": "tileset",
       "ocupacao": "wang",
-      "descricao": "wang tileset: stony sand transitioning to dry cracked earth",
-      "feito": true
+      "descricao": "wang tileset: stony sand transitioning to dry cracked earth"
     },
     {
       "nome": "carro-red-0",
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "1980s group B rally car, boxy wide-arch hatchback, rear wing, roof scoop, bonnet spotlights, mud flaps, door number, red livery, dirty lower body",
-      "feito": true,
       "direcoes": 8,
       "defasagem": 0,
       "cor": "red"
@@ -293,7 +257,6 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "same car, headings offset by 22.5 degrees",
-      "feito": false,
       "direcoes": 8,
       "defasagem": 22.5,
       "cor": "red"
@@ -303,7 +266,6 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "same group B rally car, green livery",
-      "feito": false,
       "direcoes": 8,
       "defasagem": 0,
       "cor": "green"
@@ -313,7 +275,6 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "same car, headings offset by 22.5 degrees",
-      "feito": false,
       "direcoes": 8,
       "defasagem": 22.5,
       "cor": "green"
@@ -323,7 +284,6 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "same group B rally car, blue livery",
-      "feito": false,
       "direcoes": 8,
       "defasagem": 0,
       "cor": "blue"
@@ -333,7 +293,6 @@
       "papel": "carro",
       "ocupacao": "dois-tercos",
       "descricao": "same car, headings offset by 22.5 degrees",
-      "feito": false,
       "direcoes": 8,
       "defasagem": 22.5,
       "cor": "blue"
@@ -342,8 +301,7 @@
       "nome": "poeira",
       "papel": "efeito",
       "ocupacao": "metade",
-      "descricao": "puff of desert dust kicked up behind a car, expanding and fading",
-      "feito": true
+      "descricao": "puff of desert dust kicked up behind a car, expanding and fading"
     }
   ]
 }
