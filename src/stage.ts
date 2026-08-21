@@ -16,6 +16,13 @@ export interface Biome {
   name: string;
   palette: Palette;
   weights: SegmentWeights;
+  /**
+   * A Aderência do chão do Bioma, de 0 a 1. Um é o chão seco, onde a direção que o Carro
+   * aponta e a que ele percorre são a mesma. O Gelo é o Bioma que escorrega inteiro.
+   */
+  grip: number;
+  /** O Bioma tem Poças — trechos soltos de Aderência baixa, que dá para desviar. */
+  puddles: boolean;
 }
 
 export const BIOMES: readonly Biome[] = [
@@ -31,6 +38,8 @@ export const BIOMES: readonly Biome[] = [
       text: '#f6f2e9',
     },
     weights: { straight: 4, smoothCurve: 3, tightCurve: 2, chicane: 1 },
+    grip: 1,
+    puddles: false,
   },
   {
     id: 'floresta',
@@ -44,6 +53,8 @@ export const BIOMES: readonly Biome[] = [
       text: '#f2fff5',
     },
     weights: { straight: 2, smoothCurve: 3, tightCurve: 3, chicane: 2 },
+    grip: 1,
+    puddles: true,
   },
   {
     id: 'gelo',
@@ -57,6 +68,8 @@ export const BIOMES: readonly Biome[] = [
       text: '#eaf6ff',
     },
     weights: { straight: 2, smoothCurve: 2, tightCurve: 4, chicane: 3 },
+    grip: TUNING.iceGrip,
+    puddles: false,
   },
 ];
 

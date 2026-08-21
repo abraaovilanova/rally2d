@@ -13,6 +13,7 @@ import { readBestTime, recordTime } from './records';
 import { makeStage, type Stage } from './stage';
 import type { Vec } from './path';
 import { pathOf, progressOf, START_ROUTE, stepRoute, type Route } from './route';
+import { gripAt } from './surface';
 import { TUNING } from './tuning';
 
 /**
@@ -169,7 +170,9 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
 
   game.elapsed += dt;
   game.aim = aim;
-  driveCar(game.car, aim, dt, categoryOf(game));
+  // A Aderência é lida onde o Carro está agora: entrar na Poça é o que escorrega, e
+  // por isso o preço aparece no quadro seguinte, já dentro dela.
+  driveCar(game.car, aim, dt, categoryOf(game), gripAt(game.stage, game.car.x, game.car.y));
 
   // O progresso só pode avançar o que o Carro de fato andou neste quadro. A folga extra
   // cobre as Rotas Alternativas, cujos pontos ficam um pouco mais espaçados que o passo.

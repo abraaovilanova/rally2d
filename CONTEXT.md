@@ -120,6 +120,32 @@ entrada, não haveria decisão a tomar, apenas bordas a seguir.
 O fim de um **Beco sem Saída**. Tocá-la é **Batida**. Não existe voltar: o **Carro** não para nem
 dá ré, e nas larguras menores da **Escalada** não cabe uma meia-volta.
 
+## Aderência (Grip)
+
+Quanto do que o volante pede o chão devolve. Aderência cheia é o chão seco: a direção que o **Carro**
+aponta e a direção em que ele anda são a mesma, e o jogo é só o **Ponto de Mira**. Abaixo dela as duas
+se separam.
+
+A Aderência é do chão, não do **Carro**: as três **Categorias** escorregam igual. O que muda entre elas
+continua sendo velocidade e giro.
+
+## Derrapagem (Slip)
+
+A diferença entre a direção que o **Carro** aponta e a direção em que ele de fato anda, quando a
+**Aderência** é baixa. O Carro vira na hora — o deslocamento é que demora a acompanhar.
+
+Frear não desfaz uma Derrapagem em curso, e é isso que a torna uma decisão de traçado: o preço se paga
+na entrada, escolhendo por onde passar, não no meio.
+
+## Poça (Puddle)
+
+Um trecho de **Aderência** baixa dentro de uma **Etapa**, nascido da **Semente** como tudo mais. Fica
+**sobre** a **Pista**, deslocada do meio: desviar custa ir para a borda. Uma Poça que dá para evitar
+sem sair da linha não seria uma decisão.
+
+É o oposto do **Gelo**, onde a Aderência baixa é do **Bioma** inteiro e não existe por onde desviar —
+lá a Derrapagem é a Etapa, não um lugar dela.
+
 ## Segmento (Segment)
 
 A peça de que a **Linha Central** é montada: reta, curva suave, curva fechada, chicane. O catálogo

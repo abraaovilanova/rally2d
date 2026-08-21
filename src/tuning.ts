@@ -21,6 +21,31 @@ export const TUNING = {
    */
   aimDeadzone: 40,
 
+  /**
+   * A Derrapagem: com que velocidade, em rad/s, a direção do deslocamento alcança a
+   * direção que o Carro aponta, com Aderência 1. Aderência menor divide isto na mesma
+   * proporção — no Gelo o Carro vira na hora e demora a ir para onde virou.
+   *
+   * Alto de propósito: em chão seco (Aderência 1) a direção alcança dentro do quadro e
+   * o Carro dirige exatamente como sempre dirigiu. Derrapar é a exceção, não a regra.
+   */
+  slipResponse: 6,
+
+  /** A Aderência do Gelo. Vale na Etapa inteira: no Gelo não existe linha seca. */
+  iceGrip: 0.5,
+
+  /** A Aderência dentro de uma Poça. Menor que a do Gelo: a Poça dá para desviar. */
+  puddleGrip: 0.3,
+
+  /** Faixa de raio de uma Poça, em px. */
+  puddleRadius: [26, 48] as [number, number],
+
+  /** Distância entre tentativas de Poça, em pontos da Linha Central. */
+  puddleSpacing: 55,
+
+  /** Chance de cada tentativa virar uma Poça de fato. */
+  puddleChance: 0.55,
+
   /** Raio de colisão do Carro, em px. */
   carRadius: 9,
 

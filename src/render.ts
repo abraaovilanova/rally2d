@@ -1,4 +1,4 @@
-import { throttleOf } from './car';
+import { slipOf, throttleOf } from './car';
 import { CAR_COLORS, CAR_SWATCHES, drawCarSprite } from './carSprite';
 import { categoryOf, currentPath, progress, type Game } from './game';
 import { nextNotes, type PaceNote } from './pacenotes';
@@ -6,6 +6,7 @@ import type { Path, Vec } from './path';
 import { formatTime } from './records';
 import { isOffRoute } from './route';
 import { drawGates, drawGround, drawProps, hasScenery, sceneryOf, trackFill } from './scenery';
+import { puddlesOf, type Puddle } from './surface';
 import type { Track } from './track';
 import { TUNING } from './tuning';
 
@@ -35,17 +36,20 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.save();
   ctx.translate(-cam.x, -cam.y);
 
-  const scenery = hasScenery(game.stage.biome.id);
-  if (scenery) drawGround(ctx, cam, canvas.width, canvas.height, palette.background);
+  const biomeId = game.stage.biome.id;
+  const scenery = hasScenery(biomeId);
+  if (scenery) drawGround(ctx, biomeId, cam, canvas.width, canvas.height, palette.background);
 
-  const surface = (scenery && trackFill(ctx)) || palette.track;
+  const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
 
   const [from, to] = windowAround(track.main, mainIndex);
   drawPathWindow(ctx, track.main, from, to, surface, palette.edge);
   drawBranches(ctx, game, from, to, surface);
+  // Sobre o leito e debaixo de tudo o mais: a Poça é chão, não objeto.
+  drawPuddles(ctx, game, cam, canvas.width, canvas.height);
   if (scenery) {
     drawGates(ctx, game.stage);
-    drawProps(ctx, sceneryOf(game.stage), cam, canvas.width, canvas.height);
+    drawProps(ctx, biomeId, sceneryOf(game.stage), cam, canvas.width, canvas.height);
   }
   drawForkSigns(ctx, game, from, to);
   drawNoteMarkers(ctx, game);
@@ -191,6 +195,52 @@ function roundedRect(
   ctx.closePath();
 }
 
+/**
+ * As Poças. Precisam ser lidas antes de serem pisadas, senão a Derrapagem vira azar:
+ * escuras contra o leito, com um brilho na borda que é o que denuncia água de longe.
+ */
+function drawPuddles(
+  ctx: CanvasRenderingContext2D,
+  game: Game,
+  cam: Vec,
+  width: number,
+  height: number,
+): void {
+  const puddles = puddlesOf(game.stage);
+  if (puddles.length === 0) return;
+
+  for (const puddle of puddles) {
+    const reach = puddle.radius * puddle.stretch;
+    if (puddle.x < cam.x - reach || puddle.x > cam.x + width + reach) continue;
+    if (puddle.y < cam.y - reach || puddle.y > cam.y + height + reach) continue;
+    puddleShape(ctx, puddle);
+  }
+}
+
+function puddleShape(ctx: CanvasRenderingContext2D, puddle: Puddle): void {
+  ctx.save();
+  ctx.translate(puddle.x, puddle.y);
+  ctx.rotate(puddle.angle);
+  ctx.scale(puddle.stretch, 1);
+
+  ctx.beginPath();
+  ctx.arc(0, 0, puddle.radius, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(34, 25, 14, 0.66)';
+  ctx.fill();
+
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = 'rgba(126, 148, 106, 0.55)';
+  ctx.stroke();
+
+  // O reflexo: sem ele a Poça se lê como buraco, e buraco o jogador tenta desviar sempre.
+  ctx.beginPath();
+  ctx.ellipse(-puddle.radius * 0.25, -puddle.radius * 0.3, puddle.radius * 0.4, puddle.radius * 0.18, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(198, 226, 206, 0.2)';
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function drawFinishLine(ctx: CanvasRenderingContext2D, path: Path, color: string): void {
   const last = path.center.length - 1;
   ctx.strokeStyle = color;
@@ -230,6 +280,8 @@ function drawCar(ctx: CanvasRenderingContext2D, game: Game, color: string): void
   const r = TUNING.carRadius;
   const { x, y, heading } = game.car;
 
+  drawSkid(ctx, game);
+
   // A Batida precisa de um sinal que o sprite não dá: um anel no ponto do impacto.
   if (game.phase === 'crashed') {
     ctx.strokeStyle = '#ff4d4d';
@@ -253,6 +305,38 @@ function drawCar(ctx: CanvasRenderingContext2D, game: Game, color: string): void
   ctx.closePath();
   ctx.fill();
   ctx.restore();
+}
+
+/**
+ * O rastro de Derrapagem: o Carro anda numa direção e aponta noutra, e sem o rastro essa
+ * diferença some no meio da rotação do sprite. O traço sai por onde ele *veio*.
+ */
+function drawSkid(ctx: CanvasRenderingContext2D, game: Game): void {
+  if (game.phase !== 'running') return;
+
+  const slip = Math.abs(slipOf(game.car));
+  if (slip < 0.06) return;
+
+  const length = Math.min(slip, 1) * 90;
+  const { x, y, drift } = game.car;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(drift);
+  ctx.globalAlpha = Math.min(slip * 1.6, 0.7);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(0, side * TUNING.carRadius * 0.6);
+    ctx.lineTo(-length, side * TUNING.carRadius * 0.6);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
 }
 
 /** Seletor de cor do Carro. Sempre visível: a escolha é anterior à primeira Corrida. */

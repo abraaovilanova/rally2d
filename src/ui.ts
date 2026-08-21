@@ -69,7 +69,7 @@ function drawGrid(game: Game): void {
 
   show(`
     <div class="panel">
-      <p class="eyebrow">${stage.biome.name} · volta ${stage.lap + 1}</p>
+      <p class="eyebrow">${stage.biome.name} · volta ${stage.lap + 1}${surfaceHint(game)}</p>
       <h1>Grid</h1>
       <p class="lede">Escolha a etapa e o carro. Seu melhor aqui na categoria ${game.category}: <b>${best}</b></p>
 
@@ -106,6 +106,17 @@ function drawGrid(game: Game): void {
   };
 
   if (game.mode === 'online') loadBoard(game);
+}
+
+/**
+ * O chão que escorrega tem de ser sabido antes da largada. Descobrir no meio da primeira
+ * curva não é dificuldade, é pegadinha — e o Tempo já foi.
+ */
+function surfaceHint(game: Game): string {
+  const biome = game.stage.biome;
+  if (biome.grip < 1) return ' · pista escorregadia';
+  if (biome.puddles) return ' · poças na pista';
+  return '';
 }
 
 /**

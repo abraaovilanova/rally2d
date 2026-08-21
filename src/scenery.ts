@@ -1,4 +1,5 @@
 import desertSheet from '../assets/world/deserto.png';
+import iceForestSheet from '../assets/world/gelo-floresta.png';
 import { normalAt, type Vec } from './path';
 import { createRng, seedFromStageId } from './rng';
 import type { Stage } from './stage';
@@ -20,8 +21,40 @@ interface Rect {
 
 const r = (x: number, y: number, w: number, h: number): Rect => ({ x, y, w, h });
 
+/**
+ * O Cenário de um Bioma. Cada Bioma nomeia os seus próprios sprites — um cacto não tem
+ * equivalente no gelo — e o que é comum são os papéis: o chão, o leito, os dois pórticos,
+ * o que fica na beira e quem assiste.
+ */
+interface Scenery {
+  /** A folha de onde todos os recortes vêm. Duas Biomas podem dividir a mesma. */
+  sheet: Sheet;
+  sprites: Record<string, Rect>;
+  /** O chão fora da Pista. */
+  ground: string;
+  /** O leito da Pista. */
+  bed: string;
+  largada: string;
+  chegada: string;
+  roadside: readonly string[];
+  roadsideWeights: readonly number[];
+  fans: readonly string[];
+  crowd: string;
+}
+
+interface Sheet {
+  src: string;
+  image: HTMLImageElement;
+}
+
+const makeSheet = (src: string): Sheet => ({ src, image: new Image() });
+
+const DESERT_SHEET = makeSheet(desertSheet);
+/** Uma folha só, com a Floresta em cima e o Gelo embaixo. */
+const ICE_FOREST_SHEET = makeSheet(iceForestSheet);
+
 /** Medidos na folha `assets/world/deserto.png`. */
-const DESERT = {
+const DESERT_SPRITES = {
   largada: r(22, 30, 200, 81),
   chegada: r(589, 19, 179, 81),
   cactus: r(1150, 338, 58, 96),
@@ -50,67 +83,156 @@ const DESERT = {
   sand: r(755, 315, 140, 138),
   /** Terra com marcas de pneu, para o leito da Pista. */
   dirt: r(20, 318, 132, 134),
-} as const;
+};
 
-type SpriteName = keyof typeof DESERT;
+/**
+ * Medidos na folha `assets/world/gelo-floresta.png`. As duas metades dela são Biomas
+ * diferentes; a última fileira, o público, é dividida entre os dois.
+ */
+const FOREST_SPRITES = {
+  largada: r(11, 5, 206, 140),
+  chegada: r(571, 12, 202, 129),
+  signTrail: r(257, 35, 126, 105),
+  signWood: r(421, 40, 121, 100),
+  flag: r(820, 24, 75, 106),
+  podium: r(946, 46, 140, 73),
+  tires: r(1274, 44, 123, 91),
+  pines: r(791, 156, 149, 149),
+  trees: r(942, 153, 150, 148),
+  rocks: r(1102, 173, 143, 115),
+  hiker: r(56, 641, 65, 121),
+  ranger: r(223, 637, 71, 126),
+  biker: r(395, 636, 89, 125),
+  crowd: r(1265, 632, 133, 121),
+  /** Musgo, para o chão. */
+  moss: r(527, 152, 93, 155),
+  /** Terra batida entre as samambaias, para o leito da Pista. */
+  soil: r(626, 152, 156, 155),
+};
 
-/** Objetos da beira da Pista e seus pesos de sorteio. */
-const ROADSIDE: readonly SpriteName[] = [
-  'cactus',
-  'bush',
-  'rocks',
-  'smallRocks',
-  'cone',
-  'flagYellow',
-  'flagBlue',
-  'fence',
-  'guardrail',
-  'tires',
-];
-const ROADSIDE_WEIGHTS: readonly number[] = [5, 5, 3, 4, 2, 2, 2, 2, 2, 2];
+const ICE_SPRITES = {
+  largada: r(10, 310, 211, 145),
+  chegada: r(562, 310, 201, 141),
+  signIce: r(261, 339, 92, 116),
+  signValley: r(392, 342, 129, 105),
+  flag: r(819, 330, 76, 112),
+  podium: r(937, 355, 144, 80),
+  cubes: r(1267, 337, 131, 104),
+  bareTree: r(881, 459, 98, 147),
+  snowBush: r(1002, 513, 70, 76),
+  crystals: r(1106, 471, 136, 138),
+  parka: r(578, 636, 71, 125),
+  sculptor: r(747, 637, 107, 123),
+  snowmobile: r(902, 633, 159, 130),
+  seated: r(1118, 632, 83, 131),
+  crowd: r(1265, 632, 133, 121),
+  /**
+   * Neve lisa, para o chão. O recorte é o miolo opaco do ladrilho: incluir as linhas
+   * transparentes da borda abriria uma faixa vazia a cada repetição do padrão.
+   */
+  snow: r(528, 469, 117, 146),
+  /** Neve com marcas de pneu, para o leito da Pista. */
+  tracks: r(411, 469, 105, 147),
+};
 
-const FANS: readonly SpriteName[] = ['fan1', 'fan2', 'fan3', 'fan4', 'fan5', 'fan6', 'fan7'];
+const SCENERY: Record<string, Scenery> = {
+  deserto: {
+    sheet: DESERT_SHEET,
+    sprites: DESERT_SPRITES,
+    ground: 'sand',
+    bed: 'dirt',
+    largada: 'largada',
+    chegada: 'chegada',
+    roadside: [
+      'cactus',
+      'bush',
+      'rocks',
+      'smallRocks',
+      'cone',
+      'flagYellow',
+      'flagBlue',
+      'fence',
+      'guardrail',
+      'tires',
+    ],
+    roadsideWeights: [5, 5, 3, 4, 2, 2, 2, 2, 2, 2],
+    fans: ['fan1', 'fan2', 'fan3', 'fan4', 'fan5', 'fan6', 'fan7'],
+    crowd: 'crowd',
+  },
+  floresta: {
+    sheet: ICE_FOREST_SHEET,
+    sprites: FOREST_SPRITES,
+    ground: 'moss',
+    bed: 'soil',
+    largada: 'largada',
+    chegada: 'chegada',
+    roadside: ['pines', 'trees', 'rocks', 'tires', 'signTrail', 'signWood', 'flag', 'podium'],
+    roadsideWeights: [6, 6, 3, 2, 2, 2, 1, 1],
+    fans: ['hiker', 'ranger', 'biker'],
+    crowd: 'crowd',
+  },
+  gelo: {
+    sheet: ICE_FOREST_SHEET,
+    sprites: ICE_SPRITES,
+    ground: 'snow',
+    bed: 'tracks',
+    largada: 'largada',
+    chegada: 'chegada',
+    roadside: ['bareTree', 'crystals', 'snowBush', 'cubes', 'signIce', 'signValley', 'flag', 'podium'],
+    roadsideWeights: [5, 5, 4, 3, 2, 2, 1, 1],
+    fans: ['parka', 'sculptor', 'snowmobile', 'seated'],
+    crowd: 'crowd',
+  },
+};
 
 /** Tamanho na tela = pixels do sprite × isto. Calibrado contra a largura da Pista. */
 const PROP_SCALE = 0.55;
 
 /** Um objeto já posicionado no mundo. O ponto é onde ele toca o chão. */
 export interface Prop {
-  sprite: SpriteName;
+  sprite: string;
   x: number;
   y: number;
   scale: number;
   flip: boolean;
 }
 
-const sheet = new Image();
-let sheetRequested = false;
-
 export function preloadScenery(): void {
-  if (sheetRequested) return;
-  sheetRequested = true;
-  sheet.src = desertSheet;
+  for (const sheet of [DESERT_SHEET, ICE_FOREST_SHEET]) {
+    if (sheet.image.src === '') sheet.image.src = sheet.src;
+  }
 }
 
 /** O Cenário existe por Bioma; os que não têm folha continuam só com a paleta. */
 export function hasScenery(biomeId: string): boolean {
-  return biomeId === 'deserto' && sheet.complete && sheet.naturalWidth > 0;
+  const scenery = SCENERY[biomeId];
+  if (scenery === undefined) return false;
+  const { image } = scenery.sheet;
+  return image.complete && image.naturalWidth > 0;
 }
 
 // ---------------------------------------------------------------- chão e leito
 
 /** Padrões custam um canvas cada; são os mesmos para o jogo todo. */
-const patterns = new Map<'sand' | 'dirt', CanvasPattern | null>();
+const patterns = new Map<string, CanvasPattern | null>();
 
 /**
  * Ladrilhar um recorte que não é contínuo deixa costura visível a cada repetição.
  * Espelhar em 2×2 faz as bordas do bloco baterem consigo mesmas e a costura some.
  */
-function patternOf(ctx: CanvasRenderingContext2D, name: 'sand' | 'dirt'): CanvasPattern | null {
-  const cached = patterns.get(name);
+function patternOf(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  role: 'ground' | 'bed',
+): CanvasPattern | null {
+  const key = `${biomeId}:${role}`;
+  const cached = patterns.get(key);
   if (cached !== undefined) return cached;
 
-  const src = DESERT[name];
+  const scenery = SCENERY[biomeId];
+  if (scenery === undefined) return null;
+
+  const src = scenery.sprites[scenery[role]];
   const tile = document.createElement('canvas');
   tile.width = src.w * 2;
   tile.height = src.h * 2;
@@ -126,30 +248,31 @@ function patternOf(ctx: CanvasRenderingContext2D, name: 'sand' | 'dirt'): Canvas
     tctx.save();
     tctx.translate(sx ? src.w * 2 : 0, sy ? src.h * 2 : 0);
     tctx.scale(sx ? -1 : 1, sy ? -1 : 1);
-    tctx.drawImage(sheet, src.x, src.y, src.w, src.h, 0, 0, src.w, src.h);
+    tctx.drawImage(scenery.sheet.image, src.x, src.y, src.w, src.h, 0, 0, src.w, src.h);
     tctx.restore();
   }
 
   const pattern = ctx.createPattern(tile, 'repeat');
-  patterns.set(name, pattern);
+  patterns.set(key, pattern);
   return pattern;
 }
 
-/** O chão de areia, já em coordenadas de mundo (chamar dentro do translate da câmera). */
+/** O chão do Bioma, já em coordenadas de mundo (chamar dentro do translate da câmera). */
 export function drawGround(
   ctx: CanvasRenderingContext2D,
+  biomeId: string,
   cam: Vec,
   width: number,
   height: number,
   tint: string,
 ): void {
-  const pattern = patternOf(ctx, 'sand');
+  const pattern = patternOf(ctx, biomeId, 'ground');
   if (!pattern) return;
 
   ctx.fillStyle = pattern;
   ctx.fillRect(cam.x, cam.y, width, height);
 
-  // A areia crua é clara demais para a Pista se destacar dela.
+  // A areia — e a neve mais ainda — é clara demais para a Pista se destacar dela.
   ctx.globalAlpha = 0.45;
   ctx.fillStyle = tint;
   ctx.fillRect(cam.x, cam.y, width, height);
@@ -157,8 +280,8 @@ export function drawGround(
 }
 
 /** A textura do leito da Pista, para usar como `fillStyle` no lugar da cor da paleta. */
-export function trackFill(ctx: CanvasRenderingContext2D): CanvasPattern | null {
-  return patternOf(ctx, 'dirt');
+export function trackFill(ctx: CanvasRenderingContext2D, biomeId: string): CanvasPattern | null {
+  return patternOf(ctx, biomeId, 'bed');
 }
 
 // ------------------------------------------------------------------- objetos
@@ -176,6 +299,9 @@ export function sceneryOf(stage: Stage): Prop[] {
 }
 
 function buildProps(stage: Stage): Prop[] {
+  const scenery = SCENERY[stage.biome.id];
+  if (scenery === undefined) return [];
+
   const { track } = stage;
   const center = track.main.center;
   const rng = createRng(seedFromStageId(`${stage.id}-cenario`));
@@ -196,7 +322,7 @@ function buildProps(stage: Stage): Prop[] {
     if (occupied.has(cellKey(x, y))) continue;
 
     props.push({
-      sprite: rng.weighted(ROADSIDE, ROADSIDE_WEIGHTS),
+      sprite: rng.weighted(scenery.roadside, scenery.roadsideWeights),
       x,
       y,
       scale: PROP_SCALE * rng.range(0.85, 1.15),
@@ -205,8 +331,8 @@ function buildProps(stage: Stage): Prop[] {
   }
 
   // Público na largada e na chegada: é onde a Corrida começa e termina de valer.
-  addCrowd(props, stage, rng, 8, 90);
-  addCrowd(props, stage, rng, last - 90, last - 8);
+  addCrowd(props, stage, scenery, rng, 8, 90);
+  addCrowd(props, stage, scenery, rng, last - 90, last - 8);
 
   return props;
 }
@@ -214,6 +340,7 @@ function buildProps(stage: Stage): Prop[] {
 function addCrowd(
   props: Prop[],
   stage: Stage,
+  scenery: Scenery,
   rng: ReturnType<typeof createRng>,
   from: number,
   to: number,
@@ -228,7 +355,10 @@ function addCrowd(
     const away = stage.track.width / 2 + 22 + rng.range(0, 40);
 
     props.push({
-      sprite: rng.next() < 0.25 ? 'crowd' : FANS[Math.floor(rng.range(0, FANS.length))],
+      sprite:
+        rng.next() < 0.25
+          ? scenery.crowd
+          : scenery.fans[Math.floor(rng.range(0, scenery.fans.length))],
       x: center[i].x + n.x * away * side,
       y: center[i].y + n.y * away * side,
       scale: PROP_SCALE * rng.range(0.8, 1.0),
@@ -261,36 +391,42 @@ function occupiedCells(stage: Stage): Set<string> {
 /** Desenha os objetos visíveis. O sprite fica em pé, apoiado no ponto do mundo. */
 export function drawProps(
   ctx: CanvasRenderingContext2D,
+  biomeId: string,
   props: readonly Prop[],
   cam: Vec,
   width: number,
   height: number,
 ): void {
+  const scenery = SCENERY[biomeId];
+  if (scenery === undefined) return;
+
   ctx.imageSmoothingEnabled = false;
 
   for (const prop of props) {
     if (prop.x < cam.x - 200 || prop.x > cam.x + width + 200) continue;
     if (prop.y < cam.y - 300 || prop.y > cam.y + height + 200) continue;
-    drawSprite(ctx, prop.sprite, prop.x, prop.y, prop.scale, prop.flip);
+    drawSprite(ctx, scenery, prop.sprite, prop.x, prop.y, prop.scale, prop.flip);
   }
 }
 
 function drawSprite(
   ctx: CanvasRenderingContext2D,
-  name: SpriteName,
+  scenery: Scenery,
+  name: string,
   x: number,
   y: number,
   scale: number,
   flip = false,
 ): void {
-  const s = DESERT[name];
+  const s = scenery.sprites[name];
+  if (s === undefined) return;
   const w = s.w * scale;
   const h = s.h * scale;
 
   ctx.save();
   ctx.translate(x, y);
   if (flip) ctx.scale(-1, 1);
-  ctx.drawImage(sheet, s.x, s.y, s.w, s.h, -w / 2, -h, w, h);
+  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h, w, h);
   ctx.restore();
 }
 
@@ -299,23 +435,27 @@ function drawSprite(
  * Marcam no mundo os dois pontos que o HUD só sabe dizer em número.
  */
 export function drawGates(ctx: CanvasRenderingContext2D, stage: Stage): void {
+  const scenery = SCENERY[stage.biome.id];
+  if (scenery === undefined) return;
+
   const center = stage.track.main.center;
-  gate(ctx, center, 6, 'largada', stage.track.width);
-  gate(ctx, center, center.length - 6, 'chegada', stage.track.width);
+  gate(ctx, scenery, center, 6, scenery.largada, stage.track.width);
+  gate(ctx, scenery, center, center.length - 6, scenery.chegada, stage.track.width);
 }
 
 function gate(
   ctx: CanvasRenderingContext2D,
+  scenery: Scenery,
   center: Vec[],
   index: number,
-  name: SpriteName,
+  name: string,
   trackWidth: number,
 ): void {
   const i = Math.min(Math.max(index, 1), center.length - 1);
   const a = center[i - 1];
   const b = center[i];
   const heading = Math.atan2(b.y - a.y, b.x - a.x);
-  const s = DESERT[name];
+  const s = scenery.sprites[name];
   const w = trackWidth * 1.15;
   const h = (s.h / s.w) * w;
 
@@ -324,6 +464,6 @@ function gate(
   // Deitado sobre a Pista: visto de cima, o pórtico é uma faixa cruzando o traçado.
   ctx.rotate(heading + Math.PI / 2);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(sheet, s.x, s.y, s.w, s.h, -w / 2, -h / 2, w, h);
+  ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -w / 2, -h / 2, w, h);
   ctx.restore();
 }

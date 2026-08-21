@@ -5,17 +5,27 @@ import type { Vec } from './track';
 export interface Car {
   x: number;
   y: number;
-  /** A direção que o Carro *tem*, em radianos. */
+  /** A direção que o Carro *tem*, em radianos: para onde ele aponta. */
   heading: number;
+  /**
+   * A direção em que o Carro de fato *anda*, em radianos. Em chão seco é a mesma coisa
+   * que `heading`; onde a Aderência é baixa ela fica para trás, e essa diferença é a
+   * Derrapagem.
+   */
+  drift: number;
   /** Velocidade atual, em px/s. Derivada da distância do Ponto de Mira. */
   speed: number;
 }
 
 export function spawnCar(at: Vec, heading: number, category: Category): Car {
-  return { x: at.x, y: at.y, heading, speed: category.speedMin };
+  return { x: at.x, y: at.y, heading, drift: heading, speed: category.speedMin };
 }
 
 /**
+ * A Aderência entra depois do volante, não nele: o Carro vira igual em qualquer chão —
+ * o que muda é o quanto o chão devolve. Frear na Poça também não ajuda, e é isso que faz
+ * dela uma decisão de traçado e não de acelerador.
+ *
  * O Ponto de Mira carrega os dois controles do jogo: a **direção** que o Carro tenta
  * alcançar, e — pela sua distância ao Carro — a **velocidade**. Cursor esticado é
  * acelerador, cursor colado é freio.
@@ -23,7 +33,13 @@ export function spawnCar(at: Vec, heading: number, category: Category): Car {
  * O Carro nunca gira mais rápido que a taxa máxima, então quanto mais rápido ele vai,
  * mais aberta fica a curva que ele consegue fazer. É daí que vem a tensão da corrida.
  */
-export function driveCar(car: Car, aim: Vec, dt: number, category: Category): void {
+export function driveCar(
+  car: Car,
+  aim: Vec,
+  dt: number,
+  category: Category,
+  grip: number,
+): void {
   const dx = aim.x - car.x;
   const dy = aim.y - car.y;
   const distance = Math.hypot(dx, dy);
@@ -39,8 +55,19 @@ export function driveCar(car: Car, aim: Vec, dt: number, category: Category): vo
     car.heading += Math.max(-maxTurn, Math.min(maxTurn, delta));
   }
 
-  car.x += Math.cos(car.heading) * car.speed * dt;
-  car.y += Math.sin(car.heading) * car.speed * dt;
+  // O deslocamento persegue a direção do Carro. Em chão seco alcança dentro do quadro;
+  // com Aderência baixa fica para trás, e o Carro anda de lado até recuperar.
+  const chase = TUNING.slipResponse * grip * dt;
+  const lag = shortestAngle(car.heading - car.drift);
+  car.drift += Math.max(-chase, Math.min(chase, lag));
+
+  car.x += Math.cos(car.drift) * car.speed * dt;
+  car.y += Math.sin(car.drift) * car.speed * dt;
+}
+
+/** O quanto o Carro está de lado agora, em radianos. Zero é o Carro indo para onde aponta. */
+export function slipOf(car: Car): number {
+  return shortestAngle(car.heading - car.drift);
 }
 
 /** 0 na velocidade mínima, 1 na máxima. Útil para o HUD. */
