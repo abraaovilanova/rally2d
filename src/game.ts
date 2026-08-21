@@ -13,6 +13,7 @@ import { readBestTime, recordTime } from './records';
 import { makeStage, type Stage } from './stage';
 import type { Vec } from './path';
 import { pathOf, progressOf, START_ROUTE, stepRoute, type Route } from './route';
+import { emitirPoeira, limparPoeira, moverPoeira } from './poeira';
 import { gripAt } from './surface';
 import { TUNING } from './tuning';
 
@@ -163,6 +164,7 @@ function resetRace(game: Game, phase: Phase): void {
   game.hitBarrier = false;
   game.attempts = 1;
   game.newRecord = false;
+  limparPoeira();
 }
 
 export function updateGame(game: Game, aim: Vec, dt: number): void {
@@ -172,7 +174,13 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
   game.aim = aim;
   // A Aderência é lida onde o Carro está agora: entrar na Poça é o que escorrega, e
   // por isso o preço aparece no quadro seguinte, já dentro dela.
-  driveCar(game.car, aim, dt, categoryOf(game), gripAt(game.stage, game.car.x, game.car.y));
+  const aderencia = gripAt(game.stage, game.car.x, game.car.y);
+  driveCar(game.car, aim, dt, categoryOf(game), aderencia);
+
+  // A Poeira é decoração e vive fora do modelo, mas o que ela mostra é o modelo: a
+  // velocidade, a Derrapagem e a Aderência do chão em que o Carro está agora.
+  emitirPoeira(game.car, aderencia, categoryOf(game).speedMax, dt);
+  moverPoeira(dt);
 
   // O progresso só pode avançar o que o Carro de fato andou neste quadro. A folga extra
   // cobre as Rotas Alternativas, cujos pontos ficam um pouco mais espaçados que o passo.

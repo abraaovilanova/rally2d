@@ -45,8 +45,9 @@ interface Scenery {
   sprites: Record<string, Rect>;
   /** O chão fora da Pista. */
   ground: string;
-  /** O leito da Pista. */
+  /** O leito da Pista, e as variantes dele que o jogo alterna ao longo da Etapa. */
   bed: string;
+  beds: readonly string[];
   largada: string;
   chegada: string;
   roadside: readonly string[];
@@ -64,6 +65,14 @@ interface Scenery {
   rasteiros: readonly string[];
   /** Nome base → recortes numerados, para o que tem mais de um quadro. */
   quadros: Map<string, string[]>;
+  /** Recortes que o jogo desenha por conta própria — a Poeira, por exemplo. */
+  efeitos: readonly string[];
+  /**
+   * Espelhar o ladrilho em 2×2 ao montar o padrão. Serve para esconder a costura de um
+   * recorte que não fecha consigo mesmo — e **estraga** um ladrilho que já fecha, porque
+   * espelhar uma textura com direção produz losangos de caleidoscópio.
+   */
+  espelharLadrilho: boolean;
 }
 
 interface Sheet {
@@ -115,6 +124,7 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       sprites: b.recortes as Record<string, Rect>,
       ground: b.chao,
       bed: b.leito,
+      beds: 'leitos' in b ? (b.leitos as string[]) : [b.leito],
       largada: b.largada,
       chegada: b.chegada,
       roadside: b.beira,
@@ -135,6 +145,8 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
             }
           : null,
       quadros: agruparQuadros(Object.keys(b.recortes)),
+      efeitos: 'efeitos' in b ? (b.efeitos as string[]) : [],
+      espelharLadrilho: 'espelhar' in b ? (b.espelhar as boolean) : true,
     },
   ]),
 );
@@ -180,32 +192,40 @@ function patternOf(
   ctx: CanvasRenderingContext2D,
   biomeId: string,
   role: 'ground' | 'bed',
+  variante = 0,
 ): CanvasPattern | null {
-  const key = `${biomeId}:${role}`;
+  const key = `${biomeId}:${role}:${variante}`;
   const cached = patterns.get(key);
   if (cached !== undefined) return cached;
 
   const scenery = SCENERY[biomeId];
   if (scenery === undefined) return null;
 
-  const src = scenery.sprites[scenery[role]];
+  const nome = role === 'bed' ? scenery.beds[variante % scenery.beds.length] : scenery[role];
+  const src = scenery.sprites[nome];
+  if (src === undefined) return null;
+  const espelhar = scenery.espelharLadrilho;
   const tile = document.createElement('canvas');
-  tile.width = src.w * 2;
-  tile.height = src.h * 2;
+  tile.width = src.w * (espelhar ? 2 : 1);
+  tile.height = src.h * (espelhar ? 2 : 1);
   const tctx = tile.getContext('2d');
   if (!tctx) return null;
 
-  for (const [sx, sy] of [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-    [1, 1],
-  ]) {
-    tctx.save();
-    tctx.translate(sx ? src.w * 2 : 0, sy ? src.h * 2 : 0);
-    tctx.scale(sx ? -1 : 1, sy ? -1 : 1);
+  if (espelhar) {
+    for (const [sx, sy] of [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ]) {
+      tctx.save();
+      tctx.translate(sx ? src.w * 2 : 0, sy ? src.h * 2 : 0);
+      tctx.scale(sx ? -1 : 1, sy ? -1 : 1);
+      tctx.drawImage(scenery.sheet.image, src.x, src.y, src.w, src.h, 0, 0, src.w, src.h);
+      tctx.restore();
+    }
+  } else {
     tctx.drawImage(scenery.sheet.image, src.x, src.y, src.w, src.h, 0, 0, src.w, src.h);
-    tctx.restore();
   }
 
   const pattern = ctx.createPattern(tile, 'repeat');
@@ -283,8 +303,17 @@ export function drawGround(
 }
 
 /** A textura do leito da Pista, para usar como `fillStyle` no lugar da cor da paleta. */
-export function trackFill(ctx: CanvasRenderingContext2D, biomeId: string): CanvasPattern | null {
-  return patternOf(ctx, biomeId, 'bed');
+export function trackFill(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  variante = 0,
+): CanvasPattern | null {
+  return patternOf(ctx, biomeId, 'bed', variante);
+}
+
+/** Quantas variantes de leito este Bioma tem. */
+export function bedCount(biomeId: string): number {
+  return SCENERY[biomeId]?.beds.length ?? 1;
 }
 
 // ------------------------------------------------------------------- objetos
@@ -438,6 +467,40 @@ function occupiedCells(stage: Stage): Set<string> {
 
 /** Quantas vezes por segundo um objeto de dois quadros troca de quadro. */
 const QUADROS_POR_SEGUNDO = 4;
+
+/**
+ * A Poeira, deitada no chão e não em pé: é o único desenho do Cenário que não é painel.
+ * Nasce pequena e opaca, morre grande e transparente — o sprite é sempre o mesmo, quem
+ * anima é o tempo.
+ */
+export function drawPoeira(
+  ctx: CanvasRenderingContext2D,
+  biomeId: string,
+  sopros: readonly { x: number; y: number; idade: number; vida: number; tamanho: number; giro: number }[],
+): void {
+  const scenery = SCENERY[biomeId];
+  const nome = scenery?.efeitos.find((e) => e === 'poeira');
+  const s = nome ? scenery.sprites[nome] : undefined;
+  if (!scenery || s === undefined) return;
+
+  ctx.imageSmoothingEnabled = false;
+
+  for (const sopro of sopros) {
+    const t = sopro.idade / sopro.vida;
+    if (t >= 1) continue;
+
+    // Cresce até o dobro e some no fim; a opacidade cai mais rápido que o tamanho cresce,
+    // senão a nuvem fica sólida e tapa a Pista bem onde o jogador precisa olhar.
+    const tamanho = sopro.tamanho * (1 + t);
+
+    ctx.save();
+    ctx.globalAlpha = 0.8 * (1 - t) ** 1.3;
+    ctx.translate(sopro.x, sopro.y);
+    ctx.rotate(sopro.giro);
+    ctx.drawImage(scenery.sheet.image, s.x, s.y, s.w, s.h, -tamanho / 2, -tamanho / 2, tamanho, tamanho);
+    ctx.restore();
+  }
+}
 
 /** Desenha os objetos visíveis. O sprite fica em pé, apoiado no ponto do mundo. */
 export function drawProps(

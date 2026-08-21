@@ -4,8 +4,10 @@ import { categoryOf, currentPath, progress, type Game } from './game';
 import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
 import { formatTime } from './records';
+import { sopros } from './poeira';
 import { isOffRoute } from './route';
-import { drawGates, drawGround, drawProps, drawTerreno, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
+import { bedCount, drawGates, drawGround, drawPoeira, drawProps, drawTerreno, hasScenery, sceneryOf, trackFill, type Prop } from './scenery';
+import { seedFromStageId } from './rng';
 import { puddlesOf, type Puddle } from './surface';
 import type { Stage } from './stage';
 import type { Track } from './track';
@@ -39,6 +41,8 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
 
   const [from, to] = windowAround(track.main, mainIndex);
   drawScene(ctx, game.stage, cam, canvas.width, canvas.height, from, to);
+  // A Poeira fica sobre o chão e sob tudo o mais: ela é o chão levantado, não um objeto.
+  drawPoeira(ctx, game.stage.biome.id, sopros());
   drawForkSigns(ctx, game, from, to);
   drawNoteMarkers(ctx, game);
   drawFinishLine(ctx, track.main, palette.edge);
@@ -78,7 +82,7 @@ export function drawScene(
 
   const surface = (scenery && trackFill(ctx, biomeId)) || palette.track;
 
-  drawPathWindow(ctx, stage.track.main, from, to, surface, palette.edge);
+  drawLeito(ctx, stage, from, to, surface);
   drawBranches(ctx, stage, from, to, surface);
   // Sobre o leito e debaixo de tudo o mais: a Poça é chão, não objeto.
   drawPuddles(ctx, stage, cam, width, height);
@@ -86,6 +90,49 @@ export function drawScene(
   if (scenery) {
     drawGates(ctx, stage);
     drawProps(ctx, biomeId, props, cam, width, height);
+  }
+}
+
+/** Quantos pontos da Linha Central um trecho de leito cobre antes de trocar de textura. */
+const TRECHO_DE_LEITO = 90;
+
+/**
+ * O leito da Pista, em trechos.
+ *
+ * Era uma textura só do começo ao fim, e numa Pista de vinte e três mil pixels isso se lê
+ * como um corredor infinito da mesma coisa. Agora cada trecho sorteia a sua variante — o
+ * liso, o de sulcos fundos, o de cascalho, o coberto de areia — a partir da Semente, que
+ * é o que mantém a Etapa igual a si mesma.
+ */
+function drawLeito(
+  ctx: CanvasRenderingContext2D,
+  stage: Stage,
+  from: number,
+  to: number,
+  padrao: string | CanvasPattern,
+): void {
+  const variantes = bedCount(stage.biome.id);
+  if (variantes <= 1 || typeof padrao === 'string') {
+    drawPathWindow(ctx, stage.track.main, from, to, padrao, stage.biome.palette.edge);
+    return;
+  }
+
+  const semente = seedFromStageId(`${stage.id}-leito`);
+  const primeiro = Math.floor(from / TRECHO_DE_LEITO);
+  const ultimo = Math.floor(to / TRECHO_DE_LEITO);
+
+  for (let t = primeiro; t <= ultimo; t++) {
+    // Um trecho vizinho nunca repete a variante do anterior: dois trechos iguais lado a
+    // lado são o mesmo corredor infinito que se está tentando quebrar.
+    const anterior = ((semente + (t - 1) * 2654435761) >>> 0) % variantes;
+    const bruto = ((semente + t * 2654435761) >>> 0) % variantes;
+    const variante = bruto === anterior ? (bruto + 1) % variantes : bruto;
+
+    const fill = trackFill(ctx, stage.biome.id, variante) ?? padrao;
+    // Um ponto de sobreposição entre trechos: sem ele a costura vira uma linha de fundo.
+    const de = Math.max(from, t * TRECHO_DE_LEITO);
+    const ate = Math.min(to, (t + 1) * TRECHO_DE_LEITO + 1);
+    if (ate > de) drawPathWindow(ctx, stage.track.main, de, ate, fill, stage.biome.palette.edge);
   }
 }
 

@@ -227,56 +227,56 @@
       "papel": "leito",
       "ocupacao": "ladrilho",
       "descricao": "packed dirt rally road surface, smooth, faint tire grooves",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "leito2",
       "papel": "leito",
       "ocupacao": "ladrilho",
       "descricao": "packed dirt rally road surface with deep tire ruts and loose gravel",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "leito3",
       "papel": "leito",
       "ocupacao": "ladrilho",
       "descricao": "packed dirt rally road surface half covered by wind-blown sand",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "terrenoAreia",
       "papel": "terreno",
       "ocupacao": "ladrilho",
       "descricao": "smooth desert sand, fine wind ripples",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "terrenoPedregoso",
       "papel": "terreno",
       "ocupacao": "ladrilho",
       "descricao": "desert sand strewn with small stones and gravel",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "terrenoRachado",
       "papel": "terreno",
       "ocupacao": "ladrilho",
       "descricao": "dry cracked earth, hard pale clay",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "transicaoAreiaPedregoso",
       "papel": "tileset",
       "ocupacao": "wang",
       "descricao": "wang tileset: smooth sand transitioning to stony sand",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "transicaoPedregosoRachado",
       "papel": "tileset",
       "ocupacao": "wang",
       "descricao": "wang tileset: stony sand transitioning to dry cracked earth",
-      "feito": false
+      "feito": true
     },
     {
       "nome": "carro-red-0",
@@ -340,11 +340,10 @@
     },
     {
       "nome": "poeira",
-      "papel": "poeira",
+      "papel": "efeito",
       "ocupacao": "metade",
       "descricao": "puff of desert dust kicked up behind a car, expanding and fading",
-      "feito": false,
-      "quadros": 6
+      "feito": true
     }
   ]
 }

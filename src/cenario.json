@@ -15,8 +15,14 @@
       },
       "folha": "deserto-v2",
       "escala": 0.5,
+      "espelhar": false,
       "chao": "terrenoAreia",
       "leito": "leito1",
+      "leitos": [
+        "leito1",
+        "leito2",
+        "leito3"
+      ],
       "largada": "largada",
       "chegada": "chegada",
       "beira": [
@@ -77,6 +83,9 @@
         "mancha"
       ],
       "plateia": "plateia",
+      "efeitos": [
+        "poeira"
+      ],
       "recortes": {
         "terrenoAreia": {
           "x": 2,
@@ -222,68 +231,74 @@
           "w": 76,
           "h": 68
         },
-        "flagBlue": {
+        "poeira": {
           "x": 707,
+          "y": 142,
+          "w": 72,
+          "h": 68
+        },
+        "flagBlue": {
+          "x": 781,
           "y": 142,
           "w": 48,
           "h": 66
         },
         "rachadura": {
-          "x": 757,
+          "x": 831,
           "y": 142,
           "w": 56,
           "h": 59
         },
         "cone": {
-          "x": 815,
+          "x": 889,
           "y": 142,
           "w": 38,
           "h": 57
         },
         "smallRocks": {
-          "x": 855,
+          "x": 929,
           "y": 142,
           "w": 65,
           "h": 56
         },
         "pedrinhas": {
-          "x": 922,
+          "x": 996,
           "y": 142,
           "w": 56,
           "h": 48
         },
         "cranio": {
-          "x": 980,
+          "x": 1054,
           "y": 142,
           "w": 40,
           "h": 45
         },
         "mancha": {
-          "x": 1022,
+          "x": 1096,
           "y": 142,
           "w": 48,
           "h": 43
         },
         "pneuEnterrado": {
-          "x": 1072,
+          "x": 1146,
           "y": 142,
           "w": 58,
           "h": 42
         },
         "marcaPneu": {
-          "x": 1132,
+          "x": 1206,
           "y": 142,
           "w": 37,
           "h": 41
         },
         "galhoSeco": {
-          "x": 1171,
+          "x": 1245,
           "y": 142,
           "w": 47,
           "h": 41
         },
         "capimSeco": {
-          "x": 1220,
+          "x": 1294,
           "y": 142,
           "w": 38,
           "h": 30

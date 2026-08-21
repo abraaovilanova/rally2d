@@ -28,7 +28,7 @@ FOLGA = 2
 # As chaves que este script é dono e reescreve por inteiro. Todo o resto do Bioma passa.
 PAPEIS_DE_OBJETO = {
     'folha', 'escala', 'chao', 'leito', 'largada', 'chegada',
-    'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes',
+    'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes', 'leitos', 'efeitos', 'espelhar',
 }
 
 
@@ -76,6 +76,23 @@ def empacotar(pecas: list[tuple[str, Image.Image]], largura=1408):
     return folha, recortes
 
 
+def costura(img: Image.Image) -> tuple[float, float]:
+    """
+    Quanto a borda de um ladrilho destoa da borda oposta, contra a variação interna dele.
+
+    Um ladrilho que fecha consigo mesmo tem costura da ordem do próprio grão. Quando a
+    costura é muito maior, ela vira uma grade visível no chão — e foi assim que a areia
+    soprada entrou no jogo com linhas retas atravessando a Pista.
+    """
+    import numpy as np
+
+    a = np.asarray(img.convert('RGB'), dtype=float)
+    horizontal = float(np.abs(a[:, -1] - a[:, 0]).mean())
+    vertical = float(np.abs(a[-1, :] - a[0, :]).mean())
+    interna = float(np.abs(a[:, 1:] - a[:, :-1]).mean()) + 1e-6
+    return max(horizontal, vertical), interna
+
+
 def main() -> int:
     manifesto = json.loads(Path(sys.argv[1]).read_text('utf8'))
     pasta = Path(sys.argv[2])
@@ -85,13 +102,21 @@ def main() -> int:
     for item in manifesto['itens']:
         # O tileset Wang e a poeira não são objetos de cenário: têm desenho próprio no
         # jogo e folha própria. Entram no manifesto para a fila não os esquecer.
-        if item['papel'] in ('tileset', 'poeira', 'carro'):
+        if item['papel'] in ('tileset', 'carro'):
             continue
 
         achados = quadros(pasta, item)
         if not achados:
             faltando.append(item['nome'])
             continue
+
+        if item['papel'] in ('leito', 'terreno'):
+            pior, interna = costura(achados[0][1])
+            # O piso absoluto evita alarme num ladrilho liso, onde qualquer costura é
+            # muitas vezes um grão que é praticamente zero — e invisível de qualquer jeito.
+            if pior > 3 and pior > interna * 2.5:
+                print(f"  aviso: {item['nome']} tem costura {pior:.1f} contra grão {interna:.1f} "
+                      f'— vai aparecer como linha reta no chão')
 
         pecas.extend(achados)
         # Quem tem mais de um quadro entra nas listas pelo **nome base**: é ele que o jogo
@@ -127,9 +152,13 @@ def main() -> int:
         **{k: v for k, v in antigo.items() if k not in PAPEIS_DE_OBJETO},
         'folha': nome_folha,
         'escala': manifesto['escala'],
+        # Os ladrilhos gerados já fecham consigo mesmos: espelhar só produziria losango.
+        'espelhar': False,
         # O leito e o terreno viram um recorte só cada; a variação entre eles é do jogo.
         'chao': um('terreno', antigo.get('chao', '')),
         'leito': um('leito', antigo.get('leito', '')),
+        # Todas as variantes do leito: é o jogo que escolhe qual vai em cada trecho.
+        'leitos': [n for n, _ in papeis.get('leito', [])],
         'largada': um('largada', antigo.get('largada', '')),
         'chegada': um('chegada', antigo.get('chegada', '')),
         'beira': [n for n, _ in beira],
@@ -138,6 +167,8 @@ def main() -> int:
         # Quem fica deitado no chão não ganha sombra de contato: não há o que projetar.
         'rasteiros': rasteiros,
         'plateia': um('plateia', antigo.get('plateia', '')),
+        # Efeitos entram na folha mas em lista nenhuma: quem os desenha é o jogo, na hora.
+        'efeitos': [n for n, _ in papeis.get('efeito', [])],
         'recortes': recortes,
     }
 

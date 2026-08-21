@@ -46,6 +46,18 @@ export const TUNING = {
   /** Chance de cada tentativa virar uma Poça de fato. */
   puddleChance: 0.55,
 
+  /** Quantos sopros de Poeira por segundo o Carro levanta, no esforço máximo. */
+  poeiraPorSegundo: 70,
+
+  /** Com que velocidade, em px/s, o sopro é jogado para trás do Carro. */
+  poeiraRecuo: 90,
+
+  /** Quanto tempo um sopro leva para sumir, em segundos. */
+  poeiraVida: 0.85,
+
+  /** Tamanho de um sopro na tela ao nascer, em px. Ele cresce até o dobro antes de morrer. */
+  poeiraTamanho: 34,
+
   /** Raio de colisão do Carro, em px. */
   carRadius: 9,
 
