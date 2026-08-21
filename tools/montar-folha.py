@@ -29,6 +29,7 @@ FOLGA = 2
 PAPEIS_DE_OBJETO = {
     'folha', 'escala', 'chao', 'leito', 'largada', 'chegada',
     'beira', 'pesos', 'publico', 'rasteiros', 'plateia', 'recortes', 'leitos', 'efeitos', 'espelhar', 'densidade',
+    'mata', 'mataPesos', 'mataPasso',
 }
 
 
@@ -98,7 +99,7 @@ def main() -> int:
     pasta = Path(sys.argv[2])
     bioma = manifesto['bioma']
 
-    pecas, faltando, papeis, rasteiros = [], [], {}, []
+    pecas, faltando, papeis, rasteiros, mata = [], [], {}, [], []
     for item in manifesto['itens']:
         # O tileset Wang e a poeira não são objetos de cenário: têm desenho próprio no
         # jogo e folha própria. Entram no manifesto para a fila não os esquecer.
@@ -126,6 +127,8 @@ def main() -> int:
         papeis.setdefault(item['papel'], []).append((registrado, item.get('peso', 3)))
         if item.get('rasteiro'):
             rasteiros.append(item['nome'])
+        if item.get('mata'):
+            mata.append((registrado, item.get('pesoMata', item.get('peso', 3))))
 
     if not pecas:
         print('nada gerado ainda em', pasta)
@@ -166,6 +169,10 @@ def main() -> int:
         'chegada': um('chegada', antigo.get('chegada', '')),
         'beira': [n for n, _ in beira],
         'pesos': [p for _, p in beira],
+        # A Mata: o subconjunto que cobre o mundo longe da Pista, não só a beira dela.
+        'mata': [n for n, _ in mata],
+        'mataPesos': [p for _, p in mata],
+        'mataPasso': manifesto.get('mataPasso', 120),
         'publico': [n for n, _ in papeis.get('publico', [])],
         # Quem fica deitado no chão não ganha sombra de contato: não há o que projetar.
         'rasteiros': rasteiros,

@@ -64,6 +64,17 @@ interface Scenery {
    * de um deserto não é uma floresta — é um deserto verde.
    */
   densidade: number;
+  /**
+   * A Mata: o que cobre o resto do mundo, longe da Pista.
+   *
+   * A beira é uma faixa de uns cento e cinquenta pixels; o que a câmera mostra é muito
+   * mais que isso. Sem uma segunda população, a Floresta era uma fileira de árvores com
+   * um campo vazio atrás — o que se lê como clareira, não como mata.
+   */
+  mata: readonly string[];
+  mataPesos: readonly number[];
+  /** Distância média entre árvores da Mata, em px. Menor = mais fechada. */
+  mataPasso: number;
   /** O tileset de canto do chão, quando o Bioma já tem um. */
   terreno: { sheet: Sheet; tile: number; pares: number } | null;
   /**
@@ -171,6 +182,9 @@ const SCENERY: Record<string, Scenery> = Object.fromEntries(
       // Bioma antigo for refeito.
       propScale: campo(b, 'escala', PROP_SCALE_ANTIGA),
       densidade: campo(b, 'densidade', 0.55),
+      mata: campo<string[]>(b, 'mata', []),
+      mataPesos: campo<number[]>(b, 'mataPesos', []),
+      mataPasso: campo(b, 'mataPasso', 120),
       rasteiros: campo<string[]>(b, 'rasteiros', []),
       terreno: montarTerreno(campo<Tileset | null>(b, 'terreno', null)),
       quadros: agruparQuadros(Object.keys(b.recortes)),
@@ -513,7 +527,61 @@ function buildProps(stage: Stage): Prop[] {
   addCrowd(props, stage, scenery, rng, 8, 90);
   addCrowd(props, stage, scenery, rng, last - 90, last - 8);
 
+  encherMata(props, stage, scenery, rng, occupied);
+
   return props;
+}
+
+/**
+ * A Mata: árvores cobrindo tudo o que não é Pista, e não só a beira dela.
+ *
+ * Uma grade com tremor, e não um sorteio livre: sorteio livre deixa buracos grandes e
+ * aglomerados, que se leem como falha. A grade garante que não haja clareira acidental, e
+ * o tremor tira dela a cara de plantação.
+ */
+function encherMata(
+  props: Prop[],
+  stage: Stage,
+  scenery: Scenery,
+  rng: ReturnType<typeof createRng>,
+  ocupado: Set<string>,
+): void {
+  if (scenery.mata.length === 0) return;
+
+  const centro = stage.track.main.center;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const p of centro) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+
+  // Uma tela de folga em volta: a câmera vê muito além da Linha Central, e mata que
+  // acaba numa linha reta a meio caminho da tela é pior que mata nenhuma.
+  const folga = 900;
+  const passo = scenery.mataPasso;
+
+  for (let y = minY - folga; y < maxY + folga; y += passo) {
+    for (let x = minX - folga; x < maxX + folga; x += passo) {
+      const px = x + rng.range(-passo * 0.42, passo * 0.42);
+      const py = y + rng.range(-passo * 0.42, passo * 0.42);
+      if (ocupado.has(cellKey(px, py))) continue;
+
+      props.push({
+        sprite: rng.weighted(scenery.mata, scenery.mataPesos),
+        x: px,
+        y: py,
+        scale: scenery.propScale * rng.range(0.8, 1.2),
+        flip: rng.next() < 0.5,
+        fase: rng.next(),
+      });
+    }
+  }
 }
 
 function addCrowd(
@@ -620,9 +688,16 @@ export function drawProps(
 
   ctx.imageSmoothingEnabled = false;
 
-  for (const prop of props) {
+  // A ordenação por profundidade serve de índice: como os objetos estão em ordem de y, a
+  // faixa visível é um trecho contíguo, achado por busca binária. Sem isso, a Mata da
+  // Floresta faria o laço varrer quinze mil objetos por quadro para desenhar cem.
+  const deY = cam.y - 300;
+  const ateY = cam.y + height + 200;
+
+  for (let i = primeiroApos(props, deY); i < props.length; i++) {
+    const prop = props[i];
+    if (prop.y > ateY) break;
     if (prop.x < cam.x - 200 || prop.x > cam.x + width + 200) continue;
-    if (prop.y < cam.y - 300 || prop.y > cam.y + height + 200) continue;
 
     const nome = quadroAgora(scenery, prop, tempo);
     const s = scenery.sprites[nome];
@@ -631,6 +706,19 @@ export function drawProps(
     if (!scenery.rasteiros.includes(prop.sprite)) sombra(ctx, prop.x, prop.y, s.w * prop.scale);
     drawSprite(ctx, scenery, nome, prop.x, prop.y, prop.scale, prop.flip);
   }
+}
+
+/** O índice do primeiro objeto com `y` a partir do limite, numa lista ordenada por `y`. */
+function primeiroApos(props: readonly Prop[], limite: number): number {
+  let baixo = 0;
+  let alto = props.length;
+
+  while (baixo < alto) {
+    const meio = (baixo + alto) >> 1;
+    if (props[meio].y < limite) baixo = meio + 1;
+    else alto = meio;
+  }
+  return baixo;
 }
 
 /** O quadro deste objeto agora. Objeto de um quadro só devolve o próprio nome. */

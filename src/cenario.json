@@ -361,6 +361,19 @@
         2,
         2
       ],
+      "mata": [
+        "pinheiro",
+        "arvore",
+        "arbusto",
+        "samambaia"
+      ],
+      "mataPesos": [
+        10,
+        7,
+        3,
+        2
+      ],
+      "mataPasso": 104,
       "publico": [
         "torcedor1",
         "torcedor2",
@@ -1159,6 +1172,19 @@
         2,
         2
       ],
+      "mata": [
+        "pinheiro",
+        "arvore",
+        "arbusto",
+        "samambaia"
+      ],
+      "mataPesos": [
+        10,
+        7,
+        3,
+        2
+      ],
+      "mataPasso": 104,
       "publico": [
         "torcedor1",
         "torcedor2",

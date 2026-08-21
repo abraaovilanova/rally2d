@@ -20,28 +20,36 @@
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "tall dark green pine tree seen from a high angle, dense needled canopy",
-      "peso": 16
+      "peso": 16,
+      "mata": true,
+      "pesoMata": 10
     },
     {
       "nome": "arvore",
       "papel": "beira",
       "ocupacao": "quadro",
       "descricao": "broad leafy deciduous tree with a round green canopy, brown trunk",
-      "peso": 13
+      "peso": 13,
+      "mata": true,
+      "pesoMata": 7
     },
     {
       "nome": "arbusto",
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "dense round green forest shrub with broad leaves, fills the frame",
-      "peso": 8
+      "peso": 8,
+      "mata": true,
+      "pesoMata": 3
     },
     {
       "nome": "samambaia",
       "papel": "beira",
       "ocupacao": "metade",
       "descricao": "cluster of green ferns with arching fronds, fills the frame",
-      "peso": 7
+      "peso": 7,
+      "mata": true,
+      "pesoMata": 2
     },
     {
       "nome": "pedras",
@@ -179,5 +187,6 @@
       "descricao": "mud spray"
     }
   ],
-  "densidade": 0.92
+  "densidade": 0.92,
+  "mataPasso": 104
 }
