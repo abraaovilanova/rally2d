@@ -34,10 +34,10 @@ const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/firebase-Dz_bzM
       <p class="eyebrow">Categoria</p>
       <div class="cards">${Me.map(o=>Ja(o,e.category)).join("")}</div>
 
+      <button class="go" data-go>Largar</button>
+
       ${e.mode==="online"?`<p class="eyebrow board-title">Resultados · ${t.biome.name} PE ${t.lap+1} · categoria ${e.category}</p>`:""}
       <div class="board" data-board>${e.mode==="online"?"carregando ranking…":""}</div>
-
-      <button class="go" data-go>Largar</button>
       <div class="rodape">
         <p class="foot">
           <span data-toggle-mode class="link">${e.mode==="online"?"jogando online — mudar para offline":"jogando offline — mudar para online"}</span>
