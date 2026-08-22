@@ -2,7 +2,10 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>Rally 2D</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,12 +41,15 @@
         margin: 0;
         height: 100%;
         overflow: hidden;
+        overscroll-behavior: none;
         background: var(--tinta);
         font-family: var(--texto);
       }
       canvas {
         display: block;
         cursor: crosshair;
+        /* Arrastar o dedo aqui é mirar, não rolar a página. */
+        touch-action: none;
       }
 
       /* Grid, menu de modo e conclusão. O canvas continua desenhando atrás. */

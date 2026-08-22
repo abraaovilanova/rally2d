@@ -26,10 +26,17 @@ function resize(): void {
 resize();
 window.addEventListener('resize', resize);
 
-window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
+// Mira: no mouse ela segue o cursor sem tocar em nada; no celular ela segue o dedo
+// enquanto ele está na tela, e fica onde ficou quando o dedo sai — soltar não é freio.
+// `pointer*` cobre os dois, e `touch-action: none` no canvas impede que arrastar o dedo
+// role ou dê zoom na página em vez de mirar.
+for (const gesto of ['pointerdown', 'pointermove'] as const) {
+  canvas.addEventListener(gesto, (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    if (e.pointerType !== 'mouse') e.preventDefault();
+  });
+}
 
 boot();
 
@@ -47,7 +54,7 @@ async function boot(): Promise<void> {
 function listen(game: Game): void {
   // O navegador só deixa tocar som depois de um gesto do jogador, e a recusa é silenciosa:
   // sem isto o jogo pareceria simplesmente não ter música.
-  for (const gesto of ['mousedown', 'keydown'] as const) {
+  for (const gesto of ['pointerdown', 'keydown'] as const) {
     window.addEventListener(gesto, () => {
       liberarSom();
       ligarMotor();
@@ -55,7 +62,7 @@ function listen(game: Game): void {
   }
 
   // Grid e Conclusão são botões de DOM; aqui só a Batida, que precisa de um gesto rápido.
-  window.addEventListener('mousedown', () => {
+  canvas.addEventListener('pointerdown', () => {
     if (game.phase === 'crashed') retry(game);
   });
 
