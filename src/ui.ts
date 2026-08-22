@@ -89,14 +89,14 @@ function drawGrid(game: Game): void {
       <p class="eyebrow">Categoria</p>
       <div class="cards">${CATEGORY_IDS.map((id) => card(id, game.category)).join('')}</div>
 
+      <button class="go" data-go>Largar</button>
+
       ${
         game.mode === 'online'
           ? `<p class="eyebrow board-title">Resultados · ${stage.biome.name} PE ${stage.lap + 1} · categoria ${game.category}</p>`
           : ''
       }
       <div class="board" data-board>${game.mode === 'online' ? 'carregando ranking…' : ''}</div>
-
-      <button class="go" data-go>Largar</button>
       <div class="rodape">
         <p class="foot">
           <span data-toggle-mode class="link">${
