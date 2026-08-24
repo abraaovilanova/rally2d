@@ -216,7 +216,7 @@ function drawFinish(game: Game): void {
       <p class="eyebrow" style="margin-top:22px">Tempo da prova</p>
       <h1 class="finish">${time}</h1>
       <p class="lede">${record}</p>
-      <div class="board" data-board>${game.mode === 'offline' ? 'offline: este tempo não sobe para o ranking.' : 'enviando…'}</div>
+      <div class="board" data-board>${boardPlaceholder(game)}</div>
       <div data-name></div>
       <button class="go" data-next>Seguir para a próxima prova</button>
       <div class="rodape">
@@ -229,23 +229,40 @@ function drawFinish(game: Game): void {
   root.querySelector<HTMLElement>('[data-grid]')!.onclick = () => openGrid(game);
 
   if (game.mode !== 'online') return;
-  if (name === null) askName(game);
+  if (name === null || game.newRecord) askName(game, name ?? '');
   else send(game, name);
 }
 
-/** O Nome é pedido na primeira Conclusão online, e lembrado depois. */
-function askName(game: Game): void {
+/** Enquanto o Nome não estiver confirmado, o Ranking ainda não foi consultado. */
+function boardPlaceholder(game: Game): string {
+  if (game.mode === 'offline') return 'offline: este tempo não sobe para o ranking.';
+  if (game.newRecord) return 'confirme o nome para entrar no ranking.';
+  return 'enviando…';
+}
+
+/**
+ * O Nome é pedido na primeira Conclusão online, e lembrado depois — e oferecido de novo
+ * a cada Recorde, já preenchido, para o jogador poder assinar a Corrida de outro jeito.
+ *
+ * Perguntar *antes* de enviar é a única forma possível: um Tempo registrado é registrado,
+ * e as Security Rules recusam qualquer edição depois. Trocar o nick de um Tempo que já
+ * subiu não existe; o que existe é escolher com que nome ele sobe.
+ */
+function askName(game: Game, initial: string): void {
   const slot = root.querySelector<HTMLElement>('[data-name]')!;
   slot.innerHTML = `
     <div class="naming">
       <input data-input maxlength="16" placeholder="seu nome no ranking" autofocus />
-      <button data-send>Entrar no ranking</button>
+      <button data-send>${initial === '' ? 'Entrar no ranking' : 'Enviar ao ranking'}</button>
     </div>
   `;
   const boardSlot = root.querySelector<HTMLElement>('[data-board]');
   if (boardSlot) boardSlot.textContent = '';
 
+  // Pela propriedade, e não pelo atributo: um Nome com aspas quebraria o HTML.
   const input = slot.querySelector<HTMLInputElement>('[data-input]')!;
+  input.value = initial;
+
   const confirm = () => {
     if (input.value.trim() === '') return;
     saveName(input.value);
@@ -259,6 +276,7 @@ function askName(game: Game): void {
     e.stopPropagation();
   };
   input.focus();
+  input.select();
 }
 
 /** Envio automático: a Conclusão é o gesto, não existe botão de enviar. */

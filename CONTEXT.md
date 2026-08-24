@@ -317,7 +317,12 @@ pode ter um nome só.
 ## Nome (Name)
 
 O que identifica um Tempo no **Ranking Mundial**. Digitado na primeira **Conclusão** e lembrado
-depois. Não é uma conta: não há login, nada impede dois jogadores usarem o mesmo Nome, e o jogo
+depois — e oferecido de novo, já preenchido, a cada **Recorde**: o Nome é do jogador, mas a
+assinatura é de cada Corrida.
+
+O Nome é escolhido **antes** de o Tempo entrar no Ranking, nunca depois. Um Tempo registrado é
+registrado: não existe trocar o Nome de uma linha que já está lá, existe escolher com que Nome ela
+sobe. Não é uma conta: não há login, nada impede dois jogadores usarem o mesmo Nome, e o jogo
 aceita isso — o preço de ninguém precisar se cadastrar para correr.
 
 ## Modo (Mode)
