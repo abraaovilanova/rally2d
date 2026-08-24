@@ -57,8 +57,9 @@ decisão, é um reflexo.
 
 ## Categoria (Class)
 
-O carro que o jogador escolhe no **Grid**. Um pacote fechado — **A**, **B** ou **C** — de velocidade
-mínima, velocidade máxima e taxa de giro. Não existe ajustar um carro: existe escolher entre três.
+O carro que o jogador escolhe no **Grid**. Um pacote fechado — **Shakedown**, **A**, **B** ou **C** —
+de velocidade mínima, velocidade máxima e taxa de giro. Não existe ajustar um carro: existe escolher
+entre quatro.
 
 A regra que mantém as três vivas é uma troca, não uma escala: **quem ganha velocidade perde giro**.
 A Categoria A anda mais e curva menos; a C perdoa. Nenhuma é melhor — cada uma pede uma **Pista**
@@ -70,6 +71,18 @@ Categoria deixaria de ser um carro diferente e passaria a ser um jogo diferente.
 Trocar de Categoria não mexe na **Progressão** — ela é uma só, e o carro é do momento. Trocar no meio
 de uma Corrida reinicia a Corrida: um **Tempo** pertence à Categoria com que foi feito, do começo ao
 fim.
+
+## Shakedown
+
+A **Categoria** em que a **Borda da Pista** não mata na hora: tocá-la é **Escapada**, e a Escapada
+tem dez segundos antes da **Engolida**.
+
+O carro é o da **Categoria A**, número por número — a Shakedown não é uma máquina mais fácil, é a
+mesma máquina num teste. É o que o nome diz no rali: a volta de acerto antes da prova valer.
+
+É a única Categoria que muda uma **regra** do jogo, e não só os números do carro — e é por isso que
+ela corre sozinha. Um **Tempo** feito nela não é da mesma prova que um Tempo das outras três, então
+ela não entra no **Ranking Mundial**. O **Melhor Tempo** local existe nela como em qualquer outra.
 
 ## Tentativa (Attempt)
 
@@ -284,6 +297,30 @@ O **Carro** tocou a **Borda da Pista**. Encerra a **Corrida** sem produzir **Tem
 **Tentativas**, e devolve o jogador ao início da mesma **Etapa**. Nunca faz retroceder na
 **Progressão**.
 
+Existe em três das quatro **Categorias**. Na **Shakedown**, tocar a Borda é **Escapada**, e a
+Corrida não acaba na hora.
+
+## Escapada (Run-off)
+
+O **Carro** saiu da **Pista** e continua correndo, do lado de fora, muito mais devagar. É o que a
+**Shakedown** tem no lugar da **Batida**: a Borda freia em vez de matar.
+
+Não é perdão, é prazo. O preço imediato é o **Tempo**, que continua correndo enquanto o Carro
+arrasta; e a Escapada **acaba** — passados dez segundos fora da Pista, vem a **Engolida**. Sai dela
+dirigindo: o giro não muda na Escapada, porque voltar à Pista é a única coisa que se pede.
+
+Cruzar a **Linha de Chegada** em Escapada não é **Conclusão**. Chegar é chegar pela Pista.
+
+## Engolida (Swallow)
+
+O fim de uma **Escapada** que passou do prazo: o **Bioma** engole o **Carro**. Encerra a **Corrida**
+como uma **Batida** — sem **Tempo**, na mesma **Etapa**, sem retroceder na **Progressão**.
+
+Cada Bioma engole do seu jeito, e isso não é enfeite: é a afirmação de que o fora da Pista pertence
+ao lugar e não é um estacionamento neutro onde dá para esperar. No **Deserto** é o verme; nas
+**Dunas**, a tempestade soterra; na **Floresta**, a mata fecha; na **Montanha**, o chão cede; no
+**Lamaçal**, o lodo traga; no **Gelo**, a placa racha e a água leva.
+
 ## Conclusão (Finish)
 
 O **Carro** cruzou a **Linha de Chegada** sem ter batido. Única forma de produzir um **Tempo**, e
@@ -305,7 +342,7 @@ existe sempre, nos dois **Modos** — não depende de rede, de nome, nem de ning
 ## Ranking Mundial (Leaderboard)
 
 A lista dos **Tempos** de todos os jogadores numa **Etapa** numa **Categoria**, do menor para o
-maior. Só existe no **Modo Online**, e é coisa diferente do **Melhor Tempo**: o Melhor Tempo é seu
+maior. A **Shakedown** não tem Ranking: onde a Borda não mata na hora, o Tempo mede outra coisa. Só existe no **Modo Online**, e é coisa diferente do **Melhor Tempo**: o Melhor Tempo é seu
 recorde, o Ranking é o mundo.
 
 Cada Conclusão vira uma linha — o mesmo jogador aparece tantas vezes quantas concluir. É um placar

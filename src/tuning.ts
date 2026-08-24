@@ -172,5 +172,19 @@ export const TUNING = {
   paceNoteLookahead: 1600,
 
   /** Quantos px de Pista valem um "metro" na leitura das Notas. */
+  /**
+   * Quanto da velocidade sobra fora da Pista, na Categoria Shakedown. Baixo o bastante
+   * para que sair custe a prova, alto o bastante para o Carro conseguir voltar — zero
+   * seria uma Batida com outro nome.
+   */
+  runoffSpeed: 0.28,
+  /**
+   * Quantos segundos o Carro sobrevive fora da Pista antes de o Bioma engoli-lo. É o que
+   * impede a Escapada de virar um segundo traçado: fora da Pista dá para consertar, não
+   * dá para correr.
+   */
+  runoffLimit: 10,
+  /** Duração da Engolida, em segundos. O jogador assiste; não há o que fazer. */
+  engolidaTime: 1.6,
   pixelsPerMeter: 10,
 } as const;

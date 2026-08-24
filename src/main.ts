@@ -1,6 +1,6 @@
 import { CAR_COLORS, preloadCars } from './carSprite';
 import { CATEGORY_IDS, type CategoryId } from './category';
-import { categoryOf, createGame, openGrid, restartProgression, retry, setCarColor, setCategory, startRace, updateGame, type Game } from './game';
+import { categoryOf, createGame, engolindo, openGrid, restartProgression, retry, setCarColor, setCategory, startRace, updateGame, type Game } from './game';
 import { atualizarMotor, ligarMotor } from './motor';
 import { alternarSom, liberarSom, tocarTrilha } from './musica';
 import { readMode, saveMode } from './player';
@@ -63,14 +63,14 @@ function listen(game: Game): void {
 
   // Grid e Conclusão são botões de DOM; aqui só a Batida, que precisa de um gesto rápido.
   canvas.addEventListener('pointerdown', () => {
-    if (game.phase === 'crashed') retry(game);
+    if (game.phase === 'crashed' && !engolindo(game)) retry(game);
   });
 
   window.addEventListener('keydown', (e) => {
     const key = e.key.toUpperCase();
 
     if (key === 'M') alternarSom();
-    if (key === 'R' && game.phase === 'crashed') retry(game);
+    if (key === 'R' && game.phase === 'crashed' && !engolindo(game)) retry(game);
     if (key === 'G') openGrid(game);
     if (e.key === ' ' && game.phase === 'grid') startRace(game);
     if (e.key === 'Escape') restartProgression(game);

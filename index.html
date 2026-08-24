@@ -236,7 +236,8 @@
       /* Ficha de cada carro, com o número na porta. */
       .cards {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        /* Quatro Categorias: no desktop cabem lado a lado, no celular quebram em duas. */
+        grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
         gap: 8px;
         /* Largar vem logo abaixo: sem isto o botão encosta nas categorias. */
         margin-bottom: 20px;
@@ -262,7 +263,9 @@
         border-bottom: 1px solid var(--linha);
         font-family: var(--placa);
         font-weight: 700;
-        font-size: 30px;
+        /* Três das quatro são uma letra só; a Shakedown é uma palavra curta e precisa
+           caber na mesma altura sem empurrar o cartão. */
+        font-size: clamp(15px, 2.2vw, 30px);
         line-height: 1;
         color: var(--apagado);
       }

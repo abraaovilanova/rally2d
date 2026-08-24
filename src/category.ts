@@ -21,12 +21,31 @@ export interface Category {
   turnRate: number;
   /** O que o jogador precisa saber antes de escolher, em uma linha. */
   blurb: string;
+  /**
+   * A Borda da Pista freia em vez de matar: tocá-la é **Escapada**, não **Batida** — e a
+   * Escapada tem prazo. Ver `docs/adr/0006`.
+   */
+  runoff: boolean;
 }
 
-export const CATEGORY_IDS = ['A', 'B', 'C'] as const;
+export const CATEGORY_IDS = ['S', 'A', 'B', 'C'] as const;
 export type CategoryId = (typeof CATEGORY_IDS)[number];
 
 export const CATEGORIES: Record<CategoryId, Category> = {
+  /**
+   * O carro é o da A, número por número. A Shakedown não é um carro mais fácil — é a
+   * mesma máquina numa prova em que sair da Pista ainda dá para consertar, e só por
+   * dez segundos. É por isso que ela não vale Ranking: o carro é igual, a prova não.
+   */
+  S: {
+    id: 'S',
+    name: 'Shakedown',
+    speedMin: 130,
+    speedMax: 560,
+    turnRate: 135,
+    blurb: 'O carro da A. A borda não mata — mas você tem 10s para voltar.',
+    runoff: true,
+  },
   A: {
     id: 'A',
     name: 'Categoria A',
@@ -34,6 +53,7 @@ export const CATEGORIES: Record<CategoryId, Category> = {
     speedMax: 560,
     turnRate: 135,
     blurb: 'Rápida e ingovernável. Não desce o suficiente para uma chicane.',
+    runoff: false,
   },
   B: {
     id: 'B',
@@ -42,6 +62,7 @@ export const CATEGORIES: Record<CategoryId, Category> = {
     speedMax: 430,
     turnRate: 150,
     blurb: 'Equilibrada. Freia nas fechadas, voa no resto.',
+    runoff: false,
   },
   C: {
     id: 'C',
@@ -50,6 +71,7 @@ export const CATEGORIES: Record<CategoryId, Category> = {
     speedMax: 340,
     turnRate: 165,
     blurb: 'Perdoa. Cabe em quase toda curva sem tirar o pé.',
+    runoff: false,
   },
 };
 

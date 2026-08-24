@@ -1,7 +1,7 @@
 import { slipOf, throttleOf } from './car';
 import { CAR_COLORS, CAR_SWATCHES, drawCarSprite } from './carSprite';
 import { drawClima } from './clima';
-import { categoryOf, currentPath, progress, type Game } from './game';
+import { categoryOf, currentPath, engolindo, progress, runoffLeft, type Game } from './game';
 import { nextNotes, type PaceNote } from './pacenotes';
 import type { Path, Vec } from './path';
 import { formatTime } from './records';
@@ -54,6 +54,7 @@ export function render(ctx: CanvasRenderingContext2D, game: Game): void {
   drawNoteMarkers(ctx, game);
   drawFinishLine(ctx, track.main, palette.edge);
   drawCar(ctx, game, palette.car);
+  drawEngolida(ctx, game);
 
   ctx.restore();
 
@@ -822,8 +823,263 @@ function drawSpeedometer(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.globalAlpha = 1;
 }
 
+
+// ------------------------------------------------------------- Engolida
+
+/**
+ * O Bioma engolindo o Carro que ficou tempo demais fora da Pista.
+ *
+ * Cada Bioma tem a sua, e isso não é enfeite: o fora da Pista não é um estacionamento
+ * neutro onde dá para esperar — ele pertence ao lugar, e o lugar tem cara. No Deserto
+ * quem cobra é o verme; no Gelo, a água por baixo.
+ *
+ * Tudo aqui é procedural e desenhado no mundo, em cima do Carro, sem sprite nenhum: são
+ * seis animações de uma vez, e seis folhas de arte seriam seis dívidas de estilo.
+ */
+function drawEngolida(ctx: CanvasRenderingContext2D, game: Game): void {
+  if (!game.devoured) return;
+
+  const t = clamp01(game.devourTime / TUNING.engolidaTime);
+  const { x, y } = game.car;
+  const r = TUNING.carRadius;
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  switch (game.stage.biome.engolida) {
+    case 'verme':
+      verme(ctx, t, r);
+      break;
+    case 'areia':
+      areia(ctx, t, r);
+      break;
+    case 'mata':
+      mata(ctx, t, r);
+      break;
+    case 'abismo':
+      abismo(ctx, t, r);
+      break;
+    case 'lodo':
+      lodo(ctx, t, r);
+      break;
+    case 'gelo':
+      geloRacha(ctx, t, r);
+      break;
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Shai-Hulud. A areia afunda primeiro — o funil é o aviso —, a boca abre por baixo do
+ * Carro com os dentes voltados para dentro, e fecha. O verme não é desenhado inteiro de
+ * propósito: o que assusta é a boca, e um verme visto de cima é um tubo.
+ */
+function verme(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const funil = r * (2 + 26 * easeIn(t));
+
+  // O funil de areia sendo puxado para baixo.
+  const g = ctx.createRadialGradient(0, 0, funil * 0.15, 0, 0, funil);
+  g.addColorStop(0, 'rgba(20, 12, 6, 0.95)');
+  g.addColorStop(0.55, 'rgba(120, 88, 46, 0.75)');
+  g.addColorStop(1, 'rgba(120, 88, 46, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, funil, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Anéis de areia girando para dentro: é o que diz que aquilo suga.
+  ctx.strokeStyle = 'rgba(232, 176, 75, 0.5)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 3; i++) {
+    const raio = funil * (0.35 + i * 0.22);
+    ctx.beginPath();
+    ctx.arc(0, 0, raio, t * 9 + i, t * 9 + i + 2.4);
+    ctx.stroke();
+  }
+
+  if (t < 0.25) return;
+
+  // A boca: um círculo preto com dentes, que abre e fecha em cima do Carro.
+  const abertura = Math.sin(clamp01((t - 0.25) / 0.75) * Math.PI);
+  const boca = r * (1.5 + 9 * abertura);
+
+  ctx.fillStyle = '#0a0705';
+  ctx.beginPath();
+  ctx.arc(0, 0, boca, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#d9c9a8';
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * Math.PI * 2;
+    const ponta = boca * 0.58;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * boca, Math.sin(a) * boca);
+    ctx.lineTo(Math.cos(a + 0.16) * boca, Math.sin(a + 0.16) * boca);
+    ctx.lineTo(Math.cos(a + 0.08) * ponta, Math.sin(a + 0.08) * ponta);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+/** Dunas: a tempestade fecha e soterra. Não há bicho — o que come é o vento. */
+function areia(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const raio = r * (2 + 22 * t);
+
+  ctx.globalAlpha = Math.min(1, t * 1.6);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, raio);
+  g.addColorStop(0, 'rgba(214, 184, 128, 0.98)');
+  g.addColorStop(1, 'rgba(214, 184, 128, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, raio, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Fiapos de areia em espiral: sem eles a tempestade é só uma mancha bege.
+  ctx.strokeStyle = 'rgba(240, 220, 180, 0.55)';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 22) * Math.PI * 2 + t * 7;
+    const de = raio * 0.25;
+    const ate = raio * (0.6 + 0.35 * ((i % 3) / 3));
+    ctx.beginPath();
+    ctx.arc(0, 0, de + (ate - de) * 0.5, a, a + 0.6);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/** Floresta: a mata fecha. Os cipós vêm de fora para dentro e tapam o Carro. */
+function mata(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const alcance = r * 16;
+  const avanco = easeIn(t);
+
+  ctx.strokeStyle = '#1e5c31';
+  ctx.lineCap = 'round';
+
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 + i * 0.7;
+    const de = alcance * (1 - avanco * 0.95);
+    const ate = alcance * (1 - avanco) + r * 0.4;
+
+    ctx.lineWidth = 3 + (i % 3);
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * alcance, Math.sin(a) * alcance);
+    // Curva para o cipó não ser um raio reto: mato não cresce em linha.
+    ctx.quadraticCurveTo(
+      Math.cos(a + 0.5) * de,
+      Math.sin(a + 0.5) * de,
+      Math.cos(a) * ate,
+      Math.sin(a) * ate,
+    );
+    ctx.stroke();
+  }
+
+  // Folhagem fechando por cima no fim, quando os cipós já se encontraram.
+  ctx.globalAlpha = clamp01((t - 0.55) / 0.45);
+  ctx.fillStyle = '#123d21';
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * r * 1.6, Math.sin(a) * r * 1.6, r * 2.6, r * 1.5, a, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/** Montanha: o chão cede. As rachaduras abrem, e o Carro despenca no escuro. */
+function abismo(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const buraco = r * (1.2 + 7 * easeIn(t));
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2 + i;
+    ctx.lineWidth = 3 - (i % 2);
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * buraco * 0.8, Math.sin(a) * buraco * 0.8);
+    ctx.lineTo(Math.cos(a + 0.25) * buraco * 2.4, Math.sin(a + 0.25) * buraco * 2.4);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#05070a';
+  ctx.beginPath();
+  ctx.arc(0, 0, buraco, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Poeira da borda desabando para dentro.
+  ctx.strokeStyle = 'rgba(160, 160, 170, 0.35)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, buraco * 1.08, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+/** Lamaçal: o lodo traga. Devagar, com bolhas — é o único que não tem susto. */
+function lodo(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const poca = r * (2 + 9 * t);
+
+  ctx.fillStyle = '#241a10';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, poca, poca * 0.82, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(60, 44, 26, 0.9)';
+  for (let i = 0; i < 10; i++) {
+    // Cada bolha nasce e estoura no seu tempo, escalonadas ao longo da animação.
+    const fase = (t * 2.2 + i * 0.37) % 1;
+    const a = i * 2.1;
+    const d = poca * 0.55 * ((i % 4) / 4 + 0.25);
+    ctx.globalAlpha = 1 - fase;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * d, Math.sin(a) * d, r * 0.35 * (0.4 + fase), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/** Gelo: a placa racha e a água leva. O que mata aqui é o que está por baixo. */
+function geloRacha(ctx: CanvasRenderingContext2D, t: number, r: number): void {
+  const alcance = r * (3 + 12 * t);
+
+  ctx.strokeStyle = 'rgba(120, 170, 200, 0.9)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 11; i++) {
+    const a = (i / 11) * Math.PI * 2 + i * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    // Quebrada no meio: rachadura reta não se lê como rachadura.
+    ctx.lineTo(Math.cos(a) * alcance * 0.5, Math.sin(a) * alcance * 0.5);
+    ctx.lineTo(Math.cos(a + 0.3) * alcance, Math.sin(a + 0.3) * alcance);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha = clamp01((t - 0.35) / 0.65);
+  ctx.fillStyle = '#06222e';
+  ctx.beginPath();
+  ctx.arc(0, 0, r * (1.5 + 5 * t), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/** Devagar no começo, rápido no fim. É o que faz a coisa parecer que puxa. */
+function easeIn(t: number): number {
+  return t * t;
+}
+
 function drawOffRouteWarning(ctx: CanvasRenderingContext2D, game: Game): void {
   if (game.phase !== 'running') return;
+
+  // A Escapada vem primeiro: estar fora da Pista é mais urgente que estar na Rota errada,
+  // e os dois avisos no mesmo lugar ao mesmo tempo não se leem.
+  if (game.offTrack) {
+    // A contagem é mostrada porque um prazo que o jogador não vê não é um prazo, é uma
+    // armadilha. Os três últimos segundos vão em números inteiros grandes, no meio.
+    const resta = runoffLeft(game);
+    aviso(ctx, game, `FORA DA PISTA · ${Math.ceil(resta)}`);
+    if (resta <= 3) contagem(ctx, resta);
+    return;
+  }
+
   if (!isOffRoute(game.stage.track, game.route, TUNING.routeRevealAt)) return;
 
   const pulse = 0.55 + 0.45 * Math.sin(game.elapsed * 8);
@@ -834,6 +1090,54 @@ function drawOffRouteWarning(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.globalAlpha = pulse;
   ctx.font = '700 32px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.fillText('FORA DA ROTA', ctx.canvas.width / 2, 28);
+  ctx.globalAlpha = 1;
+}
+
+/** Os últimos segundos da Escapada, grandes o bastante para serem vistos pelo canto do olho. */
+function contagem(ctx: CanvasRenderingContext2D, resta: number): void {
+  const fracao = resta - Math.floor(resta);
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ff4d4d';
+  // Cada segundo entra grande e encolhe: o pulso vem do próprio relógio, não de um seno.
+  ctx.globalAlpha = 0.25 + 0.5 * fracao;
+  ctx.font = `700 ${Math.round(90 + 60 * fracao)}px "Saira Condensed", "Arial Narrow", system-ui, sans-serif`;
+  ctx.fillText(String(Math.ceil(resta)), ctx.canvas.width / 2, ctx.canvas.height / 2);
+  ctx.globalAlpha = 1;
+}
+
+/**
+ * Como a Corrida acabou, na palavra do lugar. A Engolida tem título próprio por Bioma
+ * porque foi o Bioma que cobrou — dizer "BATIDA" ali seria descrever a coisa errada.
+ */
+function tituloDoFim(game: Game): string {
+  if (!game.devoured) return game.hitBarrier ? 'SEM SAÍDA' : 'BATIDA';
+
+  switch (game.stage.biome.engolida) {
+    case 'verme':
+      return 'SHAI-HULUD';
+    case 'areia':
+      return 'SOTERRADO';
+    case 'mata':
+      return 'A MATA FECHOU';
+    case 'abismo':
+      return 'O CHÃO CEDEU';
+    case 'lodo':
+      return 'ATOLADO';
+    case 'gelo':
+      return 'O GELO RACHOU';
+  }
+}
+
+/** O aviso pulsante do topo. Mesma forma para os dois estados que custam tempo. */
+function aviso(ctx: CanvasRenderingContext2D, game: Game, texto: string): void {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = '#ff6b6b';
+  ctx.globalAlpha = 0.55 + 0.45 * Math.sin(game.elapsed * 8);
+  ctx.font = '700 32px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
+  ctx.fillText(texto, ctx.canvas.width / 2, 28);
   ctx.globalAlpha = 1;
 }
 
@@ -891,6 +1195,9 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   // O Grid e a Conclusão são telas de DOM (`ui.ts`): têm lista de Ranking e campo de
   // texto, que canvas não desenha bem. Aqui fica só a Batida, que precisa ser instantânea.
   if (game.phase !== 'crashed') return;
+  // Durante a Engolida a tela fica limpa: ela é a explicação do fim, e um painel por
+  // cima dela tapa exatamente a única coisa que o jogador precisa ver.
+  if (engolindo(game)) return;
 
   const crashed = true;
   ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
@@ -900,7 +1207,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: Game): void {
   ctx.fillStyle = crashed ? '#ff6b6b' : palette.edge;
   ctx.font = '700 60px "Saira Condensed", "Arial Narrow", system-ui, sans-serif';
   ctx.fillText(
-    crashed ? (game.hitBarrier ? 'SEM SAÍDA' : 'BATIDA') : 'CHEGADA',
+    crashed ? tituloDoFim(game) : 'CHEGADA',
     ctx.canvas.width / 2,
     ctx.canvas.height / 2 - 90,
   );

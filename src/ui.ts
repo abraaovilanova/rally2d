@@ -81,7 +81,7 @@ function drawGrid(game: Game): void {
       </div>
 
       <h1>Grid</h1>
-      <p class="lede">Escolha a prova e o carro. Seu melhor aqui na categoria ${game.category}: <b>${best}</b></p>
+      <p class="lede">Escolha a prova e o carro. Seu melhor aqui na ${categoryLabel(game.category)}: <b>${best}</b></p>
 
       <p class="eyebrow">Prova especial</p>
       <div class="stages">${stagePicker(game)}</div>
@@ -93,10 +93,10 @@ function drawGrid(game: Game): void {
 
       ${
         game.mode === 'online'
-          ? `<p class="eyebrow board-title">Resultados · ${stage.biome.name} PE ${stage.lap + 1} · categoria ${game.category}</p>`
+          ? `<p class="eyebrow board-title">Resultados · ${stage.biome.name} PE ${stage.lap + 1} · ${categoryLabel(game.category)}</p>`
           : ''
       }
-      <div class="board" data-board>${game.mode === 'online' ? 'carregando ranking…' : ''}</div>
+      <div class="board" data-board>${gridBoardPlaceholder(game)}</div>
       <div class="rodape">
         <p class="foot">
           <span data-toggle-mode class="link">${
@@ -125,7 +125,27 @@ function drawGrid(game: Game): void {
     (e.target as HTMLElement).textContent = `som ${somLigado() ? 'ligado' : 'mudo'} (M)`;
   };
 
-  if (game.mode === 'online') loadBoard(game);
+  if (game.mode === 'online' && !foraDoRanking(game)) loadBoard(game);
+}
+
+/**
+ * A Shakedown corre fora do Ranking Mundial. Não é castigo: o carro dela é o da A, mas a
+ * prova não é a mesma — nela a Borda não mata na hora. Comparar os dois Tempos não
+ * significaria nada. O Melhor Tempo local continua existindo, como em toda Categoria.
+ */
+function foraDoRanking(game: Game): boolean {
+  return CATEGORIES[game.category].runoff;
+}
+
+function gridBoardPlaceholder(game: Game): string {
+  if (game.mode !== 'online') return '';
+  if (foraDoRanking(game)) return 'a Shakedown corre fora do ranking mundial.';
+  return 'carregando ranking…';
+}
+
+/** "categoria B", mas "Shakedown" — ela não é uma letra na grade, é outro jeito de correr. */
+function categoryLabel(id: CategoryId): string {
+  return id === 'S' ? CATEGORIES.S.name : `categoria ${id}`;
 }
 
 /**
@@ -173,7 +193,7 @@ function card(id: CategoryId, chosen: CategoryId): string {
 
   return `
     <div class="card ${id === chosen ? 'chosen' : ''}" data-cat="${id}">
-      <h2>${id}</h2>
+      <h2>${id === 'S' ? 'SHAKE' : id}</h2>
       <dl>
         <div><dt>máxima</dt><dd>${kmh(c.speedMax)} km/h</dd></div>
         <div><dt>mínima</dt><dd>${kmh(c.speedMin)} km/h</dd></div>
@@ -209,7 +229,7 @@ function drawFinish(game: Game): void {
   show(`
     <div class="panel">
       <div class="cabecalho">
-        <span class="eyebrow">PE ${game.stage.lap + 1} · ${game.stage.biome.name} · categoria ${game.category}</span>
+        <span class="eyebrow">PE ${game.stage.lap + 1} · ${game.stage.biome.name} · ${categoryLabel(game.category)}</span>
         <span class="eyebrow">Chegada</span>
       </div>
 
@@ -228,7 +248,7 @@ function drawFinish(game: Game): void {
   root.querySelector<HTMLElement>('[data-next]')!.onclick = () => advance(game);
   root.querySelector<HTMLElement>('[data-grid]')!.onclick = () => openGrid(game);
 
-  if (game.mode !== 'online') return;
+  if (game.mode !== 'online' || foraDoRanking(game)) return;
   if (name === null || game.newRecord) askName(game, name ?? '');
   else send(game, name);
 }
@@ -236,6 +256,7 @@ function drawFinish(game: Game): void {
 /** Enquanto o Nome não estiver confirmado, o Ranking ainda não foi consultado. */
 function boardPlaceholder(game: Game): string {
   if (game.mode === 'offline') return 'offline: este tempo não sobe para o ranking.';
+  if (foraDoRanking(game)) return 'a Shakedown corre fora do ranking mundial.';
   if (game.newRecord) return 'confirme o nome para entrar no ranking.';
   return 'enviando…';
 }
@@ -298,7 +319,7 @@ async function send(game: Game, name: string): Promise<void> {
 
 function renderBoard(board: Board | null, category: CategoryId): string {
   if (board === null) return '<p class="warn">ranking indisponível — sem conexão.</p>';
-  if (board.top.length === 0) return `<p class="empty">ninguém correu esta etapa na categoria ${category} ainda.</p>`;
+  if (board.top.length === 0) return `<p class="empty">ninguém correu esta etapa na ${categoryLabel(category)} ainda.</p>`;
 
   const rows = [...board.top, ...(board.self ? [board.self] : [])]
     .map(

@@ -29,11 +29,23 @@ export interface Biome {
   relevo?: number;
   /** O que cai ou voa entre a câmera e o mundo. Desenho, não Aderência. */
   clima?: Clima;
+  /**
+   * Como este Bioma engole o Carro que passou do limite fora da Pista. Cada Bioma tem o
+   * seu: o que mata fora da Pista é o lugar, e o lugar tem cara.
+   */
+  engolida: Engolida;
 }
+
+/**
+ * A forma da **Engolida** de um Bioma. Não é só arte: é a afirmação de que o fora da
+ * Pista pertence ao Bioma, e não é um estacionamento neutro onde dá para esperar.
+ */
+export type Engolida = 'verme' | 'areia' | 'mata' | 'abismo' | 'lodo' | 'gelo';
 
 export const BIOMES: readonly Biome[] = [
   {
     id: 'deserto',
+    engolida: 'verme',
     name: 'Deserto',
     palette: {
       background: '#1c1410',
@@ -48,6 +60,7 @@ export const BIOMES: readonly Biome[] = [
   },
   {
     id: 'floresta',
+    engolida: 'mata',
     name: 'Floresta',
     palette: {
       background: '#0c1610',
@@ -62,6 +75,7 @@ export const BIOMES: readonly Biome[] = [
   },
   {
     id: 'montanha',
+    engolida: 'abismo',
     name: 'Montanha',
     palette: {
       background: '#0a0c14',
@@ -91,6 +105,7 @@ export const BIOMES: readonly Biome[] = [
   },
   {
     id: 'lamacal',
+    engolida: 'lodo',
     name: 'Lamaçal',
     palette: {
       background: '#141a16',
@@ -114,6 +129,7 @@ export const BIOMES: readonly Biome[] = [
   },
   {
     id: 'dunas',
+    engolida: 'areia',
     name: 'Dunas',
     palette: {
       background: '#2a1a12',
@@ -139,6 +155,7 @@ export const BIOMES: readonly Biome[] = [
   },
   {
     id: 'gelo',
+    engolida: 'gelo',
     name: 'Gelo',
     palette: {
       background: '#0b131c',

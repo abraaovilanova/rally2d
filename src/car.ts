@@ -32,6 +32,10 @@ export function spawnCar(at: Vec, heading: number, category: Category): Car {
  *
  * O Carro nunca gira mais rápido que a taxa máxima, então quanto mais rápido ele vai,
  * mais aberta fica a curva que ele consegue fazer. É daí que vem a tensão da corrida.
+ *
+ * `speedScale` é o arrasto de estar fora da Pista, numa Escapada. Ele multiplica a
+ * velocidade toda — inclusive a mínima — porque o chão de fora não devolve nem o
+ * rastejo. O giro não muda: é dirigindo que se volta para a Pista.
  */
 export function driveCar(
   car: Car,
@@ -39,12 +43,13 @@ export function driveCar(
   dt: number,
   category: Category,
   grip: number,
+  speedScale = 1,
 ): void {
   const dx = aim.x - car.x;
   const dy = aim.y - car.y;
   const distance = Math.hypot(dx, dy);
 
-  car.speed = speedFor(distance, category);
+  car.speed = speedFor(distance, category) * speedScale;
 
   // Dentro da zona morta o vetor de mira é curto demais para ter um ângulo confiável:
   // o Carro segue reto e o jogador controla só a velocidade.

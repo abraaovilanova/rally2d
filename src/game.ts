@@ -42,6 +42,20 @@ export interface Game {
   route: Route;
   /** O Carro bateu numa Barreira de beco sem saída, e não na Borda da Pista. */
   hitBarrier: boolean;
+  /**
+   * Escapada: o Carro está fora da Pista e arrastando. Só existe na Categoria Shakedown
+   * — nas outras, sair da Pista é Batida e a Corrida já acabou.
+   */
+  offTrack: boolean;
+  /**
+   * Há quantos segundos o Carro está em Escapada. Passado o limite, o Bioma o engole:
+   * fora da Pista dá para consertar, não dá para correr.
+   */
+  offTrackFor: number;
+  /** A Corrida acabou numa Engolida, e não numa Batida contra a Borda. */
+  devoured: boolean;
+  /** Relógio da animação da Engolida, em segundos. Só corre depois que ela começa. */
+  devourTime: number;
   /** Tentativas nesta Etapa. Zera ao avançar de Etapa. */
   attempts: number;
   bestTime: number | null;
@@ -71,6 +85,10 @@ export function createGame(mode: Mode): Game {
     elapsed: 0,
     route: { ...START_ROUTE },
     hitBarrier: false,
+    offTrack: false,
+    offTrackFor: 0,
+    devoured: false,
+    devourTime: 0,
     attempts: 1,
     bestTime: null,
     newRecord: false,
@@ -162,12 +180,23 @@ function resetRace(game: Game, phase: Phase): void {
   game.elapsed = 0;
   game.route = { ...START_ROUTE };
   game.hitBarrier = false;
+  game.offTrack = false;
+  game.offTrackFor = 0;
+  game.devoured = false;
+  game.devourTime = 0;
   game.attempts = 1;
   game.newRecord = false;
   limparPoeira();
 }
 
 export function updateGame(game: Game, aim: Vec, dt: number): void {
+  // A Engolida é a única coisa que continua andando depois do fim da Corrida: ela é o
+  // fim sendo mostrado, não um estado jogável.
+  if (game.devoured) {
+    game.devourTime += dt;
+    return;
+  }
+
   if (game.phase !== 'running') return;
 
   game.elapsed += dt;
@@ -175,7 +204,9 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
   // A Aderência é lida onde o Carro está agora: entrar na Poça é o que escorrega, e
   // por isso o preço aparece no quadro seguinte, já dentro dela.
   const aderencia = gripAt(game.stage, game.car.x, game.car.y);
-  driveCar(game.car, aim, dt, categoryOf(game), aderencia);
+  // O arrasto da Escapada é lido do quadro anterior: o preço de sair aparece já fora,
+  // como o da Poça. Dentro da Pista o fator é 1 e nada disto existe.
+  driveCar(game.car, aim, dt, categoryOf(game), aderencia, game.offTrack ? TUNING.runoffSpeed : 1);
 
   // A Poeira é decoração e vive fora do modelo, mas o que ela mostra é o modelo: a
   // velocidade, a Derrapagem e a Aderência do chão em que o Carro está agora.
@@ -189,24 +220,72 @@ export function updateGame(game: Game, aim: Vec, dt: number): void {
   const step = stepRoute(game.stage.track, game.car, game.route, maxAdvance, limit);
   game.route = step.route;
 
+  // Na Shakedown a Borda freia em vez de matar. É a única Categoria que muda uma regra
+  // do jogo e não só os números do carro — e é por isso que ela corre sozinha.
+  const escapa = categoryOf(game).runoff;
+
   if (step.hitBarrier) {
-    game.phase = 'crashed';
-    game.hitBarrier = true;
+    if (!escapa) {
+      game.phase = 'crashed';
+      game.hitBarrier = true;
+      return;
+    }
+    // A Barreira do beco sem saída também só freia: o Carro para de progredir e tem de
+    // sair dali dirigindo, que é o mesmo preço da Escapada, pago no mesmo lugar.
+    escapar(game, dt);
     return;
   }
 
   // Batida: o Carro saiu do Caminho em que estava e nenhum vizinho o contém.
   if (step.probe.distance > limit) {
-    game.phase = 'crashed';
+    if (!escapa) {
+      game.phase = 'crashed';
+      return;
+    }
+    escapar(game, dt);
     return;
   }
 
-  // Conclusão: única forma de produzir um Tempo.
+  game.offTrack = false;
+  game.offTrackFor = 0;
+
+  // Conclusão: única forma de produzir um Tempo. Cruzar a Linha de Chegada por fora não
+  // é chegar — na Escapada o Carro tem de voltar à Pista antes do fim dela.
   if (step.finished) {
     game.phase = 'finished';
     game.newRecord = recordTime(game.stage.id, game.category, game.elapsed);
     game.bestTime = readBestTime(game.stage.id, game.category);
   }
+}
+
+/**
+ * Um quadro de Escapada. O relógio da Escapada é o que a impede de virar um segundo
+ * traçado: passado o limite, o Bioma engole o Carro e a Corrida acaba como qualquer
+ * Batida — sem Tempo, na mesma Etapa, sem retroceder na Progressão.
+ */
+function escapar(game: Game, dt: number): void {
+  game.offTrack = true;
+  game.offTrackFor += dt;
+
+  if (game.offTrackFor >= TUNING.runoffLimit) {
+    game.phase = 'crashed';
+    game.devoured = true;
+    game.devourTime = 0;
+  }
+}
+
+/**
+ * A Engolida ainda está sendo mostrada. Enquanto estiver, o jogador assiste: recomeçar no
+ * meio dela seria cortar a única coisa que explica por que a Corrida acabou.
+ */
+export function engolindo(game: Game): boolean {
+  return game.devoured && game.devourTime < TUNING.engolidaTime;
+}
+
+/** Quanto resta da contagem da Escapada, em segundos. Zero fora dela. */
+export function runoffLeft(game: Game): number {
+  if (!game.offTrack) return 0;
+  return Math.max(0, TUNING.runoffLimit - game.offTrackFor);
 }
 
 /** Quanto da Etapa já foi vencido, de 0 a 1. */
